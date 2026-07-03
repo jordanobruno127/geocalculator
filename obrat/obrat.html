@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Обратные методы расчёта — Geocalculator</title>
+<title>Обратные методы расчета — Geocalculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -93,7 +93,7 @@ header{
   text-align:center;
   border-bottom:1px solid var(--line);
 }
-.logo{ max-width:64px; height:auto; margin:0 auto 20px; display:block; opacity:.92; }
+
 header h1{
   font-family:var(--font-display);
   font-weight:700;
@@ -143,7 +143,7 @@ header .lede{
   color:var(--paper-dim);
 }
 
-/* список расчётов — util-row */
+/* список расчетов — util-row */
 .calc-list{
   margin-top:40px;
   display:flex;
@@ -192,23 +192,22 @@ footer{
 
 <div class="top-bar">
   <button id="btn-back" onclick="history.back()">Назад</button>
-  <button id="btn-home" onclick="location.href='index.html'">Главная</button>
+  <button id="btn-home" onclick="location.href='/'">Главная</button>
 </div>
 
 <header>
-  <img src="/logo.png" alt="Логотип Geocalculator" class="logo">
-  <h1>Обратные методы расчёта</h1>
-  <p class="lede">Вспомогательные расчёты, определяющие показатели грунта по косвенным данным.</p>
+  <h1>Обратные методы расчета</h1>
+  <p class="lede">Вспомогательные расчеты, определяющие показатели грунта по косвенным данным.</p>
 </header>
 
 <div class="wrap">
 
   <div class="warning">
     <span class="mark">Внимание</span>
-    <p>Результаты расчётов носят вспомогательный, справочный характер, не заменяют расчёты по действующим ГОСТ/СП и не подходят для проектной документации. Ответственность за использование результатов — на пользователе.</p>
+    <p>Результаты расчетов носят вспомогательный, справочный характер, не заменяют расчеты по действующим ГОСТ/СП и не подходят для проектной документации. Ответственность за использование результатов — на пользователе.</p>
   </div>
 
-  <div class="section-label">Доступные расчёты</div>
+  <div class="section-label">Доступные расчеты</div>
 
   <div class="calc-list">
     <a class="util-row" href="vlazhnost_obr.html">
