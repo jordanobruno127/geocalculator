@@ -1,470 +1,893 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Справочник</title>
-    <style>
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #ffffff;
-            padding: 20px;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><g fill="none" stroke="%2378909c" stroke-opacity="0.1" stroke-width="1"><rect x="30" y="30" width="50" height="70" rx="3" stroke-opacity="0.08"/><rect x="100" y="50" width="60" height="80" rx="4" stroke-opacity="0.07" transform="rotate(5 130 90)"/><path d="M40,100 L90,100" stroke-opacity="0.05"/><path d="M110,130 L170,130" stroke-opacity="0.05"/></g></svg>');
-            background-repeat: repeat;
-            background-size: 200px;
-            min-height: 100vh;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Справочник</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --soil-peat:   #F2E9D8;
+    --soil-peat-2: #EAE0C9;
+    --soil-clay:   #8A7355;
+    --soil-loam:   #B06B34;
+    --soil-sand:   #C98F45;
+    --paper:       #3B2E20;
+    --paper-dim:   #7A6A52;
+    --line:        #D9C9A3;
+    --ok:          #7A9B6E;
 
-        .top-menu {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            z-index: 100;
-        }
-        .top-menu button {
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 2px solid #2c3e50;
-            background-color: #2c3e50;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-        }
-        .top-menu button:hover { background-color: #34495e; }
+    --font-display: 'Golos Text', -apple-system, sans-serif;
+    --font-body: 'Golos Text', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
 
-        .header-text {
-            max-width: 800px;
-            margin: 0 auto 40px;
-            text-align: center;
-        }
-        .header-text h1 { font-size: 28px; color: #2c3e50; margin-bottom: 10px; }
-        .header-text p { font-size: 17px; color: #34495e; }
+    --radius: 3px;
+    --tab-w: 290px;
+  }
 
-        .main-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
-        }
+  *{box-sizing:border-box; margin:0; padding:0;}
 
-        .sidebar {
-            flex: 1 1 300px;
-            min-width: 280px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            padding: 25px 20px;
-            height: fit-content;
-            position: sticky;
-            top: 20px;
-        }
-        .sidebar h2 {
-            font-size: 22px;
-            color: #2c3e50;
-            margin: 0 0 20px 0;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #ecf0f1;
-        }
-        .menu-item {
-            padding: 14px 18px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            color: #2c3e50;
-            background: #f8fafd;
-            transition: all 0.3s;
-        }
-        .menu-item:hover, .menu-item.active {
-            background: #2c3e50;
-            color: white;
-        }
-        .menu-subitems {
-            display: none;
-            margin-left: 10px;
-            margin-top: 5px;
-        }
-        .menu-subitem {
-            padding: 10px 18px 10px 40px;
-            margin-bottom: 6px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: normal;
-            color: #34495e;
-            background: #f0f5f9;
-        }
-        .menu-subitem:hover, .menu-subitem.active {
-            background: #1a73e8;
-            color: white;
-        }
+  html, body{
+    background-color:var(--soil-peat);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(176,107,52,0.08) 1px, transparent 0),
+      repeating-linear-gradient(155deg, rgba(176,107,52,0.05) 0px, rgba(176,107,52,0.05) 1px, transparent 1px, transparent 26px),
+      repeating-linear-gradient(65deg, rgba(138,115,85,0.045) 0px, rgba(138,115,85,0.045) 1px, transparent 1px, transparent 34px);
+    background-size: 18px 18px, auto, auto;
+    color:var(--paper);
+    font-family:var(--font-body);
+    font-size:17px;
+    line-height:1.55;
+    min-height:100vh;
+    padding:26px 20px 70px;
+  }
 
-        .content-area {
-            flex: 2 1 700px;
-            min-width: 300px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            padding: 30px;
-            min-height: 500px;
-        }
-        .content-area h2 {
-            color: #2c3e50;
-            margin-top: 0;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #ecf0f1;
-        }
+  /* ===== top bar ===== */
+  .top-bar{
+    max-width:1240px;
+    margin:0 auto 22px;
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+  }
+  .top-bar button{
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:14.5px;
+    padding:12px 22px;
+    border-radius:var(--radius);
+    cursor:pointer;
+    border:1px solid transparent;
+    transition:opacity .15s, border-color .15s, color .15s;
+  }
+  #btn-home{
+    background:var(--soil-loam);
+    border-color:var(--soil-loam);
+    color:var(--soil-peat);
+  }
+  #btn-home:hover{opacity:.88;}
+  #btn-back{
+    background:var(--soil-peat-2);
+    border-color:var(--line);
+    color:var(--paper);
+  }
+  #btn-back:hover{border-color:var(--soil-loam); color:var(--soil-loam);}
 
-        .search-box {
-            max-width: 480px;
-            margin: 0 auto 30px;
-        }
-        .search-box input {
-            width: 100%;
-            padding: 12px 20px;
-            font-size: 15px;
-            border: 2px solid #d0d9e4;
-            border-radius: 30px;
-            outline: none;
-        }
-        .search-box input:focus { border-color: #1a73e8; }
+  /* ===== header ===== */
+  header{
+    max-width:920px;
+    margin:0 auto;
+    padding:12px 0 40px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+  }
+  .logo{
+    max-width:64px;
+    height:auto;
+    margin:0 auto 20px;
+    display:block;
+    opacity:.92;
+  }
+  header h1{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:42px;
+    line-height:1.2;
+    color:var(--paper);
+  }
+  .lede{
+    margin:18px auto 0;
+    max-width:520px;
+    color:var(--paper-dim);
+    font-size:17px;
+  }
 
-        .term {
-            background: #fbfdff;
-            border: 1px solid #e8f0f8;
-            border-radius: 8px;
-            margin-bottom: 14px;
-            overflow: hidden;
-        }
-        .term-header {
-            padding: 14px 18px;
-            background: #eef4f9;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .term-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.4s ease;
-            padding: 0 18px;
-            line-height: 1.7;
-        }
-        .term-content.active {
-            max-height: 3000px;
-            padding: 18px;
-        }
+  /* ===== search ===== */
+  .search-box{
+    max-width:480px;
+    margin:34px auto 34px;
+  }
+  .search-box input{
+    width:100%;
+    padding:12px 14px;
+    font-family:var(--font-body);
+    font-size:15px;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    outline:none;
+    background:var(--soil-peat-2);
+    color:var(--paper);
+  }
+  .search-box input::placeholder{color:var(--paper-dim);}
+  .search-box input:focus{border-color:var(--soil-loam);}
 
-        .resource-item {
-            display: flex;
-            align-items: center;
-            padding: 14px 16px;
-            margin-bottom: 12px;
-            background-color: #f0f5f9;
-            border-radius: 8px;
-            border: 1px solid #e0e7ee;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .resource-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-        }
-        .resource-icon { font-size: 28px; margin-right: 14px; flex-shrink: 0; }
-        .resource-name {
-            font-size: 16px;
-            color: #1a73e8;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        .resource-name:hover { text-decoration: underline; }
+  /* ===== layout ===== */
+  .main-container{
+    max-width:1240px;
+    margin:0 auto;
+    display:flex;
+    align-items:flex-start;
+    gap:24px;
+    flex-wrap:wrap;
+  }
 
-        @media (max-width: 900px) {
-            .main-container { flex-direction: column; }
-            .sidebar { position: static; }
-        }
-    </style>
+  /* ---- sidebar ---- */
+  .sidebar{
+    flex:0 0 var(--tab-w);
+    min-width:250px;
+    position:sticky;
+    top:20px;
+  }
+  .sidebar-label{
+    font-family:var(--font-mono);
+    font-size:13px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+    margin:0 0 14px 4px;
+  }
+  .tab{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:var(--soil-peat-2);
+    border:1px solid var(--line);
+    padding:14px 18px;
+    margin-bottom:8px;
+    border-radius:var(--radius);
+    cursor:pointer;
+    font-weight:600;
+    font-size:14.5px;
+    color:var(--paper);
+    transition:background .15s, border-color .15s, color .15s, transform .15s;
+  }
+  .tab:hover{border-color:var(--soil-loam); background:#DCC79A; color:var(--soil-loam); transform:translateX(3px);}
+  .tab.active{border-color:var(--soil-loam); color:var(--soil-loam);}
+  .subtab-group{margin:2px 0 9px 10px;}
+  .subtab{
+    padding:10px 16px 10px 18px;
+    margin-bottom:6px;
+    border-radius:var(--radius);
+    cursor:pointer;
+    font-size:13.5px;
+    color:var(--paper-dim);
+    border:1px solid transparent;
+    background:rgba(217,201,163,0.28);
+    transition:background .15s, border-color .15s, color .15s, transform .15s;
+  }
+  .subtab:hover{border-color:var(--soil-loam); color:var(--soil-loam); transform:translateX(3px);}
+  .subtab.active{border-color:var(--soil-loam); color:var(--soil-loam); font-weight:600; background:var(--soil-peat-2);}
+
+  /* ---- content area ---- */
+  .content-area{
+    flex:1 1 640px;
+    min-width:300px;
+    background:var(--soil-peat-2);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:32px 34px;
+    min-height:520px;
+  }
+  .content-area h2{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:26px;
+    margin:0 0 8px;
+    color:var(--paper);
+  }
+  .content-sub{
+    font-family:var(--font-mono);
+    font-size:13px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--paper-dim);
+    margin:0 0 22px;
+  }
+  .empty-state{
+    text-align:center;
+    color:var(--paper-dim);
+    padding:110px 20px;
+    font-size:15px;
+  }
+  .empty-state .glyph{font-size:28px; display:block; margin-bottom:14px; opacity:.5;}
+
+  /* ---- term card ---- */
+  .term{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:12px;
+    background:var(--soil-peat);
+    overflow:hidden;
+  }
+  .term-header{
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+    padding:17px 22px;
+    cursor:pointer;
+    transition:background .15s, color .15s;
+  }
+  .term-header:hover{background:#DCC79A;}
+  .term-header .t-name{font-weight:600; font-size:15px; flex:1; color:var(--paper);}
+  .term-header .t-name .sym{
+    font-family:var(--font-mono);
+    font-weight:600;
+    font-size:14px;
+    color:var(--soil-loam);
+  }
+  .term-header .arrow{font-family:var(--font-mono); color:var(--paper-dim); font-size:12px; flex-shrink:0;}
+  .term-content{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .35s ease;
+    padding:0 22px;
+    font-size:15px;
+    line-height:1.7;
+    color:var(--paper);
+  }
+  .term-content.active{max-height:900px; padding:0 22px 18px;}
+  .formula{
+    font-family:var(--font-mono);
+    font-size:13px;
+    background:var(--soil-peat-2);
+    border-left:3px solid var(--ok);
+    padding:10px 12px;
+    margin-top:10px;
+    border-radius:var(--radius);
+    color:var(--paper);
+    overflow-x:auto;
+    white-space:pre-wrap;
+  }
+  .unit-tag{
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    color:var(--paper-dim);
+    font-weight:normal;
+  }
+
+  /* ---- method cards ---- */
+  .method{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:20px;
+    background:var(--soil-peat);
+  }
+  .method-header{
+    padding:17px 22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    cursor:pointer;
+    transition:background .15s;
+  }
+  .method-header:hover{background:#DCC79A;}
+  .method-header h3{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:17.5px;
+    margin:0;
+    color:var(--paper);
+    flex:1;
+  }
+  .method-header .method-meta{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .gost-tag{
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    font-weight:500;
+    color:var(--soil-peat);
+    background:var(--soil-loam);
+    padding:5px 11px;
+    border-radius:var(--radius);
+    white-space:nowrap;
+  }
+  .method-header .arrow{font-family:var(--font-mono); color:var(--paper-dim); font-size:12px; flex-shrink:0;}
+  .method-content{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .35s ease;
+  }
+  .method-content.active{max-height:2400px; border-top:1px solid var(--line);}
+  .method-body{padding:18px 22px 22px;}
+  .method-section{margin-bottom:16px;}
+  .method-section:last-child{margin-bottom:0;}
+  .method-section h4{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--soil-clay);
+    margin:0 0 8px;
+  }
+  .method-section ul, .method-section ol{
+    margin:0; padding-left:20px; font-size:14.5px; line-height:1.7; color:var(--paper);
+  }
+  .method-section p{margin:0; font-size:14.5px; line-height:1.7; color:var(--paper);}
+
+  /* ---- resource / material / template rows ---- */
+  .resource-item{
+    display:flex;
+    align-items:center;
+    padding:17px 22px;
+    margin-bottom:10px;
+    background:var(--soil-peat);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    transition:background .15s, border-color .15s, transform .15s;
+  }
+  .resource-item:hover{background:#DCC79A; border-color:var(--soil-loam); transform:translateX(3px);}
+  .resource-icon{font-size:22px; margin-right:14px; flex-shrink:0;}
+  .resource-name{
+    font-size:14.5px;
+    color:var(--soil-loam);
+    text-decoration:none;
+    font-weight:500;
+    line-height:1.5;
+  }
+  .resource-item:hover .resource-name{color:var(--soil-loam);}
+  .resource-name:hover{text-decoration:underline;}
+
+  footer{
+    max-width:920px;
+    margin:36px auto 0;
+    padding-top:36px;
+    border-top:1px solid var(--line);
+    text-align:center;
+    font-family:var(--font-mono);
+    font-size:12.5px;
+    color:var(--paper-dim);
+  }
+
+  @media (max-width:900px){
+    .main-container{flex-direction:column;}
+    .sidebar{position:static; width:100%;}
+    .content-area{padding:22px 18px;}
+  }
+  @media screen and (max-width:720px){
+    header h1{font-size:30px;}
+  }
+</style>
 </head>
 <body>
-    <div class="top-menu">
-        <button onclick="location.href='index.html'">🏠</button>
+
+  <div class="top-bar">
+    <button id="btn-back" onclick="history.back()">Назад</button>
+    <button id="btn-home" onclick="location.href='index.html'">Домой</button>
+  </div>
+
+  <header>
+    <img src="/logo.png" alt="Логотип Geocalculator" class="logo">
+    <h1>Справочник</h1>
+    <p class="lede">Термины, обозначения, методы испытаний и рабочие материалы для лабораторных расчётов.</p>
+  </header>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Поиск по справочнику..." onkeyup="globalFilter()">
+  </div>
+
+  <div class="main-container">
+    <div class="sidebar">
+      <div class="sidebar-label">Разделы</div>
+
+      <div class="tab" id="termsMain" onclick="toggleTermsMenu()">Термины и определения</div>
+      <div class="subtab-group" id="termsSubmenu" style="display:none;">
+        <div class="subtab active" id="sub-physical" onclick="showSection('terms','physical')">Физические свойства</div>
+        <div class="subtab" id="sub-mechanical" onclick="showSection('terms','mechanical')">Механические свойства</div>
+        <div class="subtab" id="sub-other" onclick="showSection('terms','other')">Прочие характеристики</div>
+      </div>
+
+      <div class="tab" id="methodsMain" onclick="toggleMethodsMenu()">Методы испытаний</div>
+      <div class="subtab-group" id="methodsSubmenu" style="display:none;">
+        <div class="subtab active" id="msub-physical" onclick="showSection('methods','physical')">Физические испытания</div>
+        <div class="subtab" id="msub-mechanical" onclick="showSection('methods','mechanical')">Механические испытания</div>
+        <div class="subtab" id="msub-frozen" onclick="showSection('methods','frozen')">Мерзлотные и теплофизические</div>
+        <div class="subtab" id="msub-other" onclick="showSection('methods','other')">Специальные испытания</div>
+      </div>
+
+      <div class="tab" onclick="showSection('resources')">Электронные ресурсы</div>
+      <div class="tab" onclick="showSection('materials')">Дополнительные материалы</div>
+      <div class="tab" onclick="showSection('templates')">Шаблоны</div>
     </div>
 
-    <div class="header-text">
-        <h1>Справочник</h1>
-        <p>Полезные материалы, справочная информация и шаблоны для лабораторных расчётов.</p>
+    <div class="content-area" id="contentArea">
+      <div class="empty-state"><span class="glyph">⌕</span>Выберите раздел в меню слева</div>
     </div>
+  </div>
 
-    <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Поиск по справочнику..." onkeyup="globalFilter()">
-    </div>
+  <footer>
+    © 2026 Geocalculator. Инженерно-геологические расчеты онлайн
+  </footer>
 
-    <div class="main-container">
-        <!-- Левое меню -->
-        <div class="sidebar">
-            <h2>Разделы</h2>
-            
-            <div class="menu-item" id="termsMain" onclick="toggleTermsMenu()">Термины и определения</div>
-            
-            <div class="menu-subitems" id="termsSubmenu">
-                <div class="menu-subitem active" id="sub-physical" onclick="showSection('terms', 'physical')">Физические свойства</div>
-                <div class="menu-subitem" id="sub-mechanical" onclick="showSection('terms', 'mechanical')">Механические свойства</div>
-                <div class="menu-subitem" id="sub-other" onclick="showSection('terms', 'other')">Прочие характеристики</div>
-            </div>
+<script>
+// ==================== ДАННЫЕ ====================
 
-            <div class="menu-item" onclick="showSection('methods')">Методы испытаний</div>
-            <div class="menu-item" onclick="showSection('resources')">Электронные ресурсы</div>
-            <div class="menu-item" onclick="showSection('materials')">Дополнительные материалы</div>
-            <div class="menu-item" onclick="showSection('templates')">Шаблоны</div>
+const termData = {
+  physical: {
+    title: "Физические свойства",
+    sub: "Показатели состава, влажности и плотности грунта",
+    terms: [
+      {sym:"W", unit:"%", name:"Влажность природная (естественная) грунта", desc:"Отношение массы воды, содержащейся в порах грунта в его природном состоянии, к массе твёрдых частиц (сухого грунта).", formula:"W = (mв − mс) / mс × 100\nmв — масса влажного грунта; mс — масса сухого грунта"},
+      {sym:"Wtot", unit:"%", name:"Суммарная влажность мёрзлого грунта", desc:"Общее количество воды во всех формах (незамёрзшая вода, поровый лёд, ледяные включения), содержащееся в мёрзлом грунте, отнесённое к массе сухого грунта.", formula:"Wtot = Ww + Wi + Wic"},
+      {sym:"Wg", unit:"%", name:"Гигроскопическая влажность", desc:"Количество воды, которое воздушно-сухой грунт способен удерживать в виде тончайшей плёнки на поверхности частиц при влажности воздуха, близкой к 100 %."},
+      {sym:"Wm", unit:"%", name:"Влажность за счёт ледяных прослоек (шлиров)", desc:"Количество воды, содержащейся в мёрзлом грунте в виде видимых ледяных прослоек и линз между слоями минерального грунта."},
+      {sym:"Ww", unit:"%", name:"Влажность за счёт незамёрзшей воды", desc:"Часть общей влажности мёрзлого грунта, которая остаётся в жидком состоянии при отрицательной температуре за счёт плёночных и осмотических сил."},
+      {sym:"Wi", unit:"%", name:"Влажность за счёт ледяных включений", desc:"Количество воды, содержащейся в мёрзлом грунте в виде крупных ледяных включений (шлиров, прожилок), не связанных с поровым пространством."},
+      {sym:"Wic", unit:"%", name:"Влажность за счёт порового льда", desc:"Часть воды в мёрзлом грунте, замёрзшая непосредственно в порах между минеральными частицами, без образования видимых включений."},
+      {sym:"Wl", unit:"%", name:"Влажность на границе текучести", desc:"Влажность, при которой грунт переходит из пластичного состояния в текучее. Определяется методом баллансирного конуса."},
+      {sym:"Wp", unit:"%", name:"Влажность на границе раскатывания (пластичности)", desc:"Влажность, при которой грунт переходит из твёрдого состояния в пластичное. Определяется методом раскатывания в жгут диаметром 3 мм."},
+      {sym:"Ip", unit:"д.ед., %", name:"Число пластичности", desc:"Диапазон влажности, в котором грунт находится в пластичном состоянии.", formula:"Ip = Wl − Wp"},
+      {sym:"IL", unit:"д.ед.", name:"Показатель текучести (консистенции)", desc:"Характеризует консистенцию глинистого грунта при его природной влажности относительно границ пластичности.", formula:"IL = (W − Wp) / Ip"},
+      {sym:"—", unit:"%", name:"Гранулометрический (зерновой) состав", desc:"Процентное содержание частиц различной крупности в грунте. Является основой классификации грунтов (глыбовый, галечниковый, гравийный, песчаный, пылеватый, глинистый)."},
+      {sym:"ρ", unit:"г/см³", name:"Плотность грунта", desc:"Масса единицы объёма грунта природного сложения и влажности, включая твёрдые частицы, воду и воздух в порах."},
+      {sym:"ρd", unit:"г/см³", name:"Плотность сухого грунта", desc:"Масса твёрдых частиц и порового пространства (без воды) в единице объёма грунта.", formula:"ρd = ρ / (1 + W)"},
+      {sym:"ρs", unit:"г/см³", name:"Плотность частиц грунта", desc:"Масса твёрдых (минеральных) частиц грунта, отнесённая к единице их собственного объёма, без учёта пор и воды. Определяется пикнометрическим методом."},
+      {sym:"ρf", unit:"г/см³", name:"Плотность мёрзлого грунта", desc:"Масса единицы объёма грунта, находящегося в мёрзлом состоянии, с учётом содержащегося в нём льда."},
+      {sym:"n / e", unit:"%, д.ед.", name:"Пористость и коэффициент пористости", desc:"n — доля объёма пор от общего объёма грунта; e — отношение объёма пор к объёму твёрдых частиц.", formula:"e = (ρs − ρd) / ρd"},
+      {sym:"Sr", unit:"д.ед.", name:"Степень влажности (водонасыщения)", desc:"Отношение объёма воды в порах грунта к объёму пор, показывает, насколько поровое пространство заполнено водой."},
+      {sym:"Itot", unit:"д.ед.", name:"Суммарная льдистость мёрзлого грунта", desc:"Отношение массы льда во всех формах (шлиры, включения, поровый лёд) к массе сухого грунта."},
+      {sym:"Ii", unit:"д.ед.", name:"Льдистость за счёт ледяных включений", desc:"Отношение массы льда, находящегося в виде крупных включений или прослоек, к массе сухого грунта.", formula:"Ii = Wi / Wtot × Itot"},
+      {sym:"Iic", unit:"д.ед.", name:"Льдистость за счёт порового льда", desc:"Отношение массы льда, находящегося в порах между частицами грунта, к массе сухого грунта."},
+      {sym:"Wn", unit:"%", name:"Водопоглощение", desc:"Количество воды, которое пористый или трещиноватый скальный (крупнообломочный) грунт способен впитать при насыщении, отнесённое к его сухой массе."},
+      {sym:"И", unit:"%", name:"Истираемость", desc:"Потеря массы крупнообломочного грунта или его включений при механическом истирании во вращающемся барабане, показывает сопротивляемость износу."},
+      {sym:"—", unit:"%", name:"Содержание органических веществ", desc:"Доля органики в составе грунта, определяемая методом прокаливания. Влияет на прочностные и деформационные характеристики грунта."}
+    ]
+  },
+  mechanical: {
+    title: "Механические свойства",
+    sub: "Показатели прочности и деформируемости грунта",
+    terms: [
+      {sym:"φ", unit:"град.", name:"Угол внутреннего трения", desc:"Характеризует трение между частицами грунта при сдвиге, один из параметров прочности по закону Кулона."},
+      {sym:"c", unit:"кПа", name:"Удельное сцепление", desc:"Прочность структурных связей между частицами грунта, не зависящая от нормального давления (особенно значима для глинистых грунтов).", formula:"τ = σ·tgφ + c"},
+      {sym:"E", unit:"МПа", name:"Модуль общей деформации", desc:"Характеризует способность грунта деформироваться под нагрузкой при компрессионном или штамповом испытании, отношение приращения напряжения к приращению относительной деформации."},
+      {sym:"E₀", unit:"МПа", name:"Модуль упругости", desc:"Модуль деформации грунта при разгрузке-повторном нагружении, характеризует восстанавливаемую (упругую) часть деформации."},
+      {sym:"ν", unit:"д.ед.", name:"Коэффициент поперечной деформации (Пуассона)", desc:"Отношение относительной поперечной деформации образца к относительной продольной деформации при осевом нагружении."},
+      {sym:"cu", unit:"кПа", name:"Сопротивление недренированному сдвигу", desc:"Прочностная характеристика водонасыщенных глинистых грунтов, определяемая при испытании без возможности рассеивания порового давления (метод одноосного сжатия)."},
+      {sym:"Rc / σc", unit:"МПа", name:"Предел прочности на одноосное сжатие", desc:"Максимальное напряжение, которое выдерживает образец грунта при осевом сжатии без возможности бокового расширения до момента разрушения."},
+      {sym:"mv (m₀)", unit:"МПа⁻¹", name:"Коэффициент сжимаемости", desc:"Характеризует изменение коэффициента пористости грунта на единицу приращения давления при компрессионном испытании.", formula:"m₀ = (e₁ − e₂) / (p₂ − p₁)"},
+      {sym:"cv", unit:"см²/год", name:"Коэффициент консолидации", desc:"Определяет скорость рассеивания порового давления и осадки водонасыщенного грунта во времени."},
+      {sym:"τf", unit:"кПа", name:"Сопротивление сдвигу по поверхности смерзания", desc:"Прочность контакта между мёрзлым грунтом и материалом фундамента (сваи), определяемая методом одноплоскостного среза по поверхности смерзания."},
+      {sym:"Rdl", unit:"МПа", name:"Длительная прочность мёрзлого грунта", desc:"Предельное напряжение, которое мёрзлый грунт способен выдерживать неограниченно долго без перехода в стадию прогрессирующей ползучести (реологическая характеристика)."},
+      {sym:"Pcr", unit:"МПа", name:"Структурная прочность мёрзлого грунта", desc:"Давление, при котором нарушается природная структура мёрзлого грунта, определяется методом испытания шариковым штампом."}
+    ]
+  },
+  other: {
+    title: "Прочие характеристики",
+    sub: "Теплофизические, фильтрационные и прочие показатели",
+    terms: [
+      {sym:"λ", unit:"Вт/(м·°C)", name:"Теплопроводность грунта", desc:"Способность грунта проводить тепло, определяется отдельно для талого и мёрзлого состояния грунта."},
+      {sym:"Cm", unit:"кДж/(кг·°C)", name:"Удельная теплоёмкость грунта", desc:"Количество тепла, необходимое для нагрева 1 кг грунта на 1 °C."},
+      {sym:"Tbf", unit:"°C", name:"Температура начала замерзания", desc:"Температура, при которой в поровой влаге грунта начинается образование льда; зависит от засоленности и дисперсности грунта."},
+      {sym:"εfh", unit:"д.ед.", name:"Относительная деформация морозного пучения (пучинистость)", desc:"Характеризует увеличение объёма грунта при промерзании за счёт миграции влаги и образования ледяных включений."},
+      {sym:"Kf", unit:"м/сут", name:"Коэффициент фильтрации", desc:"Скорость фильтрации воды через грунт при единичном градиенте напора, характеризует водопроницаемость грунта."},
+      {sym:"Ath", unit:"д.ед.", name:"Коэффициент оттаивания", desc:"Относительное сжатие мёрзлого грунта при его оттаивании под природным или заданным давлением."},
+      {sym:"Dsal", unit:"%", name:"Степень засоления грунта", desc:"Содержание легко- и среднерастворимых солей в грунте, влияет на температуру начала замерзания и коррозионную активность."},
+      {sym:"—", unit:"—", name:"Коррозионная активность грунта", desc:"Способность грунта вызывать коррозию металлических и бетонных конструкций, оценивается по химическому составу и электрическому сопротивлению грунта."}
+    ]
+  }
+};
+
+const methodsData = {
+  physical: {
+    title:"Физические испытания",
+    sub:"Влажность, плотность, гранулометрия и прочие физические характеристики",
+    methods:[
+      {
+        name:"Влажность грунта (природная и суммарная)",
+        gost:"ГОСТ 5180-2015",
+        equipment:["Сушильный шкаф с терморегулятором","Бюксы металлические с крышками","Весы лабораторные (погрешность не более 0,01 г)","Эксикатор с осушителем"],
+        steps:["Отобрать пробу нарушенного или ненарушенного сложения массой не менее 15–50 г; для мёрзлого грунта пробу отбирают с сохранением всех включений льда.","Поместить пробу во взвешенный бюкс, закрыть крышкой и взвесить (mв).","Высушить пробу в открытом бюксе при температуре 100–105 °C до постоянной массы.","Охладить бюкс в эксикаторе и взвесить сухую пробу (mс). Для мёрзлого грунта полученное значение является суммарной влажностью Wtot, включающей все формы воды и льда."],
+        calc:"W (Wtot) = (mв − mс) / (mс − mт) × 100\nmв — масса бюкса с влажным (мёрзлым) грунтом; mс — масса бюкса с сухим грунтом; mт — масса пустого бюкса"
+      },
+      {
+        name:"Пределы пластичности (границы текучести и раскатывания)",
+        gost:"ГОСТ 5180-2015",
+        equipment:["Балансирный конус (для границы текучести)","Стеклянная пластина (для границы раскатывания)","Весы, сушильный шкаф, бюксы"],
+        steps:["Границу текучести Wl определяют погружением балансирного конуса в пасту грунта — влажность фиксируется при глубине погружения 10 мм за 5 с.","Границу раскатывания Wp определяют раскатыванием грунтового теста в жгут диаметром 3 мм до появления трещин и распада на кусочки.","Влажность каждой пробы определяют весовым методом высушивания.","По результатам вычисляют число пластичности Ip и показатель текучести IL."],
+        calc:"Ip = Wl − Wp;  IL = (W − Wp) / Ip"
+      },
+      {
+        name:"Гранулометрический состав. Ситовой метод",
+        gost:"ГОСТ 12536-2014",
+        equipment:["Набор сит с отверстиями от 10 до 0,1 мм","Встряхиватель сит (грохот)","Весы лабораторные","Ступка с резиновым пестиком"],
+        steps:["Пробу грунта высушить, растереть в ступке, не разрушая зёрен.","Просеять пробу через колонку сит, установленных по убыванию размера отверстий.","Взвесить остаток на каждом сите и поддоне.","Вычислить процентное содержание каждой фракции от общей массы пробы."],
+        calc:"Ai = mi / m × 100\nmi — масса остатка на сите; m — масса всей пробы"
+      },
+      {
+        name:"Гранулометрический состав. Ареометрический метод",
+        gost:"ГОСТ 12536-2014",
+        equipment:["Ареометр","Мерный цилиндр 1000 мл","Диспергатор (мешалка)","Секундомер, термометр"],
+        steps:["Пробу пылевато-глинистого грунта диспергировать в растворе с пептизатором (пирофосфат натрия).","Довести суспензию до объёма 1000 мл, взболтать.","Снимать показания ареометра через установленные промежутки времени (по мере оседания частиц разного размера).","По плотности суспензии и времени оседания рассчитать содержание пылеватых и глинистых фракций по закону Стокса."],
+        calc:"Содержание фракции определяется по показаниям ареометра R с поправками на температуру и мениск, в соответствии с расчётными таблицами ГОСТ 12536-2014"
+      },
+      {
+        name:"Плотность грунта методом режущего кольца",
+        gost:"ГОСТ 5180-2015",
+        equipment:["Режущее кольцо известного объёма","Нож грунтовый","Весы лабораторные","Пластина стеклянная"],
+        steps:["Вдавить режущее кольцо в грунт ненарушенного сложения без деформации структуры.","Срезать грунт вровень с краями кольца с двух сторон.","Взвесить кольцо с грунтом (m1) и пустое кольцо (m2).","Вычислить плотность по известному объёму кольца V."],
+        calc:"ρ = (m1 − m2) / V"
+      },
+      {
+        name:"Плотность грунта методом парафинирования",
+        gost:"ГОСТ 5180-2015",
+        equipment:["Парафин технический и ванна для его расплавления","Весы гидростатические (для взвешивания в воздухе и воде)","Нить для подвешивания образца","Термометр"],
+        steps:["Образец грунта неправильной формы (комковатый, трещиноватый) обвязать нитью и взвесить на воздухе (m1).","Покрыть образец тонким слоем расплавленного парафина, дать застыть, взвесить (m2).","Взвесить запарафинированный образец в воде на гидростатических весах (m3).","Вычислить плотность грунта с учётом объёма и плотности парафиновой оболочки."],
+        calc:"ρ = m1 / ((m2 − m3)/ρw − (m2 − m1)/ρп)\nρw — плотность воды; ρп — плотность парафина"
+      },
+      {
+        name:"Плотность частиц грунта пикнометрическим методом",
+        gost:"ГОСТ 5180-2015",
+        equipment:["Пикнометр объёмом 100 мл","Весы лабораторные","Вакуумный насос или песчаная баня для удаления воздуха","Дистиллированная вода"],
+        steps:["Высушенную и растёртую пробу грунта поместить в пикнометр.","Долить дистиллированной воды до половины объёма, удалить защемлённый воздух кипячением или вакуумированием.","Довести до метки водой, взвесить пикнометр с суспензией.","Сопоставить с массой пикнометра, заполненного только водой, при той же температуре."],
+        calc:"ρs = (m2 − m1) × ρw / ((m2 − m1) − (m3 − m4))\nгде m1 — масса пустого пикнометра; m2 — с сухим грунтом; m3 — с грунтом и водой; m4 — с одной водой"
+      },
+      {
+        name:"Плотность сухого грунта (скелета)",
+        gost:"ГОСТ 5180-2015",
+        equipment:["Данные испытаний по определению плотности грунта ρ и влажности W (весы, режущее кольцо, сушильный шкаф)"],
+        steps:["Определить плотность грунта ρ методом режущего кольца или парафинирования.","Определить влажность грунта W весовым методом на той же или парной пробе.","Вычислить плотность сухого грунта (скелета) по известной зависимости от ρ и W."],
+        calc:"ρd = ρ / (1 + W)"
+      },
+      {
+        name:"Определение содержания органических веществ",
+        gost:"ГОСТ 23740-2016",
+        equipment:["Муфельная печь","Тигли фарфоровые","Весы лабораторные","Эксикатор"],
+        steps:["Высушенную пробу грунта поместить в предварительно прокалённый и взвешенный тигель.","Прокалить пробу в муфельной печи при температуре 500–550 °C до полного выгорания органики.","Охладить тигель в эксикаторе и взвесить.","Определить потерю массы при прокаливании как содержание органического вещества."],
+        calc:"Iom = (m1 − m2) / (m1 − m0) × 100\nm0 — масса пустого тигля; m1 — тигель с пробой до прокаливания; m2 — после прокаливания"
+      },
+      {
+        name:"Угол естественного откоса",
+        gost:"ГОСТ 5180-2015",
+        equipment:["Воронка (прибор) для насыпания грунта конусом","Горизонтальная опорная площадка","Транспортир или угломер","Ванна с водой (для определения угла под водой)"],
+        steps:["Сыпучий (песчаный) грунт в воздушно-сухом состоянии насыпают через воронку с определённой высоты на горизонтальную площадку до образования конуса.","Измеряют высоту конуса и радиус его основания в нескольких сечениях.","Испытание повторяют для определения угла откоса под водой, погружая площадку с конусом в ванну.","Угол естественного откоса вычисляют как угол между образующей конуса и горизонтом."],
+        calc:"tg α = h / r\nh — высота конуса; r — радиус основания конуса"
+      },
+      {
+        name:"Водопоглощение скального грунта",
+        gost:"ГОСТ 5180-2015",
+        equipment:["Ёмкость для водонасыщения образцов","Весы лабораторные","Сушильный шкаф"],
+        steps:["Образец скального грунта высушить до постоянной массы и взвесить (m1).","Погрузить образец в воду и выдержать до полного водонасыщения (постоянство массы при повторных взвешиваниях).","Извлечь образец, удалить поверхностную влагу и взвесить насыщенный образец (m2).","Вычислить водопоглощение как приращение массы, отнесённое к сухой массе образца."],
+        calc:"Wn = (m2 − m1) / m1 × 100"
+      },
+      {
+        name:"Истираемость крупнообломочных грунтов",
+        gost:"ГОСТ 70257-2022",
+        equipment:["Полочный барабан","Весы лабораторные","Набор сит для отсева истёртого материала"],
+        steps:["Отобрать пробу крупнообломочного материала (включений) установленной фракции и массы.","Поместить пробу в полочный барабан и вращать заданное число оборотов с определённой скоростью.","Отсеять пробу после испытания через контрольное сито для отделения истёртого материала.","Вычислить потерю массы пробы в результате истирания."],
+        calc:"И = (m1 − m2) / m1 × 100\nm1 — исходная масса пробы; m2 — масса пробы после отсева истёртого материала"
+      }
+    ]
+  },
+  mechanical: {
+    title:"Механические испытания",
+    sub:"Уплотнение, сжатие и сдвиг талых и мёрзлых грунтов",
+    methods:[
+      {
+        name:"Стандартное уплотнение грунта",
+        gost:"ГОСТ 22733-2016",
+        equipment:["Прибор стандартного уплотнения (прибор Союздорнии)","Трамбовка (груз) заданной массы и высоты сброса","Весы лабораторные, сушильный шкаф","Сита с отверстиями 5 и 10 мм"],
+        steps:["Подготовить пробу грунта нарушенного сложения, разбить на 5–6 навесок с последовательно увеличивающейся влажностью.","Уплотнить каждую навеску в форме прибора послойно (в три слоя) равным числом ударов трамбовки.","Определить плотность и влажность уплотнённого образца для каждой навески.","Построить график зависимости плотности сухого грунта от влажности и определить максимальную плотность ρd,max и оптимальную влажность Wopt."],
+        calc:"ρd = ρ / (1 + W) — для каждой точки; максимум кривой ρd(W) даёт ρd,max и Wopt"
+      },
+      {
+        name:"Компрессионное сжатие талого грунта",
+        gost:"ГОСТ 12248.4-2020",
+        equipment:["Компрессионный прибор (одометр) с жёстким кольцом","Индикаторы деформации","Набор грузов ступенчатого нагружения","Весы, влагомер"],
+        steps:["Образец грунта ненарушенной структуры поместить в жёсткое кольцо прибора без возможности бокового расширения.","Приложить нагрузку ступенями, выдерживая каждую ступень до условной стабилизации деформации.","Фиксировать осадку образца на каждой ступени нагружения индикатором деформации.","Построить компрессионную кривую e–p и определить модуль деформации E и коэффициент сжимаемости m0."],
+        calc:"m0 = (e1 − e2) / (p2 − p1);  E = (1 + e0) × β / m0"
+      },
+      {
+        name:"Сдвиг талого грунта (одноплоскостной срез)",
+        gost:"ГОСТ 12248.1-2020",
+        equipment:["Срезной прибор одноплоскостного среза","Индикаторы вертикальных и горизонтальных перемещений","Набор нормальных нагрузок","Кольца для образцов грунта"],
+        steps:["Образец грунта ненарушенной структуры поместить в срезную обойму прибора.","Приложить заданную нормальную нагрузку и выдержать до условной стабилизации уплотнения.","Приложить возрастающую касательную нагрузку с постоянной скоростью деформирования до среза образца.","Повторить испытание при не менее чем трёх значениях нормального давления, построить график τ = f(σ) и определить φ и c."],
+        calc:"τ = σ·tgφ + c"
+      },
+      {
+        name:"Компрессионное сжатие мёрзлого грунта",
+        gost:"ГОСТ 12248.10-2020",
+        equipment:["Компрессионный прибор для мёрзлых грунтов","Термостат (морозильная камера)","Индикаторы деформации","Набор грузов ступенчатого нагружения"],
+        steps:["Поместить образец мёрзлого грунта в жёсткое кольцо компрессионного прибора без возможности бокового расширения.","Приложить нагрузку ступенями, выдерживая каждую ступень до условной стабилизации деформации при отрицательной температуре.","Фиксировать осадку образца на каждой ступени нагружения.","Построить компрессионную кривую и определить модуль деформации мёрзлого грунта."],
+        calc:"E = (1 + e0) × Δp / m0 × β\ne0 — начальный коэффициент пористости; Δp — приращение давления; β — коэффициент, учитывающий поперечное расширение"
+      },
+      {
+        name:"Компрессионное сжатие мёрзлого грунта при оттаивании",
+        gost:"ГОСТ 12248.10-2020",
+        equipment:["Компрессионный прибор с возможностью оттаивания образца под нагрузкой","Термостат","Индикаторы деформации"],
+        steps:["Установить мёрзлый образец в компрессионный прибор и приложить природное или заданное давление.","Провести оттаивание образца под нагрузкой при контролируемой положительной температуре.","Регистрировать осадку образца в процессе оттаивания и последующего доуплотнения под нагрузкой.","Определить коэффициент оттаивания Ath и коэффициент сжимаемости оттаявшего грунта."],
+        calc:"Ath = (h0 − hth) / h0\nh0 — высота образца до оттаивания; hth — высота после оттаивания под нагрузкой"
+      },
+      {
+        name:"Срез по поверхности смерзания (бетон, сталь, грунт)",
+        gost:"ГОСТ 12248.8-2020",
+        equipment:["Срезной прибор для мёрзлых грунтов с фиксированной плоскостью среза","Термостат (морозильная камера)","Формы для смораживания образца с материалом фундамента (бетон, сталь) или грунтом","Индикаторы перемещений"],
+        steps:["Смонтировать образец мёрзлого грунта в контакте с материалом фундамента (бетон, сталь, грунтовый раствор или лёд) в срезной обойме.","Выдержать при заданной отрицательной температуре до полного смерзания контакта.","Приложить нормальную нагрузку, затем возрастающее касательное усилие до среза по поверхности смерзания.","Повторить испытание при нескольких значениях нормального давления, построить график сопротивления сдвигу τf для каждого материала контакта."],
+        calc:"τf = T / A\nT — касательное усилие в момент среза; A — площадь поверхности смерзания"
+      },
+      {
+        name:"Испытание грунта шариковым штампом",
+        gost:"ГОСТ 12248.7-2020",
+        equipment:["Прибор для испытания шариковым штампом","Стальной шарик заданного диаметра","Термостат","Индикатор глубины вдавливания"],
+        steps:["Подготовить образец мёрзлого грунта ненарушенной структуры и поместить в прибор.","Выдержать образец при заданной отрицательной температуре испытания.","Вдавливать шаровой штамп в поверхность образца ступенчато возрастающей нагрузкой, фиксируя глубину вдавливания на каждой ступени.","По зависимости «нагрузка — глубина вдавливания» определить структурную прочность грунта Pcr и эквивалентное сцепление ceq."],
+        calc:"Pcr = Pcr* / (π·d·h)\nd — диаметр шарика; h — глубина вдавливания при переходе к пластическому течению"
+      }
+    ]
+  },
+  frozen: {
+    title:"Мерзлотные и теплофизические испытания",
+    sub:"Льдистость, формы влажности, теплофизика и температура начала замерзания мёрзлого грунта",
+    methods:[
+      {
+        name:"Льдистость мёрзлого грунта (суммарная, за счёт включений, порового льда, степень заполнения пор)",
+        gost:"ГОСТ 5180-2015",
+        equipment:["Данные испытаний по суммарной влажности Wtot, плотности частиц ρs и плотности мёрзлого грунта ρf","Весы лабораторные, сушильный шкаф"],
+        steps:["Определить суммарную влажность мёрзлого грунта Wtot и плотность мёрзлого грунта ρf.","Определить плотность частиц грунта ρs пикнометрическим методом.","Вычислить коэффициент пористости и суммарную льдистость Itot по расчётным зависимостям ГОСТ 5180-2015.","Вычислить льдистость за счёт видимых ледяных включений Ii, за счёт порового льда Iic и степень заполнения пор льдом и незамерзшей водой."],
+        calc:"Itot = 0,9 × (Wtot − Ww) / (1 + Wtot);  Ii = Itot − Iic;  Sr,i + Sr,w = 1 (степень заполнения пор)"
+      },
+      {
+        name:"Влажность мёрзлого грунта по формам (между прослойками, за счёт включений, незамерзшая вода, поровый лёд)",
+        gost:"ГОСТ 5180-2015",
+        equipment:["Сушильный шкаф, бюксы, весы лабораторные","Криоскоп или калориметр (для незамерзшей воды)"],
+        steps:["Определить суммарную влажность мёрзлого грунта Wtot весовым методом.","Отдельно отобрать и взвесить видимые ледяные прослойки (шлиры) и включения для определения влажности Wm и Wi.","Определить влажность за счёт незамерзшей воды Ww криоскопическим или калориметрическим методом при температуре испытания.","Вычислить влажность за счёт порового льда Wic как разность суммарной влажности и влажности за счёт незамерзшей воды и видимых включений."],
+        calc:"Wic = Wtot − Ww − Wi − Wm"
+      },
+      {
+        name:"Теплофизические характеристики (талый и мёрзлый грунт)",
+        gost:"ГОСТ 71038-2023",
+        equipment:["Измеритель теплопроводности (игольчатый или пластинчатый зонд)","Термостатическая камера с возможностью охлаждения ниже 0 °C","Образцы грунта ненарушенной структуры в талом и мёрзлом состоянии"],
+        steps:["Подготовить образец грунта заданной влажности и плотности, поместить в измерительную ячейку.","Установить зонд теплового потока и обеспечить постоянный температурный градиент для талого состояния образца.","Повторить измерение на том же образце после его промораживания до заданной отрицательной температуры.","Рассчитать теплопроводность λ, удельную и объёмную теплоёмкость (Cm, Cv) и температуропроводность a отдельно для талого и мёрзлого состояния."],
+        calc:"λ = q / (grad T);  Cm = Q / (m·ΔT);  Cv = Cm·ρ;  a = λ / Cv"
+      },
+      {
+        name:"Температура начала замерзания грунта",
+        gost:"ГОСТ 5180-2015",
+        equipment:["Термостатическая камера с плавным программируемым охлаждением","Термодатчики (термопары)","Регистратор температуры"],
+        steps:["Образец грунта природной влажности поместить в измерительную ячейку с термодатчиком в центре образца.","Плавно охлаждать образец с постоянной скоростью, непрерывно регистрируя температуру.","Зафиксировать температурную остановку (площадку) на кривой охлаждения, соответствующую началу кристаллизации поровой влаги.","Значение температуры в момент остановки принять за температуру начала замерзания Tbf."],
+        calc:"Tbf определяется по точке перегиба (температурной остановке) на кривой «температура — время» охлаждения образца"
+      },
+      {
+        name:"Морозное пучение (степень пучинистости)",
+        gost:"ГОСТ 28622-2012",
+        equipment:["Установка для одностороннего вертикального промораживания образца","Термостатированные плиты (верхняя и нижняя)","Устройство для нагружения образца","Индикаторы вертикальных перемещений"],
+        steps:["Образец грунта заданной влажности и плотности поместить в рабочее кольцо установки, обеспечить одностороннее охлаждение сверху вниз.","Провести медленное вертикальное промораживание образца при постоянном подводе воды к фронту промерзания и заданной нагрузке.","Измерять деформацию поверхности образца в процессе промерзания и фактическую толщину промёрзшего слоя.","Вычислить относительную деформацию морозного пучения εfh и определить степень пучинистости грунта по таблице стандарта."],
+        calc:"εfh = hf / df\nhf — вертикальная деформация пучения образца; df — фактическая толщина промёрзшего слоя"
+      }
+    ]
+  },
+  other: {
+    title:"Специальные испытания",
+    sub:"Фильтрация и коррозионная активность грунта",
+    methods:[
+      {
+        name:"Коэффициент фильтрации",
+        gost:"ГОСТ 25584-2016",
+        equipment:["Компрессионно-фильтрационный прибор (для глинистых грунтов) или фильтрационная трубка (для песчаных)","Мерные цилиндры","Секундомер, термометр"],
+        steps:["Подготовить образец грунта природного или заданного сложения в рабочем кольце прибора.","Насытить образец водой снизу вверх для удаления защемлённого воздуха.","Создать постоянный или переменный напорный градиент и измерить объём профильтровавшейся воды за фиксированный промежуток времени.","Вычислить коэффициент фильтрации по закону Дарси с приведением к температуре 10 °C."],
+        calc:"Kf = (V·L) / (A·H·t) × η(T)/η(10°C)\nV — объём фильтрата; L — высота образца; A — площадь сечения; H — напор; t — время"
+      },
+      {
+        name:"Коррозионная активность грунта к стали",
+        gost:"ГОСТ 9.602-2016",
+        equipment:["Установка для измерения удельного электрического сопротивления грунта (метод Веннера)","Потенциостат для измерения плотности катодного тока","Стальные электроды-образцы"],
+        steps:["Отобрать пробу грунта и подготовить её в соответствии с требованиями стандарта (при необходимости — насыщение до природной влажности).","Измерить удельное электрическое сопротивление грунта четырёхэлектродным методом (в лабораторных условиях — в специальном сосуде).","Измерить среднюю плотность катодного тока при смещении потенциала стального электрода на 100 мВ отрицательнее стационарного потенциала в данном грунте.","Оценить коррозионную агрессивность грунта по отношению к стали по таблице стандарта, используя оба показателя."],
+        calc:"Коррозионная агрессивность оценивается по таблице ГОСТ 9.602-2016 по значениям удельного электрического сопротивления ρ (Ом·м) и средней плотности катодного тока iк (А/м²)"
+      }
+    ]
+  }
+};
+
+const resourcesData = [
+  {icon:"🌐", name:"ГОСТ 12536-2014 Грунты. Методы лабораторного определения гранулометрического (зернового) и микроагрегатного состава", link:"https://docs.cntd.ru/document/1200116022"},
+  {icon:"🌐", name:"ГОСТ 23740-2016 Грунты. Методы определения содержания органических веществ", link:"https://docs.cntd.ru/document/1200143232"},
+  {icon:"🌐", name:"ГОСТ 25100-2020 Грунты. Классификация", link:"https://docs.cntd.ru/document/1200174302"},
+  {icon:"🌐", name:"ГОСТ 5180-2015 Грунты. Методы лабораторного определения физических характеристик", link:"https://docs.cntd.ru/document/1200126371"},
+  {icon:"🌐", name:"ГОСТ 70257-2022 Грунты. Метод определения истираемости крупнообломочных грунтов (включений) в полочном барабане", link:"https://docs.cntd.ru/document/1200192536"},
+  {icon:"🌐", name:"ГОСТ 71038-2023 Грунты. Методы лабораторного определения теплофизических характеристик", link:"https://docs.cntd.ru/document/1303621782"},
+  {icon:"🌐", name:"ГОСТ 8269.0-97 Щебень и гравий из плотных горных пород и отходов промышленного производства для строительных работ. Методы физико-механических испытаний", link:"https://docs.cntd.ru/document/1200003066"}
+];
+
+const materialsData = [
+  {icon:"📚", name:"Грунтоведение. Методические указания (Томский политехнический университет)", link:"materials/file_1.pdf"},
+  {icon:"📚", name:"Исследование физико-механических свойств грунтов (Камский политехнический институт)", link:"materials/file_2.pdf"},
+  {icon:"📚", name:"Методика оценки прочности и сжимаемости крупнообломочных грунтов с пылеватым и глинистым заполнителем и пылеватых и глинистых грунтов с крупнообломочными включениями (ДальНИИС Госстроя СССР)", link:"materials/file_3.pdf"}
+];
+
+const templatesData = [
+  {icon:"📄", name:"EXCEL-таблица для расчетов физических характеристик", link:"templates/file_8.xlsx"},
+  {icon:"📄", name:"Ведомость физических свойств мерзлых грунтов", link:"templates/file_1.xlsx"},
+  {icon:"📄", name:"Ведомость теплофизических свойств мерзлых грунтов", link:"templates/file_2.xlsx"},
+  {icon:"📄", name:"Компрессионное сжатие мерзлого грунта (Паспорт)", link:"templates/file_3.xls"},
+  {icon:"📄", name:"Компрессионное сжатие мерзлого грунта с оттаиванием (Паспорт)", link:"templates/file_4.xlsx"},
+  {icon:"📄", name:"Одноплоскостной срез по поверхности смерзания (Паспорт)", link:"templates/file_5.xlsx"},
+  {icon:"📄", name:"Одноосное сжатие мерзлого грунта (Паспорт)", link:"templates/file_6.xls"},
+  {icon:"📄", name:"Испытание грунта шариковым штампом (Паспорт)", link:"templates/file_7.xlsx"}
+];
+
+// ==================== РЕНДЕР ====================
+
+function toggleTermsMenu(){
+  const submenu = document.getElementById('termsSubmenu');
+  const mainItem = document.getElementById('termsMain');
+  if(submenu.style.display === 'block'){
+    submenu.style.display = 'none';
+    mainItem.classList.remove('active');
+  } else {
+    submenu.style.display = 'block';
+    mainItem.classList.add('active');
+    showSection('terms','physical');
+  }
+}
+
+function toggleMethodsMenu(){
+  const submenu = document.getElementById('methodsSubmenu');
+  const mainItem = document.getElementById('methodsMain');
+  if(submenu.style.display === 'block'){
+    submenu.style.display = 'none';
+    mainItem.classList.remove('active');
+  } else {
+    submenu.style.display = 'block';
+    mainItem.classList.add('active');
+    showSection('methods','physical');
+  }
+}
+
+function clearActive(){
+  document.querySelectorAll('.tab, .subtab').forEach(el => el.classList.remove('active'));
+}
+
+function renderTermCard(t){
+  const symPart = t.sym && t.sym !== '—' ? ` <span class="sym">(${t.sym})</span>` : '';
+  return `
+    <div class="term">
+      <div class="term-header" onclick="toggleTerm(this)">
+        <span class="t-name">${t.name}${symPart} <span class="unit-tag">${t.unit && t.unit !== '—' ? '· ' + t.unit : ''}</span></span>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="term-content">
+        <p>${t.desc}</p>
+        ${t.formula ? `<div class="formula">${t.formula}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+function renderMethodCard(m){
+  return `
+    <div class="method">
+      <div class="method-header" onclick="toggleTerm(this)">
+        <h3>${m.name}</h3>
+        <span class="method-meta">
+          <span class="gost-tag">${m.gost}</span>
+          <span class="arrow">▼</span>
+        </span>
+      </div>
+      <div class="method-content">
+        <div class="method-body">
+          <div class="method-section">
+            <h4>Оборудование</h4>
+            <ul>${m.equipment.map(e => `<li>${e}</li>`).join('')}</ul>
+          </div>
+          <div class="method-section">
+            <h4>Схема проведения</h4>
+            <ol>${m.steps.map(s => `<li>${s}</li>`).join('')}</ol>
+          </div>
+          <div class="method-section">
+            <h4>Расчёт</h4>
+            <div class="formula">${m.calc}</div>
+          </div>
         </div>
+      </div>
+    </div>`;
+}
 
-        <!-- Правая область -->
-        <div class="content-area" id="contentArea">
-            <div style="text-align:center; color:#888; padding:100px 20px; font-size:17px;">
-                Выберите раздел в меню слева
-            </div>
-        </div>
-    </div>
+function renderResourceRow(r){
+  return `
+    <div class="resource-item">
+      <span class="resource-icon">${r.icon}</span>
+      <a href="${r.link}" class="resource-name" target="_blank">${r.name}</a>
+    </div>`;
+}
 
-    <script>
-        // ==================== НАПОЛНЕНИЕ ====================
+function showSection(type, subgroup){
+  const area = document.getElementById('contentArea');
+  clearActive();
 
-        const termData = {
-            physical: {
-                title: "Физические свойства",
-                terms: [
-                    {name: "Влажность грунта (W)", desc: "<span style='color: #1a73e8; font-weight: bold;'>Влажность грунта (W)</span> — это количество воды, содержащейся в грунте, выраженное в процентах от массы сухого грунта (W = (mв - mс)/mc*100, где mв - масса влажного грунта, mc - масса сухого грунта)."},
-                    {name: "Суммарная влажность (Wtot)", desc: "<span style='color: #1a73e8; font-weight: bold;'>Суммарная влажность (Wtot)</span> — это общее количество воды во всех формах, содержащейся в грунте, выраженное в процентах от массы сухого грунта."},
-                    {name: "Гигроскопическая влажность (Wg)", desc: "<span style='color: #1a73e8; font-weight: bold;'>Гигроскопическая влажность (Wg)</span> — это количество воды, которое грунт способен удерживать в виде тончайшей пленки на поверхности частиц при влажности воздуха меньше 100%."},
-                    {name: "Влажность между ледяными прослойками (Wm)", desc: "<span style='color: #1a73e8; font-weight: bold;'>Влажность между ледяными прослойками (Wm)</span> — это количество воды, содержащейся в мерзлом грунте между слоями льда."},
-                    {name: "Влажность за счёт незамерзшей воды (Ww)", desc: "<span style='color: #1a73e8; font-weight: bold;'>Влажность за счёт незамерзшей воды (Ww)</span> — это количество воды, которая остается жидкой в мерзлом грунте."},
-                    {name: "Влажность за счёт ледяных включений (Wi)", desc: "<span style='color: #1a73e8; font-weight: bold;'>Влажность за счёт ледяных включений (Wi)</span> — это количество воды, содержащейся в виде льда внутри грунта."},
-                    {name: "Влажность за счёт порового льда (Wic)", desc: "<span style='color: #1a73e8; font-weight: bold;'>Влажность за счёт порового льда (Wic)</span> — это часть воды в грунте, которая замёрзла в порах между частицами."},
-                    {name: "Гранулометрический состав", desc: "<span style='color: #1a73e8; font-weight: bold;'>Гранулометрический состав</span> определяет процентное содержание частиц различного размера в грунте. Используется для классификации грунтов (песок, супесь, суглинок, глина)."},
-                    {name: "Пределы пластичности", desc: "<span style='color: #1a73e8; font-weight: bold;'>Пределы пластичности</span> — это показатели влажности, при которых грунт переходит из одного состояния в другое. Wp — нижний предел, Wl — верхний предел. Ip = Wl - Wp."},
-                    {name: "Плотность грунта (ρ)", desc: "<span style='color: #1a73e8; font-weight: bold;'>Плотность грунта (ρ)</span> — это масса грунта в единице объёма, измеряется в г/см³."},
-                    {name: "Плотность сухого грунта (ρd)", desc: "<span style='color: #1a73e8; font-weight: bold;'>Плотность сухого грунта (ρd)</span> — это масса грунта после полного высушивания на единицу объёма, без учёта воды."},
-                    {name: "Плотность частиц грунта (ρs)", desc: "<span style='color: #1a73e8; font-weight: bold;'>Плотность частиц грунта (ρs)</span> — это масса твердых частиц грунта на единицу их собственного объёма, без учёта пор и воды."},
-                    {name: "Содержание органических веществ", desc: "<span style='color: #1a73e8; font-weight: bold;'>Содержание органических веществ</span> определяет долю органики в грунте, что влияет на его прочностные и деформационные свойства."},
-                    {name: "Водопоглощение", desc: "<span style='color: #1a73e8; font-weight: bold;'>Водопоглощение</span> — это количество воды, которое пористый или трещиноватый скальный грунт может впитать относительно своей сухой массы."},
-                    {name: "Истираемость", desc: "<span style='color: #1a73e8; font-weight: bold;'>Истираемость</span> грунта показывает, как материал изнашивается под воздействием механических нагрузок."}
-                ]
-            },
-            mechanical: {
-                title: "Механические свойства",
-                terms: [
-                    {name: "Сжимаемость грунта", desc: "Способность грунта уменьшать объём под действием внешней нагрузки."},
-                    {name: "Модуль деформации (E)", desc: "Характеристика деформативности грунта при сжатии."},
-                    {name: "Сопротивление сдвигу", desc: "Прочность грунта на сдвиг. Определяется углом внутреннего трения φ и сцеплением c."},
-                    {name: "Угол внутреннего трения (φ)", desc: "Показатель трения между частицами грунта."},
-                    {name: "Сцепление (c)", desc: "Сила сцепления между частицами (особенно важно для глинистых грунтов)."}
-                ]
-            },
-            other: {
-                title: "Прочие характеристики",
-                terms: [
-                    {name: "Льдистость (Itot)", desc: "<span style='color: #1a73e8; font-weight: bold;'>Суммарная льдистость (Itot)</span> — это отношение массы льда во всех формах в грунте к массе сухого грунта."},
-                    {name: "Льдистость за счет ледяных включений (Ii)", desc: "<span style='color: #1a73e8; font-weight: bold;'>Льдистость за счет ледяных включений (Ii)</span> — это отношение массы льда, находящегося в виде крупных включений или прослоек, к массе сухого грунта."},
-                    {name: "Льдистость за счет порового льда (Iic)", desc: "<span style='color: #1a73e8; font-weight: bold;'>Льдистость за счет порового льда (Iic)</span> — это отношение массы льда, находящегося в порах между частицами грунта, к массе сухого грунта."},
-                    {name: "Теплопроводность грунта (λ)", desc: "<span style='color: #1a73e8; font-weight: bold;'>Теплопроводность грунта (λ)</span> — это способность грунта проводить тепло. Измеряется в Вт/(м·°C)."},
-                    {name: "Удельная теплоемкость грунта (Cm)", desc: "<span style='color: #1a73e8; font-weight: bold;'>Удельная теплоемкость грунта (Cm)</span> — это количество тепла, необходимое, чтобы нагреть 1 кг грунта на 1 °C."}
-                ]
-            }
-        };
+  if(type === 'terms' && subgroup){
+    document.getElementById('sub-' + subgroup).classList.add('active');
+    document.getElementById('termsMain').classList.add('active');
+    const data = termData[subgroup];
+    area.innerHTML = `<h2>${data.title}</h2><p class="content-sub">${data.sub}</p>` +
+      data.terms.map(renderTermCard).join('');
+  }
+  else if(type === 'methods' && subgroup){
+    document.getElementById('msub-' + subgroup).classList.add('active');
+    document.getElementById('methodsMain').classList.add('active');
+    const data = methodsData[subgroup];
+    area.innerHTML = `<h2>${data.title}</h2><p class="content-sub">${data.sub}</p>` +
+      data.methods.map(renderMethodCard).join('');
+  }
+  else if(type === 'resources'){
+    document.querySelector('.tab[onclick="showSection(\'resources\')"]').classList.add('active');
+    area.innerHTML = `<h2>Электронные ресурсы</h2><p class="content-sub">Действующие нормативные документы</p>` +
+      resourcesData.map(renderResourceRow).join('');
+  }
+  else if(type === 'materials'){
+    document.querySelector('.tab[onclick="showSection(\'materials\')"]').classList.add('active');
+    area.innerHTML = `<h2>Дополнительные материалы</h2><p class="content-sub">Методические пособия и справочные издания</p>` +
+      materialsData.map(renderResourceRow).join('');
+  }
+  else if(type === 'templates'){
+    document.querySelector('.tab[onclick="showSection(\'templates\')"]').classList.add('active');
+    area.innerHTML = `<h2>Шаблоны</h2><p class="content-sub">Рабочие формы и ведомости для оформления результатов</p>` +
+      templatesData.map(renderResourceRow).join('');
+  }
+}
 
-        const resourcesData = [
-            {icon:"🌐", name:"ГОСТ 12536-2014 Грунты. Методы лабораторного определения гранулометрического (зернового) и микроагрегатного состава", link:"https://docs.cntd.ru/document/1200116022"},
-            {icon:"🌐", name:"ГОСТ 23740-2016 Грунты. Методы определения содержания органических веществ", link:"https://docs.cntd.ru/document/1200143232"},
-            {icon:"🌐", name:"ГОСТ 25100-2020 Грунты. Классификация", link:"https://docs.cntd.ru/document/1200174302"},
-            {icon:"🌐", name:"ГОСТ 5180-2015 Грунты. Методы лабораторного определения физических характеристик", link:"https://docs.cntd.ru/document/1200126371"},
-            {icon:"🌐", name:"ГОСТ 70257-2022 Грунты. Метод определения истираемости крупнообломочных грунтов (включений) в полочном барабане", link:"https://docs.cntd.ru/document/1200192536"},
-            {icon:"🌐", name:"ГОСТ 71038-2023 Грунты. Методы лабораторного определения теплофизических характеристик", link:"https://docs.cntd.ru/document/1303621782"},
-            {icon:"🌐", name:"ГОСТ 8269.0-97 Щебень и гравий из плотных горных пород и отходов промышленного производства для строительных работ. Методы физико-механических испытаний", link:"https://docs.cntd.ru/document/1200003066"}
-        ];
+function toggleTerm(header){
+  const content = header.nextElementSibling;
+  const arrow = header.querySelector('.arrow');
+  content.classList.toggle('active');
+  arrow.textContent = content.classList.contains('active') ? '▲' : '▼';
+}
 
-        const materialsData = [
-            {icon:"📚", name:"Грунтоведение. Методические указания (Томский политехнический университет)", link:"materials/file_1.pdf"},
-            {icon:"📚", name:"Исследование физико-механических свойств грунтов (Камский политехнический институт)", link:"materials/file_2.pdf"},
-            {icon:"📚", name:"Методика оценки прочности и сжимаемости крупнообломочных грунтов с пылеватым и глинистым заполнителем и пылеватых и глинистых грунтов с крупнообломочными включениями (ДальНИИС Госстроя СССР)", link:"materials/file_3.pdf"}
-        ];
+function globalFilter(){
+  const query = document.getElementById('searchInput').value.toLowerCase().trim();
+  const area = document.getElementById('contentArea');
+  clearActive();
 
-        const templatesData = [
-            {icon:"📄", name:"EXCEL-таблица для расчетов физических характеристик", link:"templates/file_8.xlsx"},
-            {icon:"📄", name:"Ведомость физических свойств мерзлых грунтов", link:"templates/file_1.xlsx"},
-            {icon:"📄", name:"Ведомость теплофизических свойств мерзлых грунтов", link:"templates/file_2.xlsx"},
-            {icon:"📄", name:"Компрессионное сжатие мерзлого грунта (Паспорт)", link:"templates/file_3.xls"},
-            {icon:"📄", name:"Компрессионное сжатие мерзлого грунта с оттаиванием (Паспорт)", link:"templates/file_4.xlsx"},
-            {icon:"📄", name:"Одноплоскостной срез по поверхности смерзания (Паспорт)", link:"templates/file_5.xlsx"},
-            {icon:"📄", name:"Одноосное сжатие мерзлого грунта (Паспорт)", link:"templates/file_6.xls"},
-            {icon:"📄", name:"Испытание грунта шариковым штампом (Паспорт)", link:"templates/file_7.xlsx"}
-        ];
+  if(!query){
+    area.innerHTML = `<div class="empty-state"><span class="glyph">⌕</span>Выберите раздел в меню слева</div>`;
+    return;
+  }
 
-        const methodsData = [
-            {
-                name: "В процессе добавления...",
-                desc: `<p><strong>Метод</strong> . . . . . </p>
-                       <p><strong>Оборудование:</strong> . . . . </p>
-                       <p><strong>Расчёт:</strong> . . . </p>`
-            }
-        ];
+  let html = `<h2>Результаты поиска</h2><p class="content-sub">По запросу «${query}»</p>`;
+  let found = false;
 
-        // ==================== ФУНКЦИИ ====================
-        function toggleTermsMenu() {
-            const submenu = document.getElementById('termsSubmenu');
-            const mainItem = document.getElementById('termsMain');
-            
-            if (submenu.style.display === 'block') {
-                submenu.style.display = 'none';
-                mainItem.classList.remove('active');
-            } else {
-                submenu.style.display = 'block';
-                mainItem.classList.add('active');
-                // При открытии сразу показываем Физические свойства
-                showSection('terms', 'physical');
-            }
-        }
+  Object.values(termData).forEach(group => {
+    group.terms.forEach(t => {
+      const hay = (t.sym + ' ' + t.name + ' ' + t.desc + ' ' + (t.formula||'')).toLowerCase();
+      if(hay.includes(query)){ found = true; html += renderTermCard(t); }
+    });
+  });
 
-        function showSection(type, subgroup = null) {
-            const area = document.getElementById('contentArea');
-            area.innerHTML = '';
+  Object.values(methodsData).forEach(group => {
+    group.methods.forEach(m => {
+      const hay = (m.name + ' ' + m.gost + ' ' + m.equipment.join(' ') + ' ' + m.steps.join(' ') + ' ' + m.calc).toLowerCase();
+      if(hay.includes(query)){ found = true; html += renderMethodCard(m); }
+    });
+  });
 
-            // Сброс активных классов
-            document.querySelectorAll('.menu-item, .menu-subitem').forEach(el => el.classList.remove('active'));
+  [...resourcesData, ...materialsData, ...templatesData].forEach(item => {
+    if(item.name.toLowerCase().includes(query)){ found = true; html += renderResourceRow(item); }
+  });
 
-            if (type === 'terms' && subgroup) {
-                document.getElementById('sub-' + subgroup).classList.add('active');
-                const data = termData[subgroup];
-                let html = `<h2>${data.title}</h2>`;
-                data.terms.forEach(term => {
-                    html += `
-                        <div class="term">
-                            <div class="term-header" onclick="toggleTerm(this)">
-                                ${term.name} <span style="font-size:20px;">▼</span>
-                            </div>
-                            <div class="term-content"><p>${term.desc}</p></div>
-                        </div>`;
-                });
-                area.innerHTML = html;
-            } 
-            else if (type === 'methods') {
-                document.querySelector('[onclick="showSection(\'methods\')"]').classList.add('active');
-                let html = `<h2>Методы испытаний</h2>`;
-                methodsData.forEach(m => {
-                    html += `
-                        <div class="term">
-                            <div class="term-header" onclick="toggleTerm(this)">
-                                ${m.name} <span style="font-size:20px;">▼</span>
-                            </div>
-                            <div class="term-content">${m.desc}</div>
-                        </div>`;
-                });
-                area.innerHTML = html;
-            } 
-            else if (type === 'resources') {
-                document.querySelector('[onclick="showSection(\'resources\')"]').classList.add('active');
-                area.innerHTML = `<h2>Электронные ресурсы</h2>`;
-                resourcesData.forEach(r => {
-                    area.innerHTML += `
-                        <div class="resource-item">
-                            <span class="resource-icon">${r.icon}</span>
-                            <a href="${r.link}" class="resource-name" target="_blank">${r.name}</a>
-                        </div>`;
-                });
-            } 
-            else if (type === 'materials') {
-                document.querySelector('[onclick="showSection(\'materials\')"]').classList.add('active');
-                area.innerHTML = `<h2>Дополнительные материалы</h2>`;
-                materialsData.forEach(m => {
-                    area.innerHTML += `
-                        <div class="resource-item">
-                            <span class="resource-icon">${m.icon}</span>
-                            <a href="${m.link}" class="resource-name" target="_blank">${m.name}</a>
-                        </div>`;
-                });
-            } 
-            else if (type === 'templates') {
-                document.querySelector('[onclick="showSection(\'templates\')"]').classList.add('active');
-                area.innerHTML = `<h2>Шаблоны</h2>`;
-                templatesData.forEach(t => {
-                    area.innerHTML += `
-                        <div class="resource-item">
-                            <span class="resource-icon">${t.icon}</span>
-                            <a href="${t.link}" class="resource-name" target="_blank">${t.name}</a>
-                        </div>`;
-                });
-            }
-        }
-
-        function toggleTerm(header) {
-            const content = header.nextElementSibling;
-            const arrow = header.querySelector('span');
-            content.classList.toggle('active');
-            arrow.textContent = content.classList.contains('active') ? '▲' : '▼';
-        }
-
-        function globalFilter() {
-            const query = document.getElementById('searchInput').value.toLowerCase().trim();
-            const area = document.getElementById('contentArea');
-
-            if (!query) {
-                area.innerHTML = `<div style="text-align:center; color:#888; padding:100px 20px; font-size:17px;">Выберите раздел в меню слева</div>`;
-                return;
-            }
-
-            let html = `<h2>Результаты поиска по запросу «${query}»</h2>`;
-            let found = false;
-
-            // Поиск в терминах
-            Object.values(termData).forEach(group => {
-                group.terms.forEach(term => {
-                    if (term.name.toLowerCase().includes(query) || term.desc.toLowerCase().includes(query)) {
-                        found = true;
-                        html += `
-                            <div class="term">
-                                <div class="term-header" onclick="toggleTerm(this)">
-                                    ${term.name} <span style="font-size:20px;">▼</span>
-                                </div>
-                                <div class="term-content"><p>${term.desc}</p></div>
-                            </div>`;
-                    }
-                });
-            });
-
-            // Поиск в методах, ресурсах, материалах и шаблонах
-            [...methodsData, ...resourcesData, ...materialsData, ...templatesData].forEach(item => {
-                const name = item.name || item.title || '';
-                const desc = item.desc || '';
-                if (name.toLowerCase().includes(query) || desc.toLowerCase().includes(query)) {
-                    found = true;
-                    if (item.desc) {
-                        html += `
-                            <div class="term">
-                                <div class="term-header" onclick="toggleTerm(this)">
-                                    ${name} <span style="font-size:20px;">▼</span>
-                                </div>
-                                <div class="term-content">${desc}</div>
-                            </div>`;
-                    } else {
-                        html += `
-                            <div class="resource-item">
-                                <span class="resource-icon">${item.icon || '📄'}</span>
-                                <a href="${item.link}" class="resource-name" target="_blank">${name}</a>
-                            </div>`;
-                    }
-                }
-            });
-
-            if (!found) html += `<p style="color:#777; padding:30px 0;">По вашему запросу ничего не найдено.</p>`;
-
-            area.innerHTML = html;
-        }
-
-        // При загрузке страницы ничего не открываем
-        window.onload = () => {};
-    </script>
+  if(!found) html += `<div class="empty-state"><span class="glyph">∅</span>По вашему запросу ничего не найдено</div>`;
+  area.innerHTML = html;
+}
+</script>
 </body>
 </html>
