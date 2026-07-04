@@ -1,550 +1,559 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Содержание органических веществ</title>
-    <script src="https://unpkg.com/xlsx@0.21.0/dist/xlsx.full.min.js"></script>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-        html, body {
-            width: 100%;
-            max-width: 100%;
-            overflow-x: hidden;
-        }
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #ffffff;
-            padding: 20px;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150"><g fill="none" stroke="%235d8aa8" stroke-opacity="0.1" stroke-width="1.5"><path d="M30 120 Q40 100 50 120 Q60 110 70 120 Q80 100 90 120" stroke-dasharray="5 5"/><path d="M110 30 Q120 50 130 30 Q140 40 150 30" stroke-dasharray="5 5"/><path d="M20 80 Q30 60 40 80 Q50 70 60 80" stroke-dasharray="5 5"/><path d="M90 40 L100 60 L110 40 Z"/><path d="M60 100 L70 120 L80 100 Z"/></g></svg>');
-            background-repeat: repeat;
-            background-size: 150px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Содержание органических веществ — Geocalculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/xlsx@0.21.0/dist/xlsx.full.min.js"></script>
+<style>
+:root{
+  --soil-peat:   #F2E9D8;
+  --soil-peat-2: #EAE0C9;
+  --soil-clay:   #8A7355;
+  --soil-loam:   #B06B34;
+  --soil-sand:   #C98F45;
+  --paper:       #3B2E20;
+  --paper-dim:   #7A6A52;
+  --line:        #D9C9A3;
+  --ok:          #7A9B6E;
+  --warn:        #A6462E;
 
-        .top-menu {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            display: flex;
-            gap: 10px;
-            z-index: 10;
-        }
-        .top-menu button {
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 2px solid #2c3e50;
-            background-color: #2c3e50;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        .top-menu button:hover {
-            background-color: #34495e;
-        }
+  --font-display: 'Golos Text', -apple-system, sans-serif;
+  --font-body: 'Golos Text', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 
-                .header-text {
-            max-width: 800px;
-            margin: 0 auto 30px;
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-        .header-text h1 {
-            font-size: 24px;
-            color: #2c3e50;
-        }
-        .header-text p {
-            font-size: 16px;
-            color: #000000;
-        }
+  --radius: 3px;
+}
 
-        .method-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 25px;
-            flex-wrap: wrap;
-        }
+*{ box-sizing:border-box; margin:0; padding:0; }
 
-        .action-btn {
-            padding: 10px 20px;
-            border-radius: 14px;
-            border: 2px solid #2c3e50;
-            background-color: #2c3e50;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s, border-color 0.3s;
-            min-width: 300px;
-        }
-        .action-btn:hover {
-            background-color: #34495e;
-            border-color: #34495e;
-        }
-        .action-btn.initial {
-            background-color: #2c3e50;
-            border-color: #2c3e50;
-        }
-        .action-btn.initial:hover {
-            background-color: #34495e;
-            border-color: #34495e;
-        }
-        .action-btn.method-btn:not(.active):not(.initial) {
-            background-color: #7f8c8d;
-            border-color: #7f8c8d;
-        }
-        .action-btn.method-btn:not(.active):not(.initial):hover {
-            background-color: #95a5a6;
-            border-color: #95a5a6;
-        }
-        .action-btn.active, .action-btn.always-active {
-            background-color: #2c3e50;
-            border-color: #2c3e50;
-        }
-        .action-btn.active:hover, .action-btn.always-active:hover {
-            background-color: #34495e;
-            border-color: #34495e;
-        }
+html, body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden;
+  background-color:var(--soil-peat);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(176,107,52,0.08) 1px, transparent 0),
+    repeating-linear-gradient(155deg, rgba(176,107,52,0.05) 0px, rgba(176,107,52,0.05) 1px, transparent 1px, transparent 26px),
+    repeating-linear-gradient(65deg, rgba(138,115,85,0.045) 0px, rgba(138,115,85,0.045) 1px, transparent 1px, transparent 34px);
+  background-size: 18px 18px, auto, auto;
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-size:17px;
+  line-height:1.55;
+  min-height:100vh;
+}
 
-        .test-container {
-            display: none;
-            margin-top: 20px;
-        }
-        .test-container.active {
-            display: block;
-        }
+body{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
 
-        .tests-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
+/* ===== верхняя панель навигации ===== */
+.top-bar{
+  width:100%;
+  padding:18px 32px 0;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+.top-bar button{
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:14.5px;
+  padding:12px 22px;
+  border-radius:var(--radius);
+  cursor:pointer;
+  transition:opacity .15s, border-color .15s, color .15s;
+}
+#btn-back{
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  color:var(--paper);
+}
+#btn-back:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+#btn-home{
+  background:var(--soil-loam);
+  border:1px solid var(--soil-loam);
+  color:var(--soil-peat);
+}
+#btn-home:hover{ opacity:.88; }
 
-        .test-flex {
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            gap: 15px;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: slideIn 0.5s ease forwards;
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-            position: relative;
-        }
+/* ===== шапка ===== */
+header{
+  max-width:920px;
+  margin:0 auto;
+  padding:12px 32px 40px;
+  text-align:center;
+  border-bottom:1px solid var(--line);
+  width:100%;
+}
+header h1{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:42px;
+  line-height:1.2;
+  color:var(--paper);
+}
+header .lede{
+  font-size:17px;
+  color:var(--paper-dim);
+  max-width:600px;
+  margin:18px auto 0;
+}
+header .note-link{
+  font-size:14.5px;
+  color:var(--paper-dim);
+  max-width:600px;
+  margin:12px auto 0;
+}
+header .note-link a{
+  color:var(--soil-loam);
+  text-decoration:none;
+}
+header .note-link a:hover{ text-decoration:underline; }
 
-        .calc-wrapper {
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            width: 100%;
-            max-width: 620px;
-            margin: 0 auto;
-        }
+/* ===== контентная обёртка ===== */
+.wrap{
+  max-width:1240px;
+  margin:0 auto;
+  padding:40px 32px 64px;
+  width:100%;
+  flex:1 0 auto;
+}
 
-        .calculation-container {
-            border: 2px solid #2c3e50;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            background-color: rgba(255, 255, 255, 0.9);
-            min-width: 500px;
-            max-width: 620px;
-            margin: 0 auto;
-            display: block;
-            box-sizing: border-box;
-        }
+.section-label{
+  font-family:var(--font-mono);
+  font-size:13px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  margin-bottom:16px;
+  text-align:center;
+}
 
-        .sample-block {
-            border: 1px dashed #2c3e50;
-            border-radius: 12px;
-            padding: 8px;
-            margin-bottom: 10px;
-            background-color: rgba(240, 248, 255, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            opacity: 0;
-            transform: translateY(10px);
-            animation: slideIn 0.4s ease forwards;
-            overflow-x: auto;
-            position: relative;
-        }
-        .sample-block:nth-child(1) {
-            animation-delay: 0s;
-        }
-        .sample-block:nth-child(2) {
-            animation-delay: 0.15s;
-        }
-        .sample-block:nth-child(3) {
-            animation-delay: 0.3s;
-        }
-        .sample-block:nth-child(4) {
-            animation-delay: 0.45s;
-        }
+/* ===== кнопки выбора метода ===== */
+.method-buttons{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
 
-        .sample-content {
-            flex-grow: 1;
-        }
-        .sample-row {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .sample-row input, .sample-row select {
-            width: 100%;
-            padding: 6px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-            font-size: 13px;
-        }
+.action-btn.method-btn{
+  padding:12px 20px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background-color:var(--soil-peat-2);
+  color:var(--paper);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14.5px;
+  font-weight:600;
+  transition:border-color .15s, color .15s, background-color .15s;
+  min-width:300px;
+}
+.action-btn.method-btn:hover{
+  border-color:var(--soil-loam);
+  color:var(--soil-loam);
+}
+.action-btn.method-btn.active{
+  background-color:var(--soil-loam);
+  border-color:var(--soil-loam);
+  color:var(--soil-peat);
+}
 
-        .sample-result {
-            font-size: 12px;
-            color: #7f8c8d;
-            margin-left: 8px;
-            min-width: 50px;
-            text-align: right;
-        }
+/* ===== контейнеры испытаний ===== */
+.test-container{
+  display:none;
+  margin-top:36px;
+}
+.test-container.active{
+  display:block;
+}
 
-        .action-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 8px;
-        }
+.tests-container{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:20px;
+}
 
-        .btn-calc-green {
-            padding: 8px 14px;
-            border-radius: 12px;
-            border: 2px solid #2e7d32;
-            background-color: #2e7d32;
-            color: white;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .btn-calc-green:hover {
-            background-color: #388e3c;
-        }
+.test-flex{
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  gap:15px;
+  opacity:0;
+  transform:translateY(20px);
+  animation:slideIn .5s ease forwards;
+  width:100%;
+  max-width:900px;
+  margin:0 auto;
+  position:relative;
+}
 
-        .btn-clear {
-            padding: 8px 14px;
-            border-radius: 12px;
-            border: 1px solid #7f8c8d;
-            background-color: #ecf0f1;
-            color: #2c3e50;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .btn-clear:hover {
-            background-color: #bdc3c7;
-        }
+.calc-wrapper{
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  width:100%;
+  max-width:620px;
+  margin:0 auto;
+}
 
-        .btn-add-sample {
-            padding: 8px 14px;
-            border-radius: 12px;
-            border: 2px solid #2c3e50;
-            background-color: #2c3e50;
-            color: white;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .btn-add-sample:hover {
-            background-color: #34495e;
-        }
+.calculation-container{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:22px 24px;
+  background-color:var(--soil-peat-2);
+  min-width:500px;
+  max-width:620px;
+  margin:0 auto;
+  display:block;
+  box-sizing:border-box;
+}
 
-        .average-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-            padding: 8px;
-            background-color: rgba(240, 248, 255, 0.5);
-        }
-        .average-label {
-            font-size: 16px;
-            color: #2c3e50;
-            font-weight: normal;
-        }
-        .result-average {
-            font-weight: bold;
-            font-size: 16px;
-            color: #1a73e8;
-            text-align: right;
-        }
+.sample-block{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:12px 14px;
+  margin-bottom:10px;
+  background-color:var(--soil-peat);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  opacity:0;
+  transform:translateY(10px);
+  animation:slideIn .4s ease forwards;
+  overflow-x:auto;
+  position:relative;
+}
+.sample-block:nth-child(1){ animation-delay:0s; }
+.sample-block:nth-child(2){ animation-delay:.15s; }
+.sample-block:nth-child(3){ animation-delay:.3s; }
+.sample-block:nth-child(4){ animation-delay:.45s; }
 
-        .btn-delete-sample {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            padding: 2px 8px;
-            border-radius: 10px;
-            border: 1px solid #e74c3c;
-            background-color: #e74c3c;
-            color: white;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .btn-delete-sample:hover {
-            background-color: #c0392b;
-        }
+.sample-content{ flex-grow:1; }
+.sample-row{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.sample-row input{
+  width:100%;
+  padding:9px 10px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background:var(--soil-peat-2);
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-size:13.5px;
+}
+.sample-row input::placeholder{ color:var(--paper-dim); }
+.sample-row input:focus{ outline:none; border-color:var(--soil-loam); }
 
-        .delete-btn {
-            padding: 6px 12px;
-            border-radius: 10px;
-            border: 1px solid #e74c3c;
-            background-color: #e74c3c;
-            color: white;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            position: absolute;
-            top: 0;
-            right: 0;
-        }
-        .delete-btn:hover {
-            background-color: #c0392b;
-        }
+.sample-result{
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--paper-dim);
+  margin-left:10px;
+  min-width:60px;
+  text-align:right;
+  flex-shrink:0;
+}
 
-        @keyframes slideIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+.action-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:8px;
+  flex-wrap:wrap;
+  gap:8px;
+}
 
-        @media screen and (max-width: 768px) {
-            body {
-                padding-top: 60px;
-            }
-            .header-text {
-                margin-top: 20px;
-            }
-            .method-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-            .action-btn {
-                width: 90%;
-                max-width: 300px;
-            }
-            .test-flex {
-                flex-direction: column;
-                align-items: center;
-            }
-            .calc-wrapper {
-                flex-direction: column;
-                align-items: center;
-                width: 100%;
-                max-width: 600px;
-                margin: 0 auto;
-            }
-            .calculation-container {
-                width: 100%;
-                max-width: 90%;
-                min-width: 320px;
-                margin: 0 auto;
-                box-sizing: border-box;
-            }
-            .delete-btn {
-                position: static;
-                margin-top: 10px;
-                align-self: flex-end;
-            }
-            .sample-row {
-                flex-direction: column;
-            }
-            .sample-row input, .sample-row select {
-                width: 100%;
-            }
-            .average-container {
-                width: 100%;
-                justify-content: space-between;
-            }
-            .btn-delete-sample {
-                top: 4px;
-                right: 4px;
-            }
-        }
+.btn-calc-green{
+  padding:10px 18px;
+  border-radius:var(--radius);
+  border:1px solid var(--soil-loam);
+  background-color:var(--soil-loam);
+  color:var(--soil-peat);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14px;
+  font-weight:600;
+  transition:opacity .15s;
+}
+.btn-calc-green:hover{ opacity:.88; }
 
-        @media screen and (max-width: 400px) {
-            .calculation-container {
-                min-width: 280px;
-                max-width: 90%;
-            }
-        }
-    </style>
+.btn-clear{
+  padding:10px 18px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background-color:var(--soil-peat-2);
+  color:var(--paper);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14px;
+  font-weight:600;
+  transition:border-color .15s, color .15s;
+}
+.btn-clear:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+
+.btn-add-sample{
+  padding:10px 18px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background-color:var(--soil-peat-2);
+  color:var(--paper);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14px;
+  font-weight:600;
+  transition:border-color .15s, color .15s;
+}
+.btn-add-sample:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+
+.btn-delete-sample{
+  position:absolute;
+  top:8px;
+  right:8px;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  border:1px solid var(--warn);
+  background-color:var(--soil-peat-2);
+  color:var(--warn);
+  cursor:pointer;
+  font-size:13px;
+  font-weight:600;
+  line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background-color .15s, color .15s;
+  flex-shrink:0;
+}
+.btn-delete-sample:hover{ background-color:var(--warn); color:var(--soil-peat); }
+
+.delete-btn{
+  padding:9px 16px;
+  border-radius:var(--radius);
+  border:1px solid var(--warn);
+  background-color:var(--soil-peat);
+  color:var(--warn);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:13.5px;
+  font-weight:600;
+  transition:background-color .15s, color .15s;
+  position:absolute;
+  top:0;
+  right:-92px;
+}
+.delete-btn:hover{ background-color:var(--warn); color:var(--soil-peat); }
+
+.average-container{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:10px;
+  padding:12px 14px;
+  background-color:var(--soil-peat);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  gap:10px;
+  flex-wrap:wrap;
+}
+.average-label{
+  font-size:15px;
+  color:var(--paper);
+}
+.result-average{
+  font-family:var(--font-mono);
+  font-weight:600;
+  font-size:15px;
+  color:var(--soil-loam);
+  text-align:right;
+}
+
+.add-test-row{
+  text-align:center;
+  margin-top:25px;
+}
+.action-btn{
+  padding:12px 22px;
+  border-radius:var(--radius);
+  border:1px solid var(--soil-loam);
+  background-color:var(--soil-loam);
+  color:var(--soil-peat);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14.5px;
+  font-weight:600;
+  transition:opacity .15s;
+}
+.action-btn:hover{ opacity:.88; }
+
+/* ===== футер ===== */
+footer{
+  flex-shrink:0;
+  max-width:920px;
+  margin:36px auto 0;
+  padding:36px 32px 40px;
+  border-top:1px solid var(--line);
+  text-align:center;
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--paper-dim);
+  width:100%;
+}
+
+@keyframes slideIn{
+  to{ opacity:1; transform:translateY(0); }
+}
+
+@media (max-width:900px){
+  header h1{ font-size:30px; }
+  .top-bar{ padding:14px 20px 0; }
+  header{ padding:56px 20px 32px; }
+  .wrap{ padding:28px 20px 48px; }
+
+  .action-btn.method-btn{ width:100%; min-width:0; max-width:400px; }
+
+  .test-flex{ flex-direction:column; align-items:center; }
+  .calc-wrapper{ width:100%; max-width:90%; margin:0 auto; }
+  .calculation-container{
+    width:100%;
+    max-width:90%;
+    min-width:280px;
+    margin:0 auto;
+  }
+  .delete-btn{
+    position:static;
+    align-self:flex-end;
+    margin-top:10px;
+  }
+}
+
+@media (max-width:400px){
+  .calculation-container{ min-width:260px; max-width:90%; }
+}
+</style>
 </head>
 <body>
-    <div class="top-menu">
-        <button onclick="App.navigate('https://geocalculator.ru/index.html')" aria-label="Перейти на главную">🏠</button>
+
+<div class="top-bar">
+  <button id="btn-back" onclick="history.back()">Назад</button>
+  <button id="btn-home" onclick="location.href='/'">Главная</button>
+</div>
+
+<header>
+  <h1>Содержание органических веществ</h1>
+  <p class="lede">Выберите метод для расчёта содержания органических веществ, затем введите данные образцов в таблицу. Для каждого испытания рассчитывается среднее содержание в процентах. Расчёт ведётся в соответствии с ГОСТ 23740-2016.</p>
+  <p class="note-link">Также доступен <a href="https://geocalculator.ru/obrat/organic_obr.html">обратный метод расчёта</a> — по заданному значению содержания органического вещества выполняется вычисление соответствующих массовых показателей.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="section-label">Метод расчёта</div>
+  <div class="method-buttons">
+    <button class="action-btn method-btn initial" id="btn-residues" onclick="App.toggleMethod('residues')" aria-label="Метод определения растительных остатков">Метод определения растительных остатков</button>
+    <button class="action-btn method-btn initial" id="btn-calcination" onclick="App.toggleMethod('calcination')" aria-label="Метод прокаливания до постоянной массы">Метод прокаливания до постоянной массы</button>
+  </div>
+
+  <div id="test-container-residues" class="test-container">
+    <div class="tests-container" id="tests-container-residues"></div>
+    <div class="add-test-row">
+      <button class="action-btn" onclick="App.addTest('residues')" aria-label="Добавить новое испытание">+ Добавить испытание</button>
     </div>
+  </div>
 
-       <div class="header-text">
-        <h1>Содержание органических веществ</h1>
-        <p>Выберите метод для расчета содержания органических веществ ниже, а затем введите данные в таблицу. <br>Для каждого испытания вводятся данные образцов, на основе которых рассчитывается результат в процентах. Расчет ведтся в соответствии с ГОСТ 23740-2016.</p>
-        <p style="color: #000000;">Также вы можете воспользоваться <a href="https://geocalculator.ru/obrat/organic_obr.html">обратным методом расчета</a>, при котором по заданному значению содержания органического вещества выполняется вычисление соответствующих массовых показателей.</p>
+  <div id="test-container-calcination" class="test-container">
+    <div class="tests-container" id="tests-container-calcination"></div>
+    <div class="add-test-row">
+      <button class="action-btn" onclick="App.addTest('calcination')" aria-label="Добавить новое испытание">+ Добавить испытание</button>
     </div>
+  </div>
 
-    <div class="method-buttons">
-        <button class="action-btn method-btn initial" id="btn-residues" onclick="App.toggleMethod('residues')" aria-label="Метод определения растительных остатков">Метод определения растительных остатков</button>
-        <button class="action-btn method-btn initial" id="btn-calcination" onclick="App.toggleMethod('calcination')" aria-label="Метод прокаливания до постоянной массы">Метод прокаливания до постоянной массы</button>
-    </div>
+</div>
 
-    <div id="test-container-residues" class="test-container">
-        <div class="tests-container" id="tests-container-residues"></div>
-        <div style="text-align: center; margin-top: 25px;">
-            <button class="action-btn always-active" onclick="App.addTest('residues')" aria-label="Добавить новое испытание">+ Добавить испытание</button>
-        </div>
-    </div>
+<footer>
+  © 2026 Geocalculator. Инженерно-геологические расчеты онлайн
+</footer>
 
-    <div id="test-container-calcination" class="test-container">
-        <div class="tests-container" id="tests-container-calcination"></div>
-        <div style="text-align: center; margin-top: 25px;">
-            <button class="action-btn always-active" onclick="App.addTest('calcination')" aria-label="Добавить новое испытание">+ Добавить испытание</button>
-        </div>
-    </div>
-
-    <script>
-        const App = {
-            init() {
-                document.addEventListener('DOMContentLoaded', () => {
-                    if (!window.XLSX) {
-                        console.error("SheetJS library is not loaded");
-                    } else {
-                        console.log("SheetJS library loaded successfully");
-                    }
-                    console.log('Organic content page loaded');
-                });
-            },
-
-            toggleMenu() {
-                document.getElementById("sidebar").classList.toggle("open");
-            },
-
-            navigate(url) {
-                location.href = url;
-            },
-
-            focusNextInput(event, input) {
-                if (event.key === "Enter") {
-                    event.preventDefault();
-                    const calcDiv = input.closest(".calculation-container");
-                    const method = calcDiv.querySelector(".btn-calc-green").getAttribute("onclick").match(/'([^']+)'/)[1];
-                    const sampleBlocks = Array.from(calcDiv.querySelectorAll(".sample-block"));
-                    const allInputs = Array.from(calcDiv.querySelectorAll(".sample-row input"));
-                    const currentIndex = allInputs.indexOf(input);
-                    const currentSampleBlock = input.closest(".sample-block");
-                    const currentSampleIndex = sampleBlocks.indexOf(currentSampleBlock);
-
-                    if (currentIndex === allInputs.length - 1 && currentSampleIndex === sampleBlocks.length - 1) {
-                        this.calculateTest(calcDiv.querySelector(".btn-calc-green"), method);
-                    } else {
-                        const nextIndex = (currentIndex + 1) % allInputs.length;
-                        allInputs[nextIndex].focus();
-                    }
+<script>
+    const App = {
+        init() {
+            document.addEventListener('DOMContentLoaded', () => {
+                if (!window.XLSX) {
+                    console.error("SheetJS library is not loaded");
+                } else {
+                    console.log("SheetJS library loaded successfully");
                 }
-            },
+                console.log('Organic content page loaded');
+            });
+        },
 
-            toggleMethod(method) {
-                const buttons = ['residues', 'calcination'].map(id => document.getElementById(`btn-${id}`));
-                buttons.forEach(btn => btn.classList.remove('initial'));
-                const containers = ['residues', 'calcination'].map(id => document.getElementById(`test-container-${id}`));
-                containers.forEach(container => container.classList.remove('active'));
-                document.getElementById(`test-container-${method}`).classList.add('active');
-                buttons.forEach(btn => btn.classList.remove('active'));
-                document.getElementById(`btn-${method}`).classList.add('active');
-                if (!document.getElementById(`tests-container-${method}`).querySelector('.test-flex')) {
-                    this.addTest(method);
+        toggleMenu() {
+            document.getElementById("sidebar").classList.toggle("open");
+        },
+
+        navigate(url) {
+            location.href = url;
+        },
+
+        focusNextInput(event, input) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                const calcDiv = input.closest(".calculation-container");
+                const method = calcDiv.querySelector(".btn-calc-green").getAttribute("onclick").match(/'([^']+)'/)[1];
+                const sampleBlocks = Array.from(calcDiv.querySelectorAll(".sample-block"));
+                const allInputs = Array.from(calcDiv.querySelectorAll(".sample-row input"));
+                const currentIndex = allInputs.indexOf(input);
+                const currentSampleBlock = input.closest(".sample-block");
+                const currentSampleIndex = sampleBlocks.indexOf(currentSampleBlock);
+
+                if (currentIndex === allInputs.length - 1 && currentSampleIndex === sampleBlocks.length - 1) {
+                    this.calculateTest(calcDiv.querySelector(".btn-calc-green"), method);
+                } else {
+                    const nextIndex = (currentIndex + 1) % allInputs.length;
+                    allInputs[nextIndex].focus();
                 }
-            },
+            }
+        },
 
-            addTest(method) {
-                const container = document.getElementById(`tests-container-${method}`);
-                const testFlex = document.createElement("div");
-                testFlex.classList.add("test-flex");
+        toggleMethod(method) {
+            const buttons = ['residues', 'calcination'].map(id => document.getElementById(`btn-${id}`));
+            buttons.forEach(btn => btn.classList.remove('initial'));
+            const containers = ['residues', 'calcination'].map(id => document.getElementById(`test-container-${id}`));
+            containers.forEach(container => container.classList.remove('active'));
+            document.getElementById(`test-container-${method}`).classList.add('active');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${method}`).classList.add('active');
+            if (!document.getElementById(`tests-container-${method}`).querySelector('.test-flex')) {
+                this.addTest(method);
+            }
+        },
 
-                const calcWrapper = document.createElement("div");
-                calcWrapper.classList.add("calc-wrapper");
+        addTest(method) {
+            const container = document.getElementById(`tests-container-${method}`);
+            const testFlex = document.createElement("div");
+            testFlex.classList.add("test-flex");
 
-                const calcDiv = document.createElement("div");
-                calcDiv.classList.add("calculation-container");
+            const calcWrapper = document.createElement("div");
+            calcWrapper.classList.add("calc-wrapper");
 
-                let sampleContent;
-                if (method === 'residues') {
-                    sampleContent = `
-                        <div class="sample-block">
-                            <div class="sample-content">
-                                <div class="sample-row">
-                                    <input type="number" class="residues-mass" placeholder="Масса сухих растительных остатков, г" aria-label="Масса сухих растительных остатков" onkeypress="App.focusNextInput(event, this)">
-                                    <input type="number" class="soil-mass" placeholder="Масса сухого грунта, г" aria-label="Масса сухого грунта" onkeypress="App.focusNextInput(event, this)">
-                                </div>
-                            </div>
-                            <div class="sample-result">-</div>
-                        </div>
-                    `;
-                } else if (method === 'calcination') {
-                    sampleContent = `
-                        <div class="sample-block">
-                            <div class="sample-content">
-                                <div class="sample-row">
-                                    <input type="number" class="crucible-weight" placeholder="Вес тигля, г" aria-label="Вес тигля" onkeypress="App.focusNextInput(event, this)">
-                                    <input type="number" class="before-weight" placeholder="Вес тигля с грунтом до прокаливания, г" aria-label="Вес тигля с грунтом до прокаливания" onkeypress="App.focusNextInput(event, this)">
-                                    <input type="number" class="after-weight" placeholder="Вес тигля с грунтом после прокаливания, г" aria-label="Вес тигля с грунтом после прокаливания" onkeypress="App.focusNextInput(event, this)">
-                                </div>
-                            </div>
-                            <div class="sample-result">-</div>
-                        </div>
-                    `;
-                }
+            const calcDiv = document.createElement("div");
+            calcDiv.classList.add("calculation-container");
 
-                calcDiv.innerHTML = sampleContent;
-
-                calcDiv.innerHTML += `
-                    <div class="average-container">
-                        <span class="average-label">Среднее содержание:</span>
-                        <div class="result-average"><span class="organic-value">-</span></div>
-                    </div>
-                    <div class="action-row">
-                        <div>
-                            <button class="btn-calc-green" onclick="App.calculateTest(this, '${method}')" aria-label="Рассчитать">Рассчитать</button>
-                            <button class="btn-add-sample" onclick="App.addSample(this, '${method}')" aria-label="Добавить образец">Добавить образец</button>
-                            <button class="btn-clear" onclick="App.clearTest(this)" aria-label="Очистить поля">Очистить</button>
-                        </div>
-                    </div>
-                `;
-
-                calcWrapper.appendChild(calcDiv);
-                testFlex.appendChild(calcWrapper);
-                testFlex.appendChild(document.createElement("button"));
-                testFlex.lastChild.classList.add("delete-btn");
-                testFlex.lastChild.textContent = "Удалить";
-                testFlex.lastChild.setAttribute("aria-label", "Удалить испытание");
-                testFlex.lastChild.onclick = () => testFlex.remove();
-                container.appendChild(testFlex);
-            },
-
-            addSample(btn, method) {
-                const calcDiv = btn.closest(".calculation-container");
-                const sampleCount = calcDiv.querySelectorAll(".sample-block").length + 1;
-                const sampleBlock = document.createElement("div");
-                sampleBlock.classList.add("sample-block");
-                sampleBlock.style.animationDelay = `${(sampleCount - 1) * 0.15}s`;
-
-                let sampleContent;
-                if (method === 'residues') {
-                    sampleContent = `
+            let sampleContent;
+            if (method === 'residues') {
+                sampleContent = `
+                    <div class="sample-block">
                         <div class="sample-content">
                             <div class="sample-row">
                                 <input type="number" class="residues-mass" placeholder="Масса сухих растительных остатков, г" aria-label="Масса сухих растительных остатков" onkeypress="App.focusNextInput(event, this)">
@@ -552,10 +561,11 @@
                             </div>
                         </div>
                         <div class="sample-result">-</div>
-                        <button class="btn-delete-sample" onclick="App.deleteSample(this)" aria-label="Удалить образец">—</button>
-                    `;
-                } else if (method === 'calcination') {
-                    sampleContent = `
+                    </div>
+                `;
+            } else if (method === 'calcination') {
+                sampleContent = `
+                    <div class="sample-block">
                         <div class="sample-content">
                             <div class="sample-row">
                                 <input type="number" class="crucible-weight" placeholder="Вес тигля, г" aria-label="Вес тигля" onkeypress="App.focusNextInput(event, this)">
@@ -564,80 +574,139 @@
                             </div>
                         </div>
                         <div class="sample-result">-</div>
-                        <button class="btn-delete-sample" onclick="App.deleteSample(this)" aria-label="Удалить образец">—</button>
-                    `;
-                }
-
-                sampleBlock.innerHTML = sampleContent;
-                calcDiv.insertBefore(sampleBlock, calcDiv.querySelector(".average-container"));
-            },
-
-            deleteSample(btn) {
-                const calcDiv = btn.closest(".calculation-container");
-                btn.closest(".sample-block").remove();
-                const method = calcDiv.querySelector(".btn-calc-green").getAttribute("onclick").match(/'([^']+)'/)[1];
-                this.calculateTest(calcDiv.querySelector(".btn-calc-green"), method);
-            },
-
-            clearTest(btn) {
-                const calcDiv = btn.closest(".calculation-container");
-                calcDiv.querySelectorAll(".sample-block").forEach((block, index) => {
-                    if (index === 0) {
-                        block.querySelectorAll("input").forEach(input => input.value = "");
-                        block.querySelector(".sample-result").textContent = "-";
-                    } else {
-                        block.remove();
-                    }
-                });
-                calcDiv.querySelector(".organic-value").textContent = "-";
-            },
-
-            calculateTest(btn, method) {
-                const block = btn.closest(".test-flex");
-                const samples = block.querySelectorAll(".sample-block");
-                let organicValues = [];
-
-                if (method === 'residues') {
-                    samples.forEach(sample => {
-                        const residuesMass = parseFloat(sample.querySelector(".residues-mass").value);
-                        const soilMass = parseFloat(sample.querySelector(".soil-mass").value);
-
-                        if (isNaN(residuesMass) || isNaN(soilMass) || residuesMass < 0 || soilMass <= 0) {
-                            sample.querySelector(".sample-result").textContent = "Некорректные данные";
-                            return;
-                        }
-
-                        const organicContent = (residuesMass / soilMass) * 100;
-                        sample.querySelector(".sample-result").textContent = `${organicContent.toFixed(2)} %`;
-                        organicValues.push(organicContent);
-                    });
-                } else if (method === 'calcination') {
-                    samples.forEach(sample => {
-                        const crucibleWeight = parseFloat(sample.querySelector(".crucible-weight").value);
-                        const beforeWeight = parseFloat(sample.querySelector(".before-weight").value);
-                        const afterWeight = parseFloat(sample.querySelector(".after-weight").value);
-
-                        if (isNaN(crucibleWeight) || isNaN(beforeWeight) || isNaN(afterWeight) || crucibleWeight < 0 || beforeWeight <= crucibleWeight || afterWeight < crucibleWeight) {
-                            sample.querySelector(".sample-result").textContent = "Некорректные данные";
-                            return;
-                        }
-
-                        const drySoilMass = beforeWeight - crucibleWeight;
-                        const calcinedSoilMass = afterWeight - crucibleWeight;
-                        const organicContent = ((drySoilMass - calcinedSoilMass) / drySoilMass) * 100;
-                        sample.querySelector(".sample-result").textContent = `${organicContent.toFixed(2)} %`;
-                        organicValues.push(organicContent);
-                    });
-                }
-
-                const avg = organicValues.length >= 1 
-                    ? organicValues.reduce((sum, val) => sum + val, 0) / organicValues.length 
-                    : null;
-                block.querySelector(".organic-value").textContent = avg ? `${avg.toFixed(2)} %` : "Н/Д";
+                    </div>
+                `;
             }
-        };
 
-        App.init();
-    </script>
+            calcDiv.innerHTML = sampleContent;
+
+            calcDiv.innerHTML += `
+                <div class="average-container">
+                    <span class="average-label">Среднее содержание:</span>
+                    <div class="result-average"><span class="organic-value">-</span></div>
+                </div>
+                <div class="action-row">
+                    <div>
+                        <button class="btn-calc-green" onclick="App.calculateTest(this, '${method}')" aria-label="Рассчитать">Рассчитать</button>
+                        <button class="btn-add-sample" onclick="App.addSample(this, '${method}')" aria-label="Добавить образец">Добавить образец</button>
+                        <button class="btn-clear" onclick="App.clearTest(this)" aria-label="Очистить поля">Очистить</button>
+                    </div>
+                </div>
+            `;
+
+            calcWrapper.appendChild(calcDiv);
+            testFlex.appendChild(calcWrapper);
+            testFlex.appendChild(document.createElement("button"));
+            testFlex.lastChild.classList.add("delete-btn");
+            testFlex.lastChild.textContent = "Удалить";
+            testFlex.lastChild.setAttribute("aria-label", "Удалить испытание");
+            testFlex.lastChild.onclick = () => testFlex.remove();
+            container.appendChild(testFlex);
+        },
+
+        addSample(btn, method) {
+            const calcDiv = btn.closest(".calculation-container");
+            const sampleCount = calcDiv.querySelectorAll(".sample-block").length + 1;
+            const sampleBlock = document.createElement("div");
+            sampleBlock.classList.add("sample-block");
+            sampleBlock.style.animationDelay = `${(sampleCount - 1) * 0.15}s`;
+
+            let sampleContent;
+            if (method === 'residues') {
+                sampleContent = `
+                    <div class="sample-content">
+                        <div class="sample-row">
+                            <input type="number" class="residues-mass" placeholder="Масса сухих растительных остатков, г" aria-label="Масса сухих растительных остатков" onkeypress="App.focusNextInput(event, this)">
+                            <input type="number" class="soil-mass" placeholder="Масса сухого грунта, г" aria-label="Масса сухого грунта" onkeypress="App.focusNextInput(event, this)">
+                        </div>
+                    </div>
+                    <div class="sample-result">-</div>
+                    <button class="btn-delete-sample" onclick="App.deleteSample(this)" aria-label="Удалить образец">—</button>
+                `;
+            } else if (method === 'calcination') {
+                sampleContent = `
+                    <div class="sample-content">
+                        <div class="sample-row">
+                            <input type="number" class="crucible-weight" placeholder="Вес тигля, г" aria-label="Вес тигля" onkeypress="App.focusNextInput(event, this)">
+                            <input type="number" class="before-weight" placeholder="Вес тигля с грунтом до прокаливания, г" aria-label="Вес тигля с грунтом до прокаливания" onkeypress="App.focusNextInput(event, this)">
+                            <input type="number" class="after-weight" placeholder="Вес тигля с грунтом после прокаливания, г" aria-label="Вес тигля с грунтом после прокаливания" onkeypress="App.focusNextInput(event, this)">
+                        </div>
+                    </div>
+                    <div class="sample-result">-</div>
+                    <button class="btn-delete-sample" onclick="App.deleteSample(this)" aria-label="Удалить образец">—</button>
+                `;
+            }
+
+            sampleBlock.innerHTML = sampleContent;
+            calcDiv.insertBefore(sampleBlock, calcDiv.querySelector(".average-container"));
+        },
+
+        deleteSample(btn) {
+            const calcDiv = btn.closest(".calculation-container");
+            btn.closest(".sample-block").remove();
+            const method = calcDiv.querySelector(".btn-calc-green").getAttribute("onclick").match(/'([^']+)'/)[1];
+            this.calculateTest(calcDiv.querySelector(".btn-calc-green"), method);
+        },
+
+        clearTest(btn) {
+            const calcDiv = btn.closest(".calculation-container");
+            calcDiv.querySelectorAll(".sample-block").forEach((block, index) => {
+                if (index === 0) {
+                    block.querySelectorAll("input").forEach(input => input.value = "");
+                    block.querySelector(".sample-result").textContent = "-";
+                } else {
+                    block.remove();
+                }
+            });
+            calcDiv.querySelector(".organic-value").textContent = "-";
+        },
+
+        calculateTest(btn, method) {
+            const block = btn.closest(".test-flex");
+            const samples = block.querySelectorAll(".sample-block");
+            let organicValues = [];
+
+            if (method === 'residues') {
+                samples.forEach(sample => {
+                    const residuesMass = parseFloat(sample.querySelector(".residues-mass").value);
+                    const soilMass = parseFloat(sample.querySelector(".soil-mass").value);
+
+                    if (isNaN(residuesMass) || isNaN(soilMass) || residuesMass < 0 || soilMass <= 0) {
+                        sample.querySelector(".sample-result").textContent = "Некорректные данные";
+                        return;
+                    }
+
+                    const organicContent = (residuesMass / soilMass) * 100;
+                    sample.querySelector(".sample-result").textContent = `${organicContent.toFixed(2)} %`;
+                    organicValues.push(organicContent);
+                });
+            } else if (method === 'calcination') {
+                samples.forEach(sample => {
+                    const crucibleWeight = parseFloat(sample.querySelector(".crucible-weight").value);
+                    const beforeWeight = parseFloat(sample.querySelector(".before-weight").value);
+                    const afterWeight = parseFloat(sample.querySelector(".after-weight").value);
+
+                    if (isNaN(crucibleWeight) || isNaN(beforeWeight) || isNaN(afterWeight) || crucibleWeight < 0 || beforeWeight <= crucibleWeight || afterWeight < crucibleWeight) {
+                        sample.querySelector(".sample-result").textContent = "Некорректные данные";
+                        return;
+                    }
+
+                    const drySoilMass = beforeWeight - crucibleWeight;
+                    const calcinedSoilMass = afterWeight - crucibleWeight;
+                    const organicContent = ((drySoilMass - calcinedSoilMass) / drySoilMass) * 100;
+                    sample.querySelector(".sample-result").textContent = `${organicContent.toFixed(2)} %`;
+                    organicValues.push(organicContent);
+                });
+            }
+
+            const avg = organicValues.length >= 1 
+                ? organicValues.reduce((sum, val) => sum + val, 0) / organicValues.length 
+                : null;
+            block.querySelector(".organic-value").textContent = avg ? `${avg.toFixed(2)} %` : "Н/Д";
+        }
+    };
+
+    App.init();
+</script>
 </body>
 </html>
