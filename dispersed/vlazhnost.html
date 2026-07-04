@@ -116,7 +116,7 @@ header .note-link a{
 }
 header .note-link a:hover{ text-decoration:underline; }
 
-/* ===== контентная обёртка ===== */
+/* ===== контентная обертка ===== */
 .wrap{
   max-width:920px;
   margin:0 auto;
@@ -384,8 +384,8 @@ footer{
 
 <header>
   <h1>Влажность грунта</h1>
-  <p class="lede">Введите данные для расчёта влажности грунта в таблицу ниже. Для каждого испытания вводятся данные образцов, на основе которых рассчитывается средняя влажность грунта в д.е. и в %. Расчёт ведётся в соответствии с ГОСТ 5180-2015.</p>
-  <p class="note-link">Также доступен <a href="https://geocalculator.ru/obrat/vlazhnost_obr.html">обратный метод расчёта</a> — по заданному значению влажности грунта выполняется вычисление соответствующих массовых показателей.</p>
+  <p class="lede">Введите данные для расчета влажности грунта в таблицу ниже. Для каждого испытания вводятся данные образцов, на основе которых рассчитывается средняя влажность грунта в д.е. и в %. Расчет ведется в соответствии с ГОСТ 5180-2015.</p>
+  <p class="note-link">Также доступен <a href="https://geocalculator.ru/obrat/vlazhnost_obr.html">обратный метод расчета</a> — по заданному значению влажности грунта выполняется вычисление соответствующих массовых показателей.</p>
 </header>
 
 <div class="wrap">
@@ -432,7 +432,7 @@ footer{
                 const currentSampleIndex = sampleBlocks.indexOf(currentSampleBlock);
 
                 if (currentIndex === allInputs.length - 1 && currentSampleIndex === sampleBlocks.length - 1) {
-                    // Последнее поле последнего sample-block → запуск расчёта
+                    // Последнее поле последнего sample-block → запуск расчета
                     this.calculateTest(calcDiv.querySelector(".btn-calc-green"));
                 } else {
                     // Переход к следующему полю
