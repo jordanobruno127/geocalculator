@@ -137,10 +137,11 @@ header .note-link a:hover{ text-decoration:underline; }
 
 /* ===== кнопки выбора метода ===== */
 .method-buttons{
-  display:flex;
-  justify-content:center;
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
   gap:10px;
-  flex-wrap:wrap;
+  max-width:700px;
+  margin:0 auto;
 }
 
 .action-btn.method-btn{
@@ -154,7 +155,7 @@ header .note-link a:hover{ text-decoration:underline; }
   font-size:14.5px;
   font-weight:600;
   transition:border-color .15s, color .15s, background-color .15s;
-  min-width:260px;
+  width:100%;
 }
 .action-btn.method-btn:hover{
   border-color:var(--soil-loam);
@@ -420,7 +421,8 @@ footer{
   header{ padding:56px 20px 32px; }
   .wrap{ padding:28px 20px 48px; }
 
-  .action-btn.method-btn{ width:100%; min-width:0; max-width:400px; }
+  .method-buttons{ grid-template-columns:1fr; max-width:400px; }
+  .action-btn.method-btn{ width:100%; min-width:0; }
 
   .test-flex{ flex-direction:column; align-items:center; }
   .calc-wrapper{ width:100%; max-width:90%; margin:0 auto; }
@@ -452,6 +454,7 @@ footer{
 <header>
   <h1>Плотность грунта</h1>
   <p class="lede">Выберите метод для расчёта плотности грунта, затем введите данные образцов в таблицу. Для каждого испытания рассчитывается средняя плотность в г/см³. Расчёт ведётся в соответствии с ГОСТ 5180-2015.</p>
+  <p class="note-link">Также доступен <a href="https://geocalculator.ru/obrat/plotnost_obr.html">обратный метод расчёта</a> — по заданному значению плотности выполняется вычисление соответствующих массовых показателей.</p>
 </header>
 
 <div class="wrap">
