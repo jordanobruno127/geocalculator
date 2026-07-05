@@ -1,166 +1,540 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мерзлый грунт</title>
-    <style>
-        * { box-sizing: border-box; }
-        html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #ffffff;
-            padding: 20px;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150"><g fill="none" stroke="%23002f4b" stroke-opacity="0.05" stroke-width="1"><path d="M75 15 A60 60 0 0 1 135 75 A60 60 0 0 1 75 135 A60 60 0 0 1 15 75 A60 60 0 0 1 75 15 Z" stroke-dasharray="5 5"/><circle cx="75" cy="75" r="5"/><circle cx="105" cy="45" r="3"/><circle cx="45" cy="105" r="3"/><circle cx="105" cy="105" r="3"/><circle cx="45" cy="45" r="3"/></g></svg>');
-            background-repeat: repeat;
-            background-size: 150px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мерзлый грунт — Geocalculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --soil-peat:   #F2E9D8;
+  --soil-peat-2: #EAE0C9;
+  --soil-clay:   #8A7355;
+  --soil-loam:   #B06B34;
+  --soil-sand:   #C98F45;
+  --paper:       #3B2E20;
+  --paper-dim:   #7A6A52;
+  --line:        #D9C9A3;
+  --ok:          #7A9B6E;
+  --warn:        #A6462E;
 
-        .top-menu { position: fixed; top: 10px; right: 10px; display: flex; gap: 10px; z-index: 10; }
-        .top-menu button { padding: 12px 16px; border-radius: 12px; border: 2px solid #2c3e50; background-color: #2c3e50; color: white; cursor: pointer; font-size: 16px; font-weight: bold; transition: background-color 0.3s; }
-        .top-menu button:hover { background-color: #34495e; }
+  --font-display: 'Golos Text', -apple-system, sans-serif;
+  --font-body: 'Golos Text', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 
-        .header-text { max-width: 800px; margin: 0 auto 30px; text-align: center; position: relative; z-index: 1; }
-        .header-text h1 { font-size: 24px; color: #2c3e50; }
-        .header-text p { font-size: 16px; color: #000000; }
+  --radius: 3px;
+}
 
-        .method-buttons { display: flex; justify-content: center; gap: 10px; margin-top: 25px; flex-wrap: wrap; }
+*{ box-sizing:border-box; margin:0; padding:0; }
 
-        .action-btn { padding: 10px 20px; border-radius: 14px; border: 2px solid #2c3e50; background-color: #2c3e50; color: white; cursor: pointer; font-size: 16px; font-weight: bold; transition: background-color 0.3s, border-color 0.3s; min-width: 300px; }
-        .action-btn:hover { background-color: #34495e; border-color: #34495e; }
-        .action-btn.initial { background-color: #2c3e50; border-color: #2c3e50; }
-        .action-btn.initial:hover { background-color: #34495e; border-color: #34495e; }
-        .action-btn.method-btn:not(.active):not(.initial) { background-color: #7f8c8d; border-color: #7f8c8d; }
-        .action-btn.method-btn:not(.active):not(.initial):hover { background-color: #95a5a6; border-color: #95a5a6; }
-        .action-btn.active, .action-btn.always-active { background-color: #2c3e50; border-color: #2c3e50; }
-        .action-btn.active:hover, .action-btn.always-active:hover { background-color: #34495e; border-color: #34495e; }
-        .btn-manual-toggle { padding: 8px 14px; border-radius: 12px; border: 2px solid #f5c07a; background-color: #f5c07a; color: white; cursor: pointer; font-size: 14px; font-weight: bold; }
-        .btn-manual-toggle:hover { background-color: #e6b580; border-color: #e6b580; }
+html, body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden;
+  background-color:var(--soil-peat);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(176,107,52,0.08) 1px, transparent 0),
+    repeating-linear-gradient(155deg, rgba(176,107,52,0.05) 0px, rgba(176,107,52,0.05) 1px, transparent 1px, transparent 26px),
+    repeating-linear-gradient(65deg, rgba(138,115,85,0.045) 0px, rgba(138,115,85,0.045) 1px, transparent 1px, transparent 34px);
+  background-size: 18px 18px, auto, auto;
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-size:17px;
+  line-height:1.55;
+  min-height:100vh;
+}
 
-        .test-container { display: none; margin-top: 20px; }
-        .test-container.active { display: block; }
+body{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
 
-        .tests-container { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+/* ===== верхняя панель навигации ===== */
+.top-bar{
+  width:100%;
+  padding:18px 32px 0;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+.top-bar button{
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:14.5px;
+  padding:12px 22px;
+  border-radius:var(--radius);
+  cursor:pointer;
+  transition:opacity .15s, border-color .15s, color .15s;
+}
+#btn-back{
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  color:var(--paper);
+}
+#btn-back:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+#btn-home{
+  background:var(--soil-loam);
+  border:1px solid var(--soil-loam);
+  color:var(--soil-peat);
+}
+#btn-home:hover{ opacity:.88; }
 
-        .test-flex { display: flex; align-items: flex-start; justify-content: center; gap: 15px; opacity: 0; transform: translateY(20px); animation: slideIn 0.5s ease forwards; width: 100%; max-width: 900px; margin: 0 auto; position: relative; }
+/* ===== шапка ===== */
+header{
+  max-width:920px;
+  margin:0 auto;
+  padding:12px 32px 40px;
+  text-align:center;
+  border-bottom:1px solid var(--line);
+  width:100%;
+}
+header h1{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:42px;
+  line-height:1.2;
+  color:var(--paper);
+}
+header .lede{
+  font-size:17px;
+  color:var(--paper-dim);
+  max-width:600px;
+  margin:18px auto 0;
+}
 
-        .calc-wrapper { display: flex; align-items: flex-start; justify-content: center; width: 100%; max-width: 620px; margin: 0 auto; }
+/* ===== контентная обёртка ===== */
+.wrap{
+  max-width:1240px;
+  margin:0 auto;
+  padding:40px 32px 64px;
+  width:100%;
+  flex:1 0 auto;
+}
 
-        .calculation-container { border: 2px solid #2c3e50; border-radius: 12px; padding: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); background-color: rgba(255, 255, 255, 0.9); min-width: 500px; max-width: 620px; margin: 0 auto; display: block; box-sizing: border-box; }
+.section-label{
+  font-family:var(--font-mono);
+  font-size:13px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  margin-bottom:16px;
+  text-align:center;
+}
 
-        .sample-block { border: 1px dashed #2c3e50; border-radius: 12px; padding: 8px; margin-bottom: 10px; background-color: rgba(240, 248, 255, 0.5); display: flex; align-items: center; justify-content: space-between; opacity: 0; transform: translateY(10px); animation: slideIn 0.4s ease forwards; overflow-x: auto; position: relative; }
-        .sample-block:nth-child(1) { animation-delay: 0s; }
-        .sample-block:nth-child(2) { animation-delay: 0.15s; }
-        .sample-block:nth-child(3) { animation-delay: 0.3s; }
-        .sample-block:nth-child(4) { animation-delay: 0.45s; }
+.info-note{
+  text-align:center;
+  font-size:14.5px;
+  color:var(--paper-dim);
+  max-width:760px;
+  margin:0 auto 28px;
+  line-height:1.6;
+}
+.info-note b, .info-note strong{ color:var(--paper); }
 
-        .sample-content { flex-grow: 1; }
-        .sample-row { display: flex; flex-direction: column; gap: 8px; }
-        .sample-row input, .sample-row select { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #ccc; font-size: 13px; }
-        .extra-row { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-        .extra-row input, .extra-row select { width: 100%; padding: 6px; border-radius: 6px; border: 1px solid #ccc; font-size: 13px; }
-        .extra-row label { font-size: 14px; color: #2c3e50; font-weight: bold; margin-bottom: 4px; }
+/* ===== кнопки выбора метода — сетка 2x2 ===== */
+.method-buttons{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:10px;
+  max-width:700px;
+  margin:0 auto;
+}
 
-        .sample-result { font-size: 12px; color: #7f8c8d; margin-left: 8px; min-width: 50px; text-align: right; }
+.action-btn.method-btn{
+  width:100%;
+  min-width:0;
+  padding:14px 20px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background-color:var(--soil-peat-2);
+  color:var(--paper);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14.5px;
+  font-weight:600;
+  transition:border-color .15s, color .15s, background-color .15s;
+}
+.action-btn.method-btn:hover{
+  border-color:var(--soil-loam);
+  color:var(--soil-loam);
+}
+.action-btn.method-btn.active{
+  background-color:var(--soil-loam);
+  border-color:var(--soil-loam);
+  color:var(--soil-peat);
+}
 
-        .action-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+/* ===== контейнеры испытаний ===== */
+.test-container{
+  display:none;
+  margin-top:36px;
+}
+.test-container.active{
+  display:block;
+}
 
-        .btn-calc-green { padding: 8px 14px; border-radius: 12px; border: 2px solid #2e7d32; background-color: #2e7d32; color: white; cursor: pointer; font-size: 14px; font-weight: bold; }
-        .btn-calc-green:hover { background-color: #388e3c; }
+.tests-container{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:20px;
+}
 
-        .btn-clear { padding: 8px 14px; border-radius: 12px; border: 1px solid #7f8c8d; background-color: #ecf0f1; color: #2c3e50; cursor: pointer; font-size: 14px; }
-        .btn-clear:hover { background-color: #bdc3c7; }
+.test-flex{
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  gap:15px;
+  opacity:0;
+  transform:translateY(20px);
+  animation:slideIn .5s ease forwards;
+  width:100%;
+  max-width:900px;
+  margin:0 auto;
+  position:relative;
+}
 
-        .btn-continue { padding: 8px 14px; border-radius: 12px; border: 2px solid #3498db; background-color: #3498db; color: white; cursor: pointer; font-size: 14px; font-weight: bold; }
-        .btn-continue:hover { background-color: #2980b9; }
+.calc-wrapper{
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  width:100%;
+  max-width:640px;
+  margin:0 auto;
+}
 
-        .average-container { display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; margin-top: 10px; padding: 8px; background-color: rgba(240, 248, 255, 0.5); }
-        .average-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .average-label { font-size: 16px; color: #2c3e50; font-weight: bold; text-align: left; flex-grow: 1; }
-        .result-average { font-weight: bold; font-size: 16px; color: #1a73e8; text-align: right; flex-grow: 0; width: 100px; }
+.calculation-container{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:22px 24px;
+  background-color:var(--soil-peat-2);
+  min-width:500px;
+  max-width:640px;
+  margin:0 auto;
+  display:block;
+  box-sizing:border-box;
+}
 
-        .btn-delete-sample { position: absolute; top: 4px; right: 4px; padding: 2px 8px; border-radius: 10px; border: 1px solid #e74c3c; background-color: #e74c3c; color: white; cursor: pointer; font-size: 14px; font-weight: bold; }
-        .btn-delete-sample:hover { background-color: #c0392b; }
+.sample-block{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:12px 14px;
+  margin-bottom:10px;
+  background-color:var(--soil-peat);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  opacity:0;
+  transform:translateY(10px);
+  animation:slideIn .4s ease forwards;
+  overflow-x:auto;
+  position:relative;
+}
+.sample-block:nth-child(1){ animation-delay:0s; }
+.sample-block:nth-child(2){ animation-delay:.15s; }
+.sample-block:nth-child(3){ animation-delay:.3s; }
+.sample-block:nth-child(4){ animation-delay:.45s; }
 
-        .delete-btn { padding: 6px 12px; border-radius: 10px; border: 1px solid #e74c3c; background-color: #e74c3c; color: white; cursor: pointer; font-size: 14px; font-weight: bold; position: absolute; top: 0; right: 0; }
-        .delete-btn:hover { background-color: #c0392b; }
+.sample-content{ flex-grow:1; }
+.sample-row{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.sample-row input, .sample-row select{
+  width:100%;
+  padding:9px 10px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background:var(--soil-peat-2);
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-size:13.5px;
+}
+.sample-row input::placeholder{ color:var(--paper-dim); }
+.sample-row input:focus, .sample-row select:focus{ outline:none; border-color:var(--soil-loam); }
 
-        @keyframes slideIn { to { opacity: 1; transform: translateY(0); } }
+.extra-row{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:10px;
+}
+.extra-row input, .extra-row select{
+  width:100%;
+  padding:9px 10px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background:var(--soil-peat-2);
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-size:13.5px;
+}
+.extra-row input::placeholder{ color:var(--paper-dim); }
+.extra-row input:focus, .extra-row select:focus{ outline:none; border-color:var(--soil-loam); }
+.extra-row label{
+  font-family:var(--font-mono);
+  font-size:12px;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  margin-bottom:2px;
+}
 
-        @media screen and (max-width: 768px) {
-            body { padding-top: 60px; }
-            .header-text { margin-top: 20px; }
-            .method-buttons { flex-direction: column; align-items: center; }
-            .action-btn { width: 90%; max-width: 300px; }
-            .test-flex { flex-direction: column; align-items: center; }
-            .calc-wrapper { flex-direction: column; align-items: center; width: 100%; max-width: 600px; margin: 0 auto; }
-            .calculation-container { width: 100%; max-width: 90%; min-width: 320px; margin: 0 auto; box-sizing: border-box; }
-            .delete-btn { position: static; margin-top: 10px; align-self: flex-end; }
-            .sample-row, .extra-row { flex-direction: column; }
-            .sample-row input, .sample-row select, .extra-row input, .extra-row select { width: 100%; }
-            .extra-row { margin-top: 15px; }
-            .average-container { width: 100%; }
-            .average-row { flex-direction: column; align-items: flex-start; }
-            .average-label { margin-bottom: 2px; }
-            .result-average { margin-left: 0; width: auto; text-align: right; }
-            .btn-delete-sample { top: 4px; right: 4px; }
-        }
+.sample-result{
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--paper-dim);
+  margin-left:10px;
+  min-width:60px;
+  text-align:right;
+  flex-shrink:0;
+}
 
-        @media screen and (max-width: 400px) {
-            .calculation-container { min-width: 280px; max-width: 90%; }
-        }
-    </style>
+.action-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:8px;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.btn-calc-green{
+  padding:10px 18px;
+  border-radius:var(--radius);
+  border:1px solid var(--soil-loam);
+  background-color:var(--soil-loam);
+  color:var(--soil-peat);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14px;
+  font-weight:600;
+  transition:opacity .15s;
+}
+.btn-calc-green:hover{ opacity:.88; }
+
+.btn-clear{
+  padding:10px 18px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background-color:var(--soil-peat-2);
+  color:var(--paper);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14px;
+  font-weight:600;
+  transition:border-color .15s, color .15s;
+}
+.btn-clear:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+
+.btn-continue{
+  padding:10px 18px;
+  border-radius:var(--radius);
+  border:1px solid var(--soil-clay);
+  background-color:var(--soil-peat-2);
+  color:var(--soil-clay);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14px;
+  font-weight:600;
+  transition:background-color .15s, color .15s;
+}
+.btn-continue:hover{ background-color:var(--soil-clay); color:var(--soil-peat); }
+
+.btn-manual-toggle{
+  padding:9px 15px;
+  border-radius:var(--radius);
+  border:1px solid var(--soil-sand);
+  background-color:var(--soil-peat-2);
+  color:var(--soil-clay);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:13px;
+  font-weight:600;
+  transition:background-color .15s, color .15s;
+}
+.btn-manual-toggle:hover{ background-color:var(--soil-sand); color:var(--soil-peat); }
+
+.btn-delete-sample{
+  position:absolute;
+  top:8px;
+  right:8px;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  border:1px solid var(--warn);
+  background-color:var(--soil-peat-2);
+  color:var(--warn);
+  cursor:pointer;
+  font-size:13px;
+  font-weight:600;
+  line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background-color .15s, color .15s;
+  flex-shrink:0;
+}
+.btn-delete-sample:hover{ background-color:var(--warn); color:var(--soil-peat); }
+
+.delete-btn{
+  padding:9px 16px;
+  border-radius:var(--radius);
+  border:1px solid var(--warn);
+  background-color:var(--soil-peat);
+  color:var(--warn);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:13.5px;
+  font-weight:600;
+  transition:background-color .15s, color .15s;
+  position:absolute;
+  top:0;
+  right:-92px;
+}
+.delete-btn:hover{ background-color:var(--warn); color:var(--soil-peat); }
+
+.average-container{
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  align-items:stretch;
+  margin-top:10px;
+  padding:12px 14px;
+  background-color:var(--soil-peat);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  gap:6px;
+}
+.average-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.average-label{
+  font-size:15px;
+  color:var(--paper);
+}
+.result-average{
+  font-family:var(--font-mono);
+  font-weight:600;
+  font-size:15px;
+  color:var(--soil-loam);
+  text-align:right;
+}
+
+/* ===== футер ===== */
+footer{
+  flex-shrink:0;
+  max-width:920px;
+  margin:36px auto 0;
+  padding:36px 32px 40px;
+  border-top:1px solid var(--line);
+  text-align:center;
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--paper-dim);
+  width:100%;
+}
+
+@keyframes slideIn{
+  to{ opacity:1; transform:translateY(0); }
+}
+
+@media (max-width:900px){
+  header h1{ font-size:30px; }
+  .top-bar{ padding:14px 20px 0; }
+  header{ padding:56px 20px 32px; }
+  .wrap{ padding:28px 20px 48px; }
+
+  .method-buttons{ grid-template-columns:1fr; max-width:400px; }
+
+  .test-flex{ flex-direction:column; align-items:center; }
+  .calc-wrapper{ width:100%; max-width:90%; margin:0 auto; }
+  .calculation-container{
+    width:100%;
+    max-width:90%;
+    min-width:280px;
+    margin:0 auto;
+  }
+  .delete-btn{
+    position:static;
+    align-self:flex-end;
+    margin-top:10px;
+  }
+  .average-row{ flex-direction:column; align-items:flex-start; }
+  .result-average{ text-align:left; }
+}
+
+@media (max-width:400px){
+  .calculation-container{ min-width:260px; max-width:90%; }
+}
+</style>
 </head>
 <body>
-    <div class="top-menu">
-        <button onclick="App.navigate('index.html')" aria-label="Перейти на главную">🏠</button>
+
+<div class="top-bar">
+  <button id="btn-back" onclick="history.back()">Назад</button>
+  <button id="btn-home" onclick="location.href='/'">Главная</button>
+</div>
+
+<header>
+  <h1>Мерзлый грунт</h1>
+  <p class="lede">Выберите вкладку для расчёта параметров мерзлого грунта и введите необходимые данные.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="section-label">Вид расчёта</div>
+  <div class="method-buttons">
+    <button class="action-btn method-btn initial" id="btn-moisture" onclick="App.toggleMethod('moisture')" aria-label="Расчёт влажности">Влажность</button>
+    <button class="action-btn method-btn initial" id="btn-ice" onclick="App.toggleMethod('ice')" aria-label="Расчёт льдистости">Льдистость</button>
+    <button class="action-btn method-btn initial" id="btn-thermophysics" onclick="App.toggleMethod('thermophysics')" aria-label="Расчёт теплофизики">Теплофизика</button>
+    <button class="action-btn method-btn initial" id="btn-freezing" onclick="App.toggleMethod('freezing')">Температура начала замерзания</button>
+  </div>
+
+  <div id="test-container-moisture" class="test-container">
+    <p class="info-note">После расчёта суммарной влажности (Wtot) вы сможете рассчитать дополнительные параметры: влажность между прослойками (Wm), влажность за счет ледяных включений (Wi), влажность за счет незамерзшей воды (Ww) и влажность за счет порового льда (Wic).</p>
+    <div class="tests-container" id="tests-container-moisture"></div>
+    <div style="text-align: center; margin-top: 25px;">
+      <button class="btn-calc-green" style="padding:12px 22px; font-size:14.5px;" onclick="App.addTest('moisture')" aria-label="Добавить новое испытание">+ Добавить испытание</button>
     </div>
+  </div>
 
-    <div class="header-text">
-        <h1>Мерзлый грунт</h1>
-        <p>Выберите вкладку для расчёта параметров мерзлого грунта и введите необходимые данные.</p>
+  <div id="test-container-ice" class="test-container">
+    <div class="tests-container" id="tests-container-ice"></div>
+    <div style="text-align: center; margin-top: 25px;">
+      <button class="btn-calc-green" style="padding:12px 22px; font-size:14.5px;" onclick="App.addTest('ice')" aria-label="Добавить новое испытание">+ Добавить испытание</button>
     </div>
+  </div>
 
-    <div class="method-buttons">
-        <button class="action-btn method-btn initial" id="btn-moisture" onclick="App.toggleMethod('moisture')" aria-label="Расчёт влажности">Влажность</button>
-        <button class="action-btn method-btn initial" id="btn-ice" onclick="App.toggleMethod('ice')" aria-label="Расчёт льдистости">Льдистость</button>
-        <button class="action-btn method-btn initial" id="btn-thermophysics" onclick="App.toggleMethod('thermophysics')" aria-label="Расчёт теплофизики">Теплофизика</button>
-        <button class="action-btn method-btn initial" id="btn-freezing" onclick="App.toggleMethod('freezing')">Температура начала замерзания</button>
+  <div id="test-container-thermophysics" class="test-container">
+    <p class="info-note">Сокращения: т.г. — талый грунт (th), м.г. — мерзлый грунт (f).</p>
+    <div class="tests-container" id="tests-container-thermophysics"></div>
+    <div style="text-align: center; margin-top: 25px;">
+      <button class="btn-calc-green" style="padding:12px 22px; font-size:14.5px;" onclick="App.addTest('thermophysics')" aria-label="Добавить новое испытание">+ Добавить испытание</button>
     </div>
+  </div>
 
-    <div id="test-container-moisture" class="test-container">
-        <p style="text-align: center; font-size: 16px; color: #000000;">После расчёта суммарной влажности (Wtot) вы сможете рассчитать дополнительные параметры: <br>влажность между прослойками (Wm), влажность за счет ледяных включений (Wi), <br>влажность за счет незамерзшей воды (Ww) и влажность за счет порового льда (Wic).</p>
-        <div class="tests-container" id="tests-container-moisture"></div>
-        <div style="text-align: center; margin-top: 25px;">
-            <button class="action-btn always-active" onclick="App.addTest('moisture')" aria-label="Добавить новое испытание">+ Добавить испытание</button>
-        </div>
+  <div id="test-container-freezing" class="test-container">
+    <div class="tests-container" id="tests-container-freezing"></div>
+    <div style="text-align: center; margin-top: 25px;">
+      <button class="btn-calc-green" style="padding:12px 22px; font-size:14.5px;" onclick="App.addTest('freezing')">+ Добавить испытание</button>
     </div>
+  </div>
 
-    <div id="test-container-ice" class="test-container">
-        <div class="tests-container" id="tests-container-ice"></div>
-        <div style="text-align: center; margin-top: 25px;">
-            <button class="action-btn always-active" onclick="App.addTest('ice')" aria-label="Добавить новое испытание">+ Добавить испытание</button>
-        </div>
-    </div>
+</div>
 
-    <div id="test-container-thermophysics" class="test-container">
-        <p style="text-align: center; font-size: 16px; color: #000000;">Сокращения: т.г. - <span style="color: blue">талый грунт (th)</span>, м.г. - <span style="color: blue">мерзлый грунт (f)</span>.</p>
+<footer>
+  © 2026 Geocalculator. Инженерно-геологические расчеты онлайн
+</footer>
 
-        <div class="tests-container" id="tests-container-thermophysics"></div>
-        <div style="text-align: center; margin-top: 25px;">
-            <button class="action-btn always-active" onclick="App.addTest('thermophysics')" aria-label="Добавить новое испытание">+ Добавить испытание</button>
-        </div>
-    </div>
-
-    <div id="test-container-freezing" class="test-container">
-        <div class="tests-container" id="tests-container-freezing"></div>
-        <div style="text-align: center; margin-top: 25px;">
-            <button class="action-btn always-active" onclick="App.addTest('freezing')">+ Добавить испытание</button>
-        </div>
-    </div>
-
-    <script>
+<script>
         const App = {
             // Thermal conductivity data
             sandThermalData: [
@@ -830,7 +1204,7 @@ if (method === 'freezing') {
 
                     let wm;
                     if (soilType === "sand" || consistency === "hard" || consistency === "semi_hard") {
-                        wm = wtot - 0.01;
+                        wm = wtot - 0.0001;
                     } else if (consistency === "tough_plastic" || consistency === "soft_plastic") {
                         wm = wp;
                     } else if (consistency === "flowing_plastic" || consistency === "flowing") {
