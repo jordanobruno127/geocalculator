@@ -1,411 +1,535 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Обратный расчёт плотности грунта</title>
-    <style>
-        * { box-sizing: border-box; }
-        html, body {
-            width: 100%;
-            max-width: 100%;
-            overflow-x: hidden;
-        }
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #ffffff;
-            padding: 20px;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><g fill="none" stroke="%23002f4b" stroke-opacity="0.05" stroke-width="2"><rect x="8" y="8" width="6" height="6"/><rect x="38" y="28" width="4" height="4"/><rect x="68" y="18" width="8" height="8"/><rect x="88" y="48" width="5" height="5"/><rect x="18" y="58" width="6" height="6"/><rect x="48" y="78" width="4" height="4"/><rect x="78" y="88" width="7" height="7"/><rect x="98" y="28" width="5" height="5"/></g></svg>');
-            background-repeat: repeat;
-            background-size: 120px;
-        }
-        .top-menu {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            display: flex;
-            gap: 10px;
-            z-index: 10;
-        }
-        .top-menu button {
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 2px solid #2c3e50;
-            background-color: #2c3e50;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        .top-menu button:hover { background-color: #34495e; }
-        .header-text {
-            max-width: 800px;
-            margin: 0 auto 30px;
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-        .header-text h1 {
-            font-size: 24px;
-            color: #2c3e50;
-        }
-        .header-text p {
-            font-size: 16px;
-            color: #000000;
-        }
-        .method-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 25px;
-            flex-wrap: wrap;
-        }
-        .action-btn {
-            padding: 10px 20px;
-            border-radius: 14px;
-            border: 2px solid #2c3e50;
-            background-color: #2c3e50;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s, border-color 0.3s;
-            min-width: 300px;
-        }
-        .action-btn:hover {
-            background-color: #34495e;
-            border-color: #34495e;
-        }
-        .action-btn.method-btn:not(.active) {
-            background-color: #7f8c8d;
-            border-color: #7f8c8d;
-        }
-        .action-btn.method-btn:not(.active):hover {
-            background-color: #95a5a6;
-            border-color: #95a5a6;
-        }
-        .action-btn.active {
-            background-color: #2c3e50;
-            border-color: #2c3e50;
-        }
-        .action-btn.active:hover {
-            background-color: #34495e;
-            border-color: #34495e;
-        }
-        .test-container {
-            display: none;
-            margin-top: 20px;
-        }
-        .test-container.active {
-            display: block;
-        }
-        .calculation-container {
-            border: 2px solid #2c3e50;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            background-color: rgba(255, 255, 255, 0.9);
-            min-width: 500px;
-            max-width: 620px;
-            margin: 0 auto;
-            display: block;
-            box-sizing: border-box;
-        }
-        .input-section {
-            margin-bottom: 10px;
-        }
-        .input-section h4 {
-            margin: 0 0 6px;
-            font-size: 16px;
-            color: #2c3e50;
-        }
-        .input-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: flex-end;
-        }
-        .input-group {
-            flex: 0 0 240px;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 13px;
-            color: #2c3e50;
-        }
-        input[type="number"] {
-            width: 100%;
-            padding: 6px 8px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-            text-align: right;
-        }
-        .result-table {
-            margin-top: 12px;
-            width: 100%;
-            table-layout: fixed;
-            border-collapse: collapse;
-        }
-        .result-table th, .result-table td {
-            border: 1px solid #ccc;
-            padding: 10px 8px;
-            text-align: center;
-            font-size: 14px;
-            color: #333;
-            word-wrap: break-word;
-        }
-        .result-table th {
-            background: #f5f5f5;
-            color: #444;
-            font-weight: 600;
-        }
-        .result-table td {
-            background: #fff;
-        }
-        .result-table th:nth-child(1) { width: 20%; }
-        .result-table th:nth-child(2) { width: 20%; }
-        .result-table th:nth-child(3) { width: 20%; }
-        .result-table th:nth-child(4) { width: 20%; }
-        .result-table th:nth-child(5) { width: 20%; }
-        .action-row {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            margin-top: 8px;
-            gap: 8px;
-        }
-        .btn-calc-green {
-            padding: 8px 14px;
-            border-radius: 12px;
-            border: 2px solid #2e7d32;
-            background-color: #2e7d32;
-            color: white;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .btn-calc-green:hover { background-color: #388e3c; }
-        .btn-clear {
-            padding: 8px 14px;
-            border-radius: 12px;
-            border: 1px solid #7f8c8d;
-            background-color: #ecf0f1;
-            color: #2c3e50;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .btn-clear:hover { background-color: #bdc3c7; }
-        @keyframes slideIn {
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @media screen and (max-width: 768px) {
-            body { padding-top: 60px; }
-            .method-buttons { flex-direction: column; align-items: center; }
-            .action-btn { width: 90%; max-width: 300px; }
-            .calculation-container {
-                width: 100%;
-                max-width: 90%;
-                min-width: 320px;
-                margin: 0 auto;
-                box-sizing: border-box;
-            }
-            .input-row { flex-direction: column; }
-            .input-group { flex: 1; max-width: none; }
-        }
-        @media screen and (max-width: 400px) {
-            .calculation-container { min-width: 280px; max-width: 90%; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Обратный расчёт плотности грунта — Geocalculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --soil-peat:   #F2E9D8;
+  --soil-peat-2: #EAE0C9;
+  --soil-clay:   #8A7355;
+  --soil-loam:   #B06B34;
+  --soil-sand:   #C98F45;
+  --paper:       #3B2E20;
+  --paper-dim:   #7A6A52;
+  --line:        #D9C9A3;
+  --ok:          #7A9B6E;
+  --warn:        #A6462E;
+
+  --font-display: 'Golos Text', -apple-system, sans-serif;
+  --font-body: 'Golos Text', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius: 3px;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+html, body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden;
+  background-color:var(--soil-peat);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(176,107,52,0.08) 1px, transparent 0),
+    repeating-linear-gradient(155deg, rgba(176,107,52,0.05) 0px, rgba(176,107,52,0.05) 1px, transparent 1px, transparent 26px),
+    repeating-linear-gradient(65deg, rgba(138,115,85,0.045) 0px, rgba(138,115,85,0.045) 1px, transparent 1px, transparent 34px);
+  background-size: 18px 18px, auto, auto;
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-size:17px;
+  line-height:1.55;
+  min-height:100vh;
+}
+
+body{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ===== верхняя панель навигации ===== */
+.top-bar{
+  width:100%;
+  padding:18px 32px 0;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+.top-bar button{
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:14.5px;
+  padding:12px 22px;
+  border-radius:var(--radius);
+  cursor:pointer;
+  transition:opacity .15s, border-color .15s, color .15s;
+}
+#btn-back{
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  color:var(--paper);
+}
+#btn-back:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+#btn-home{
+  background:var(--soil-loam);
+  border:1px solid var(--soil-loam);
+  color:var(--soil-peat);
+}
+#btn-home:hover{ opacity:.88; }
+
+/* ===== шапка ===== */
+header{
+  max-width:920px;
+  margin:0 auto;
+  padding:12px 32px 40px;
+  text-align:center;
+  border-bottom:1px solid var(--line);
+  width:100%;
+}
+header h1{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:42px;
+  line-height:1.2;
+  color:var(--paper);
+}
+header .lede{
+  font-size:17px;
+  color:var(--paper-dim);
+  max-width:560px;
+  margin:18px auto 0;
+}
+
+/* ===== контентная обёртка ===== */
+.wrap{
+  max-width:1240px;
+  margin:0 auto;
+  padding:40px 32px 64px;
+  width:100%;
+  flex:1 0 auto;
+}
+
+.section-label{
+  font-family:var(--font-mono);
+  font-size:13px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  margin-bottom:16px;
+  text-align:center;
+}
+
+/* ===== кнопки выбора метода ===== */
+.method-buttons{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.action-btn.method-btn{
+  padding:12px 20px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background-color:var(--soil-peat-2);
+  color:var(--paper);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14.5px;
+  font-weight:600;
+  transition:border-color .15s, color .15s, background-color .15s;
+  min-width:300px;
+}
+.action-btn.method-btn:hover{
+  border-color:var(--soil-loam);
+  color:var(--soil-loam);
+}
+.action-btn.method-btn.active{
+  background-color:var(--soil-loam);
+  border-color:var(--soil-loam);
+  color:var(--soil-peat);
+}
+
+/* ===== контейнеры испытаний ===== */
+.test-container{
+  display:none;
+  margin-top:36px;
+}
+.test-container.active{
+  display:block;
+}
+
+.calc-wrapper{
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  width:100%;
+  max-width:700px;
+  margin:0 auto;
+}
+
+.calculation-container{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:22px 24px;
+  background-color:var(--soil-peat-2);
+  min-width:500px;
+  max-width:700px;
+  margin:0 auto;
+  display:block;
+  box-sizing:border-box;
+}
+
+.input-section{ margin-bottom:15px; }
+.input-section h4{
+  margin:0 0 10px;
+  font-family:var(--font-mono);
+  font-size:12px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  font-weight:500;
+  color:var(--paper-dim);
+}
+.input-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:15px;
+  align-items:flex-end;
+}
+.input-group{
+  flex:0 0 240px;
+}
+.input-group label{
+  display:block;
+  margin-bottom:8px;
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+}
+.input-group input[type="number"]{
+  width:100%;
+  background:var(--soil-peat);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:12px 14px;
+  font-family:var(--font-mono);
+  font-size:15px;
+  color:var(--paper);
+  outline:none;
+  text-align:right;
+  transition:border-color .15s;
+}
+.input-group input[type="number"]:focus{ border-color:var(--soil-loam); }
+
+/* ===== таблица результатов ===== */
+.result-table{
+  margin-top:12px;
+  width:100%;
+  border-collapse:collapse;
+  border-radius:var(--radius);
+  overflow:hidden;
+}
+.result-table th, .result-table td{
+  border:1px solid var(--line);
+  padding:12px 10px;
+  text-align:center;
+  font-size:13.5px;
+}
+.result-table th{
+  background:var(--soil-peat);
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  font-weight:500;
+}
+.result-table td{
+  background:var(--soil-peat);
+  font-family:var(--font-mono);
+  color:var(--paper);
+}
+
+/* ===== действия ===== */
+.action-row{
+  display:flex;
+  justify-content:flex-start;
+  align-items:center;
+  margin-top:20px;
+  gap:10px;
+}
+
+.btn-calc-green{
+  padding:10px 18px;
+  border-radius:var(--radius);
+  border:1px solid var(--soil-loam);
+  background-color:var(--soil-loam);
+  color:var(--soil-peat);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14px;
+  font-weight:600;
+  transition:opacity .15s;
+}
+.btn-calc-green:hover{ opacity:.88; }
+
+.btn-clear{
+  padding:10px 18px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background-color:var(--soil-peat);
+  color:var(--paper);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14px;
+  font-weight:600;
+  transition:border-color .15s, color .15s;
+}
+.btn-clear:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+
+/* ===== футер ===== */
+footer{
+  flex-shrink:0;
+  max-width:920px;
+  margin:36px auto 0;
+  padding:36px 32px 40px;
+  border-top:1px solid var(--line);
+  text-align:center;
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--paper-dim);
+  width:100%;
+}
+
+@media (max-width:900px){
+  header h1{ font-size:30px; }
+  .top-bar{ padding:14px 20px 0; }
+  header{ padding:56px 20px 32px; }
+  .wrap{ padding:28px 20px 48px; }
+
+  .action-btn.method-btn{ width:100%; min-width:0; max-width:400px; }
+
+  .calc-wrapper{ width:100%; max-width:90%; margin:0 auto; }
+  .calculation-container{
+    width:100%;
+    max-width:90%;
+    min-width:280px;
+    margin:0 auto;
+  }
+  .input-row{ flex-direction:column; align-items:stretch; }
+  .input-group{ flex:1; }
+}
+
+@media (max-width:400px){
+  .calculation-container{ min-width:260px; max-width:90%; }
+}
+</style>
 </head>
 <body>
-    <div class="top-menu">
-        <button onclick="location.href='https://geocalculator.ru/index.html'" aria-label="Перейти на главную">🏠</button>
-    </div>
 
-    <div class="header-text">
-        <h1>Обратный расчёт плотности грунта</h1>
-        <p>Выберите метод ниже и введите значение плотности для расчета (ГОСТ 5180-2015)</p>
-    </div>
+<div class="top-bar">
+  <button id="btn-back" onclick="history.back()">Назад</button>
+  <button id="btn-home" onclick="location.href='/'">Главная</button>
+</div>
 
-    <div class="method-buttons">
-        <button class="action-btn method-btn active" id="btn-ring" onclick="toggleMethod('ring')">Плотность методом режущего кольца</button>
-        <button class="action-btn method-btn active" id="btn-paraffin" onclick="toggleMethod('paraffin')">Плотность методом парафинирования</button>
-    </div>
+<header>
+  <h1>Обратный расчёт плотности грунта</h1>
+  <p class="lede">Выберите метод ниже и введите значение плотности для расчета (ГОСТ 5180-2015)</p>
+</header>
 
-    <div id="test-container-ring" class="test-container">
-        <div class="calc-wrapper">
-            <div class="calculation-container">
+<div class="wrap">
 
-                <div class="input-section">
-                    <h4>Значение плотности</h4>
-                    <div class="input-row">
-                        <div class="input-group">
-                            <label>Плотность грунта, г/см³</label>
-                            <input type="number" step="any" id="target-density-ring">
-                        </div>
-                    </div>
-                </div>
+  <div class="section-label">Метод расчёта</div>
+  <div class="method-buttons">
+    <button class="action-btn method-btn initial" id="btn-ring" onclick="toggleMethod('ring')">Плотность методом режущего кольца</button>
+    <button class="action-btn method-btn initial" id="btn-paraffin" onclick="toggleMethod('paraffin')">Плотность методом парафинирования</button>
+  </div>
 
-                <div class="action-row">
-                    <button class="btn-calc-green" onclick="calculate('ring')">Рассчитать</button>
-                    <button class="btn-clear" onclick="clearAll('ring')">Очистить</button>
-                </div>
+  <div id="test-container-ring" class="test-container">
+    <div class="calc-wrapper">
+      <div class="calculation-container">
 
-                <table class="result-table">
-                    <thead>
-                        <tr>
-                            <th>Номер кольца</th>
-                            <th>Объём кольца, см³</th>
-                            <th>Вес кольца, г</th>
-                            <th>Вес кольца с грунтом, г</th>
-                            <th>Плотность, г/см³</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ring-table-body">
-                        <tr><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
-                    </tbody>
-                </table>
-
+        <div class="input-section">
+          <h4>Значение плотности</h4>
+          <div class="input-row">
+            <div class="input-group">
+              <label>Плотность грунта, г/см³</label>
+              <input type="number" step="any" id="target-density-ring">
             </div>
+          </div>
         </div>
+
+        <div class="action-row">
+          <button class="btn-calc-green" onclick="calculate('ring')">Рассчитать</button>
+          <button class="btn-clear" onclick="clearAll('ring')">Очистить</button>
+        </div>
+
+        <table class="result-table">
+          <thead>
+            <tr>
+              <th>Номер кольца</th>
+              <th>Объём кольца, см³</th>
+              <th>Вес кольца, г</th>
+              <th>Вес кольца с грунтом, г</th>
+              <th>Плотность, г/см³</th>
+            </tr>
+          </thead>
+          <tbody id="ring-table-body">
+            <tr><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+          </tbody>
+        </table>
+
+      </div>
     </div>
+  </div>
 
-    <div id="test-container-paraffin" class="test-container">
-        <div class="calc-wrapper">
-            <div class="calculation-container">
+  <div id="test-container-paraffin" class="test-container">
+    <div class="calc-wrapper">
+      <div class="calculation-container">
 
-                <div class="input-section">
-                    <h4>Значение плотности</h4>
-                    <div class="input-row">
-                        <div class="input-group">
-                            <label>Плотность грунта, г/см³</label>
-                            <input type="number" step="any" id="target-density-paraffin">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="action-row">
-                    <button class="btn-calc-green" onclick="calculate('paraffin')">Рассчитать</button>
-                    <button class="btn-clear" onclick="clearAll('paraffin')">Очистить</button>
-                </div>
-
-                <table class="result-table">
-                    <thead>
-                        <tr>
-                            <th>Масса грунта до парафинирования, г</th>
-                            <th>Масса после парафинирования, г</th>
-                            <th>Вес в воде, г</th>
-                            <th>Плотность, г/см³</th>
-                        </tr>
-                    </thead>
-                    <tbody id="paraffin-table-body">
-                        <tr><td>—</td><td>—</td><td>—</td><td>—</td></tr>
-                    </tbody>
-                </table>
-
+        <div class="input-section">
+          <h4>Значение плотности</h4>
+          <div class="input-row">
+            <div class="input-group">
+              <label>Плотность грунта, г/см³</label>
+              <input type="number" step="any" id="target-density-paraffin">
             </div>
+          </div>
         </div>
+
+        <div class="action-row">
+          <button class="btn-calc-green" onclick="calculate('paraffin')">Рассчитать</button>
+          <button class="btn-clear" onclick="clearAll('paraffin')">Очистить</button>
+        </div>
+
+        <table class="result-table">
+          <thead>
+            <tr>
+              <th>Масса грунта до парафинирования, г</th>
+              <th>Масса после парафинирования, г</th>
+              <th>Вес в воде, г</th>
+              <th>Плотность, г/см³</th>
+            </tr>
+          </thead>
+          <tbody id="paraffin-table-body">
+            <tr><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+          </tbody>
+        </table>
+
+      </div>
     </div>
+  </div>
 
-    <script>
-        function toggleMethod(method) {
-            document.querySelectorAll('.test-container').forEach(c => c.classList.remove('active'));
-            document.getElementById(`test-container-${method}`).classList.add('active');
-            document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`btn-${method}`).classList.add('active');
+</div>
+
+<footer>
+  © 2026 Geocalculator. Инженерно-геологические расчеты онлайн
+</footer>
+
+<script>
+    function toggleMethod(method) {
+        const buttons = ['ring', 'paraffin'].map(id => document.getElementById(`btn-${id}`));
+        buttons.forEach(btn => btn.classList.remove('initial'));
+        const containers = ['ring', 'paraffin'].map(id => document.getElementById(`test-container-${id}`));
+        containers.forEach(container => container.classList.remove('active'));
+        document.getElementById(`test-container-${method}`).classList.add('active');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`btn-${method}`).classList.add('active');
+    }
+
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function format2(n) {
+        return n.toFixed(2).replace('.', ',');
+    }
+
+    function rand(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    function calculate(method) {
+        const targetInput = document.getElementById(`target-density-${method}`);
+        const targetDensity = parseFloat(targetInput.value.replace(',', '.'));
+        if (isNaN(targetDensity) || targetDensity <= 0) {
+            alert('Введите корректное значение средней плотности');
+            return;
         }
 
-        function getRandomInt(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
+        const tableBody = document.getElementById(`${method}-table-body`);
+        tableBody.innerHTML = '';
 
-        function format2(n) {
-            return n.toFixed(2).replace('.', ',');
-        }
+        // Плотность всегда точно равна введённой
+        const density = targetDensity;
 
-        function rand(min, max) {
-            return Math.random() * (max - min) + min;
-        }
+        const row = document.createElement('tr');
+        let rowHTML = '';
 
-        function calculate(method) {
-            const targetInput = document.getElementById(`target-density-${method}`);
-            const targetDensity = parseFloat(targetInput.value.replace(',', '.'));
-            if (isNaN(targetDensity) || targetDensity <= 0) {
-                alert('Введите корректное значение средней плотности');
-                return;
-            }
+        if (method === 'ring') {
+            const ringNumber = getRandomInt(1, 9);
+            const ringVolume = rand(139, 141);
+            const ringWeight = rand(72, 74);
+            const soilMass = density * ringVolume;
+            const soilRingWeight = ringWeight + soilMass;
 
-            const tableBody = document.getElementById(`${method}-table-body`);
-            tableBody.innerHTML = '';
+            rowHTML = `
+                <td>${ringNumber}</td>
+                <td>${format2(ringVolume)}</td>
+                <td>${format2(ringWeight)}</td>
+                <td>${format2(soilRingWeight)}</td>
+                <td>${format2(density)}</td>
+            `;
+        } else if (method === 'paraffin') {
+            const massBefore = rand(100, 400);
+            const paraffinMass = rand(5, 15);
+            const massAfter = massBefore + paraffinMass;
+            const volume = massBefore / density;
+            const waterWeight = massAfter - volume; // упрощённо, вода ≈1 г/см³
 
-            // Плотность всегда точно равна введённой
-            const density = targetDensity;
-
-            const row = document.createElement('tr');
-            let rowHTML = '';
-
-            if (method === 'ring') {
-                const ringNumber = getRandomInt(1, 9);
-                const ringVolume = rand(139, 141);
-                const ringWeight = rand(72, 74);
-                const soilMass = density * ringVolume;
-                const soilRingWeight = ringWeight + soilMass;
-
-                rowHTML = `
-                    <td>${ringNumber}</td>
-                    <td>${format2(ringVolume)}</td>
-                    <td>${format2(ringWeight)}</td>
-                    <td>${format2(soilRingWeight)}</td>
-                    <td>${format2(density)}</td>
-                `;
-            } else if (method === 'paraffin') {
-                const massBefore = rand(100, 400);
-                const paraffinMass = rand(5, 15);
-                const massAfter = massBefore + paraffinMass;
-                const volume = massBefore / density;
-                const waterWeight = massAfter - volume; // упрощённо, вода ≈1 г/см³
-
-                rowHTML = `
-                    <td>${format2(massBefore)}</td>
-                    <td>${format2(massAfter)}</td>
-                    <td>${format2(waterWeight)}</td>
-                    <td>${format2(density)}</td>
-                `;
-            }
-
-            row.innerHTML = rowHTML;
-            tableBody.appendChild(row);
-        }
-
-        function clearAll(method) {
-            document.getElementById(`target-density-${method}`).value = '';
-            document.getElementById(`${method}-table-body`).innerHTML = `
-                <tr><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+            rowHTML = `
+                <td>${format2(massBefore)}</td>
+                <td>${format2(massAfter)}</td>
+                <td>${format2(waterWeight)}</td>
+                <td>${format2(density)}</td>
             `;
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const ringInput = document.getElementById('target-density-ring');
-            const paraffinInput = document.getElementById('target-density-paraffin');
+        row.innerHTML = rowHTML;
+        tableBody.appendChild(row);
+    }
 
-            ringInput.addEventListener('keydown', e => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    calculate('ring');
-                }
-            });
+    function clearAll(method) {
+        document.getElementById(`target-density-${method}`).value = '';
+        document.getElementById(`${method}-table-body`).innerHTML = `
+            <tr><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+        `;
+    }
 
-            paraffinInput.addEventListener('keydown', e => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    calculate('paraffin');
-                }
-            });
+    document.addEventListener('DOMContentLoaded', () => {
+        const ringInput = document.getElementById('target-density-ring');
+        const paraffinInput = document.getElementById('target-density-paraffin');
+
+        ringInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                calculate('ring');
+            }
         });
-    </script>
+
+        paraffinInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                calculate('paraffin');
+            }
+        });
+    });
+</script>
 </body>
 </html>
