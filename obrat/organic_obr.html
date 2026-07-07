@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Обратный расчёт содержания органических веществ — Geocalculator</title>
+<title>Обратный расчет содержания органических веществ — Geocalculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -104,7 +104,7 @@ header .lede{
   margin:18px auto 0;
 }
 
-/* ===== контентная обёртка ===== */
+/* ===== контентная обертка ===== */
 .wrap{
   max-width:1240px;
   margin:0 auto;
@@ -339,13 +339,13 @@ footer{
 </div>
 
 <header>
-  <h1>Обратный расчёт содержания органических веществ</h1>
-  <p class="lede">Выберите метод ниже и введите значение содержания органического вещества для расчёта. Расчёт ведётся в соответствии с ГОСТ 23740-2016.</p>
+  <h1>Обратный расчет содержания органических веществ</h1>
+  <p class="lede">Выберите метод ниже и введите значение содержания органического вещества для расчета. Расчет ведется в соответствии с ГОСТ 23740-2016.</p>
 </header>
 
 <div class="wrap">
 
-  <div class="section-label">Метод расчёта</div>
+  <div class="section-label">Метод расчета</div>
   <div class="method-buttons">
     <button class="action-btn method-btn" id="btn-residues" onclick="toggleMethod('residues')">Метод определения растительных остатков</button>
     <button class="action-btn method-btn" id="btn-calcination" onclick="toggleMethod('calcination')">Метод прокаливания до постоянной массы</button>
@@ -475,7 +475,7 @@ footer{
             return;
         }
 
-        // Переводим в доли единицы для расчётов
+        // Переводим в доли единицы для расчетов
         const targetFraction = unit === 'pct' ? targetOrganic / 100 : targetOrganic;
 
         const tableBody = document.getElementById(`${method}-table-body`);
