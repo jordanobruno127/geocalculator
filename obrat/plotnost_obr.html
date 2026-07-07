@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Обратный расчёт плотности грунта — Geocalculator</title>
+<title>Обратный расчет плотности грунта — Geocalculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -104,7 +104,7 @@ header .lede{
   margin:18px auto 0;
 }
 
-/* ===== контентная обёртка ===== */
+/* ===== контентная обертка ===== */
 .wrap{
   max-width:1240px;
   margin:0 auto;
@@ -339,13 +339,13 @@ footer{
 </div>
 
 <header>
-  <h1>Обратный расчёт плотности грунта</h1>
+  <h1>Обратный расчет плотности грунта</h1>
   <p class="lede">Выберите метод ниже и введите значение плотности для расчета (ГОСТ 5180-2015)</p>
 </header>
 
 <div class="wrap">
 
-  <div class="section-label">Метод расчёта</div>
+  <div class="section-label">Метод расчета</div>
   <div class="method-buttons">
     <button class="action-btn method-btn initial" id="btn-ring" onclick="toggleMethod('ring')">Плотность методом режущего кольца</button>
     <button class="action-btn method-btn initial" id="btn-paraffin" onclick="toggleMethod('paraffin')">Плотность методом парафинирования</button>
@@ -374,7 +374,7 @@ footer{
           <thead>
             <tr>
               <th>Номер кольца</th>
-              <th>Объём кольца, см³</th>
+              <th>Объем кольца, см³</th>
               <th>Вес кольца, г</th>
               <th>Вес кольца с грунтом, г</th>
               <th>Плотность, г/см³</th>
@@ -466,7 +466,7 @@ footer{
         const tableBody = document.getElementById(`${method}-table-body`);
         tableBody.innerHTML = '';
 
-        // Плотность всегда точно равна введённой
+        // Плотность всегда точно равна введенной
         const density = targetDensity;
 
         const row = document.createElement('tr');
@@ -491,7 +491,7 @@ footer{
             const paraffinMass = rand(5, 15);
             const massAfter = massBefore + paraffinMass;
             const volume = massBefore / density;
-            const waterWeight = massAfter - volume; // упрощённо, вода ≈1 г/см³
+            const waterWeight = massAfter - volume; // упрощенно, вода ≈1 г/см³
 
             rowHTML = `
                 <td>${format2(massBefore)}</td>
