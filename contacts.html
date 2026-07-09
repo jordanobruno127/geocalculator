@@ -114,11 +114,16 @@
     padding:13px 24px; border-radius:var(--radius); cursor:pointer;
     text-decoration:none; transition:background .15s;
     max-width:100%; white-space:normal; text-align:center;
-    margin-top:10px;
+    display: infine-flex;
+    ...
+    margin-bottmo:24px;
   }
   .btn-telegram:hover{ background:#1e8cc4; border-color:#1e8cc4; }
   .btn-telegram svg{ width:19px; height:19px; fill:#ffffff; flex-shrink:0; }
 
+  .email-title{
+    margin: 0 0 16px;
+  }
   .email-row{
     display:flex; justify-content:center; align-items:center; gap:10px;
     padding:14px 18px;
@@ -210,8 +215,7 @@
           Написать в Telegram
         </a>
 
-        <p><br> </br>
-        <br>или отправьте сообщение на электронную почту:</br></p>
+        <p class:"email-title">или отправьте сообщение на электронную почту:</p>
         <div class="email-row">
           <span class="email" id="emailText">geocalculator@mail.ru</span>
           <button class="copy-button" onclick="copyEmail()" aria-label="Скопировать email">
