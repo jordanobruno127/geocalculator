@@ -1,495 +1,1401 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ступени нагрузки мерзлого грунта</title>
-    <style>
-        * { box-sizing: border-box; }
-        html, body {
-            width: 100%;
-            max-width: 100%;
-            overflow-x: hidden;
-        }
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #ffffff;
-            padding: 20px;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><g fill="none" stroke="%23002f4b" stroke-opacity="0.07" stroke-width="2"><circle cx="30" cy="40" r="9"/><circle cx="80" cy="90" r="7"/><circle cx="105" cy="50" r="8"/><path d="M50 75 L58 88 M42 82 L50 95" stroke-width="2.8"/><path d="M90 30 L98 45" stroke-width="2.2"/></g><g fill="%23e3f2fd" fill-opacity="0.09"><circle cx="20" cy="110" r="5"/><circle cx="75" cy="25" r="4"/></g></svg>');
-            background-repeat: repeat;
-            background-size: 140px;
-            min-height: 100vh;
-        }
-        .top-menu {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            display: flex;
-            gap: 10px;
-            z-index: 10;
-        }
-        .top-menu button {
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 2px solid #2c3e50;
-            background-color: #2c3e50;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        .top-menu button:hover {
-            background-color: #34495e;
-        }
-        .header-text {
-            max-width: 800px;
-            margin: 0 auto 30px;
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-        .header-text h1 {
-            font-size: 24px;
-            color: #2c3e50;
-        }
-        .header-text p {
-            font-size: 16px;
-            color: #000000;
-        }
-        .method-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin: 25px auto;
-            flex-wrap: wrap;
-            max-width: 900px;
-        }
-        .action-btn {
-            padding: 12px 24px;
-            border-radius: 14px;
-            border: 2px solid #2c3e50;
-            background-color: #2c3e50;
-            color: white;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: all 0.3s;
-            min-width: 220px;
-        }
-        .action-btn:hover {
-            background-color: #34495e;
-            border-color: #34495e;
-        }
-        .action-btn.active {
-            background-color: #2c3e50;
-            border-color: #2c3e50;
-        }
-        .action-btn.inactive {
-            background-color: #7f8c8d;
-            border-color: #7f8c8d;
-        }
-        .action-btn.inactive:hover {
-            background-color: #95a5a6;
-            border-color: #95a5a6;
-        }
-        .test-container {
-            display: none;
-            margin-top: 20px;
-        }
-        .test-container.active {
-            display: block;
-        }
-        .calc-wrapper {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            max-width: 620px;
-            margin: 0 auto;
-        }
-        .calculation-container {
-            border: 2px solid #2c3e50;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            background-color: rgba(255,255,255,0.92);
-            min-width: 500px;
-            max-width: 620px;
-        }
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px 20px;
-        }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .form-group label {
-            font-size: 14px;
-            color: #2c3e50;
-            font-weight: 500;
-        }
-        input, select {
-            width: 100%;
-            padding: 8px 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-        .result-block {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(240,248,255,0.6);
-            border: 1px solid #d0e0ff;
-            border-radius: 10px;
-        }
-        .result-title {
-            font-size: 16px;
-            color: #2c3e50;
-            font-weight: bold;
-            margin-bottom: 12px;
-        }
-        .step-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 12px 10px;
-        }
-        .step-item {
-            background: white;
-            padding: 12px;
-            border: 1px solid #a3c8ff;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .step-item .step-num {
-            font-size: 13px;
-            color: #555;
-            margin-bottom: 4px;
-        }
-        .step-item .value {
-            font-size: 17px;
-            font-weight: bold;
-            color: #1a73e8;
-        }
-        .action-row {
-            display: flex;
-            justify-content: flex-start;
-            gap: 12px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        .btn-calc-green {
-            padding: 8px 20px;
-            border-radius: 12px;
-            border: 2px solid #2e7d32;
-            background-color: #2e7d32;
-            color: white;
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: bold;
-            min-width: 140px;
-        }
-        .btn-calc-green:hover { background-color: #388e3c; }
-        .btn-clear {
-            padding: 8px 20px;
-            border-radius: 12px;
-            border: 1px solid #7f8c8d;
-            background-color: #ecf0f1;
-            color: #2c3e50;
-            cursor: pointer;
-            font-size: 15px;
-            min-width: 140px;
-        }
-        .btn-clear:hover { background-color: #bdc3c7; }
-        .error {
-            color: #c62828;
-            font-size: 13px;
-            margin-top: 8px;
-            min-height: 20px;
-        }
-        @media screen and (max-width: 768px) {
-            body { padding-top: 60px; }
-            .header-text { margin-top: 20px; }
-            .method-buttons { flex-direction: column; align-items: center; }
-            .action-btn { width: 90%; max-width: 340px; }
-            .calc-wrapper { flex-direction: column; align-items: center; }
-            .calculation-container { width: 100%; max-width: 90%; min-width: 320px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Компрессионные испытания мерзлых грунтов — Geocalculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --soil-peat:   #F2E9D8;
+  --soil-peat-2: #EAE0C9;
+  --soil-clay:   #8A7355;
+  --soil-loam:   #B06B34;
+  --soil-sand:   #C98F45;
+  --paper:       #3B2E20;
+  --paper-dim:   #7A6A52;
+  --line:        #D9C9A3;
+  --ok:          #7A9B6E;
+  --warn:        #A6462E;
+
+  --font-display: 'Golos Text', -apple-system, sans-serif;
+  --font-body: 'Golos Text', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius: 3px;
+
+  --frozen-bg:  #EAD9C6;
+  --frozen-t:   #9A5A2B;
+  --frozen-row: rgba(176,107,52,0.06);
+  --thaw-bg:    #DCE8D3;
+  --thaw-t:     #4F6B45;
+  --thaw-row:   rgba(122,155,110,0.08);
+  --load-bg:    #E3DCD0;
+  --load-t:     #6B5842;
+  --load-row:   transparent;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+html, body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden;
+  background-color:var(--soil-peat);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(176,107,52,0.08) 1px, transparent 0),
+    repeating-linear-gradient(155deg, rgba(176,107,52,0.05) 0px, rgba(176,107,52,0.05) 1px, transparent 1px, transparent 26px),
+    repeating-linear-gradient(65deg, rgba(138,115,85,0.045) 0px, rgba(138,115,85,0.045) 1px, transparent 1px, transparent 34px);
+  background-size: 18px 18px, auto, auto;
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-size:17px;
+  line-height:1.55;
+  min-height:100vh;
+}
+
+body{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ===== верхняя панель навигации ===== */
+.top-bar{
+  width:100%;
+  padding:18px 32px 0;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+.top-bar button{
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:14.5px;
+  padding:12px 22px;
+  border-radius:var(--radius);
+  cursor:pointer;
+  transition:opacity .15s, border-color .15s, color .15s;
+}
+#btn-back{
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  color:var(--paper);
+}
+#btn-back:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+#btn-home{
+  background:var(--soil-loam);
+  border:1px solid var(--soil-loam);
+  color:var(--soil-peat);
+}
+#btn-home:hover{ opacity:.88; }
+
+/* ===== шапка ===== */
+header{
+  max-width:920px;
+  margin:0 auto;
+  padding:12px 32px 40px;
+  text-align:center;
+  border-bottom:1px solid var(--line);
+  width:100%;
+}
+header h1{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:42px;
+  line-height:1.2;
+  color:var(--paper);
+}
+header .lede{
+  font-size:17px;
+  color:var(--paper-dim);
+  max-width:640px;
+  margin:18px auto 0;
+}
+
+/* ===== контентная обёртка ===== */
+.wrap{
+  max-width:1240px;
+  margin:0 auto;
+  padding:40px 32px 64px;
+  width:100%;
+  flex:1 0 auto;
+}
+
+.section-label{
+  font-family:var(--font-mono);
+  font-size:13px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  margin-bottom:16px;
+  text-align:center;
+}
+
+/* ===== предупреждение ===== */
+.warning{
+  margin-bottom:28px;
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  border-left:3px solid var(--warn);
+  border-radius:var(--radius);
+  padding:14px 18px;
+  max-width:900px;
+  margin-left:auto;
+  margin-right:auto;
+}
+.warning .mark{
+  display:block;
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--warn);
+  font-weight:600;
+  margin-bottom:5px;
+}
+.warning p{
+  font-size:13.5px;
+  line-height:1.55;
+  color:var(--paper-dim);
+}
+
+/* ===== главные (верхнеуровневые) вкладки ===== */
+.method-buttons{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+  max-width:900px;
+  margin:0 auto 8px;
+}
+.action-btn.method-btn{
+  padding:12px 20px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background-color:var(--soil-peat-2);
+  color:var(--paper);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14.5px;
+  font-weight:600;
+  transition:border-color .15s, color .15s, background-color .15s;
+  min-width:270px;
+}
+.action-btn.method-btn:hover{
+  border-color:var(--soil-loam);
+  color:var(--soil-loam);
+}
+.action-btn.method-btn.active{
+  background-color:var(--soil-loam);
+  border-color:var(--soil-loam);
+  color:var(--soil-peat);
+}
+
+.main-tab{
+  display:none;
+  margin-top:36px;
+}
+.main-tab.active{
+  display:block;
+}
+
+.tag-inline{
+  display:flex;
+  justify-content:center;
+  margin-bottom:22px;
+}
+.tag{
+  font-family:var(--font-mono); font-size:11.5px; font-weight:500;
+  color:var(--soil-peat); background:var(--soil-loam);
+  padding:5px 11px; border-radius:var(--radius); white-space:nowrap;
+}
+
+/* ===== панели (карточки-разделы) ===== */
+.panel{
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:24px 26px;
+  margin-bottom:18px;
+  max-width:900px;
+  margin-left:auto;
+  margin-right:auto;
+}
+.ph{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  font-weight:600;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  margin-bottom:16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.ph::after{ content:''; flex:1; height:1px; background:var(--line); }
+.hint{ font-size:12.5px; color:var(--paper-dim); margin-top:10px; line-height:1.6; }
+
+/* ===== сетки полей ===== */
+.r2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.r3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+.r4{ display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:14px; }
+@media (max-width:720px){ .r4{ grid-template-columns:1fr 1fr; } .r2, .r3{ grid-template-columns:1fr; } }
+
+.field label{ display:block; font-family:var(--font-mono); font-size:11.5px; letter-spacing:.04em; color:var(--paper-dim); margin-bottom:6px; }
+input[type=number], select{
+  width:100%;
+  background:var(--soil-peat);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:9px 11px;
+  font-family:var(--font-mono);
+  font-size:14px;
+  color:var(--paper);
+  outline:none;
+  transition:border-color .15s;
+}
+input:focus, select:focus{ border-color:var(--soil-loam); }
+input:disabled{ opacity:.45; background:var(--soil-peat-2); cursor:not-allowed; }
+select{ cursor:pointer; }
+
+/* ===== чекбокс-строка ===== */
+.check-row{ display:flex; align-items:center; gap:10px; margin-top:14px; flex-wrap:wrap; }
+input[type=checkbox]{ width:16px; height:16px; accent-color:var(--soil-loam); cursor:pointer; flex-shrink:0; }
+.check-label{ font-size:13.5px; color:var(--paper); cursor:pointer; user-select:none; }
+.reseed-btn{ font-family:var(--font-mono); font-size:11.5px; color:var(--paper-dim); background:none; border:none; cursor:pointer; text-decoration:underline; padding:0; transition:color .15s; }
+.reseed-btn:hover{ color:var(--soil-loam); }
+.seed-chip-row{ display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap; }
+.noise-chip{
+  display:inline-flex; align-items:center; gap:5px;
+  font-family:var(--font-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--soil-loam); background:var(--soil-peat); border:1px solid var(--line);
+  border-radius:var(--radius); padding:3px 10px;
+}
+.noise-chip::before{ content:'±'; font-weight:600; }
+.seed-lbl{ font-family:var(--font-mono); font-size:10.5px; color:var(--paper-dim); }
+
+/* ===== таблица ступеней нагружения ===== */
+.steps-table{ width:100%; border-collapse:collapse; margin-bottom:12px; }
+.steps-table thead th{
+  background:var(--soil-peat);
+  padding:8px 12px;
+  text-align:left;
+  font-family:var(--font-mono);
+  font-size:10px;
+  font-weight:500;
+  color:var(--paper-dim);
+  border-bottom:1px solid var(--line);
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.steps-table thead th:last-child{ width:36px; }
+.steps-table tbody tr{ border-bottom:1px solid var(--line); transition:background .1s; }
+.steps-table tbody tr.row-frozen{ background:var(--frozen-row); }
+.steps-table tbody tr.row-thaw{ background:var(--thaw-row); }
+.steps-table tbody tr:last-child{ border-bottom:none; }
+.steps-table tbody tr:hover{ background:#DCC79A; }
+.steps-table tbody td{ padding:7px 12px; font-family:var(--font-mono); font-size:12px; color:var(--paper-dim); }
+.steps-table tbody td:nth-child(2) input{ max-width:180px; padding:6px 9px; font-size:12px; }
+.steps-table tbody td input[type=number]{ padding:6px 9px; font-size:12px; max-width:160px; }
+
+/* ===== бейджи ===== */
+.badge{ font-family:var(--font-mono); font-size:10.5px; padding:3px 9px; border-radius:var(--radius); font-weight:500; white-space:nowrap; display:inline-block; }
+.badge-frozen{ background:var(--frozen-bg); color:var(--frozen-t); }
+.badge-thaw{ background:var(--thaw-bg); color:var(--thaw-t); }
+.badge-load{ background:var(--load-bg); color:var(--load-t); }
+
+.step-del{ background:none; border:none; color:var(--paper-dim); cursor:pointer; padding:3px 7px; border-radius:var(--radius); font-size:15px; line-height:1; transition:all .14s; }
+.step-del:hover{ color:var(--warn); background:#F0D2C8; }
+
+/* ===== кнопки ===== */
+.btn-row{ display:flex; gap:10px; flex-wrap:wrap; }
+.btn-add{
+  background:var(--soil-peat); color:var(--soil-loam); border:1px solid var(--line);
+  border-radius:var(--radius); padding:9px 16px; font-family:var(--font-body); font-size:13.5px; font-weight:600;
+  cursor:pointer; transition:border-color .15s, color .15s;
+}
+.btn-add:hover{ border-color:var(--soil-loam); }
+.btn-calc{
+  flex:1; min-width:160px; padding:11px; background:var(--soil-loam); color:var(--soil-peat);
+  border:1px solid var(--soil-loam); border-radius:var(--radius); font-family:var(--font-body); font-size:14.5px; font-weight:600;
+  cursor:pointer; transition:opacity .15s; display:flex; align-items:center; justify-content:center; gap:7px;
+}
+.btn-calc:hover{ opacity:.88; }
+.btn-re{
+  display:none; padding:10px 16px; background:var(--soil-peat-2); color:var(--paper);
+  border:1px solid var(--line); border-radius:var(--radius); font-family:var(--font-body); font-size:13.5px;
+  cursor:pointer; transition:border-color .15s, color .15s;
+}
+.btn-re:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+
+.btn-calc-green{
+  padding:10px 18px; border-radius:var(--radius); border:1px solid var(--soil-loam);
+  background-color:var(--soil-loam); color:var(--soil-peat); cursor:pointer;
+  font-family:var(--font-body); font-size:14px; font-weight:600; transition:opacity .15s; min-width:140px;
+}
+.btn-calc-green:hover{ opacity:.88; }
+.btn-clear{
+  padding:10px 18px; border-radius:var(--radius); border:1px solid var(--line);
+  background-color:var(--soil-peat-2); color:var(--paper); cursor:pointer;
+  font-family:var(--font-body); font-size:14px; font-weight:600; transition:border-color .15s, color .15s; min-width:140px;
+}
+.btn-clear:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+
+/* ===== график (SVG, мерзлый грунт) ===== */
+.chart-wrap-svg{ padding:16px; border-bottom:1px solid var(--line); background:var(--soil-peat); border-radius:var(--radius) var(--radius) 0 0; }
+.chart-lbl{ font-size:11px; color:var(--paper-dim); margin-bottom:10px; font-family:var(--font-mono); letter-spacing:.04em; text-transform:uppercase; }
+svg#chartFrozen{ display:block; width:100%; overflow:visible; }
+
+/* ===== результаты (мерзлый грунт) ===== */
+.rc{ background:var(--soil-peat-2); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; display:none; max-width:900px; margin:0 auto 18px; }
+.rc.on{ display:block; }
+.rh{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; padding:12px 16px; border-bottom:1px solid var(--line); background:var(--soil-peat); }
+.rtit{ font-size:13.5px; font-weight:600; color:var(--paper); }
+.recalc-btn{ font-family:var(--font-mono); font-size:10.5px; color:var(--soil-loam); background:none; border:none; cursor:pointer; text-decoration:underline; padding:0; }
+.recalc-btn:hover{ opacity:.8; }
+
+/* ===== результаты (оттаивание) ===== */
+#thawResults{ display:none; }
+.results-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; max-width:900px; margin-left:auto; margin-right:auto; }
+@media (max-width:640px){ .results-grid{ grid-template-columns:1fr; } }
+.trend-eq{ font-family:var(--font-mono); font-size:18px; font-weight:500; color:var(--paper); margin-bottom:10px; letter-spacing:-.02em; }
+.trend-sub{ font-size:12.5px; color:var(--paper-dim); line-height:1.7; }
+.metrics-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.metric{ background:var(--soil-peat); border:1px solid var(--line); border-radius:var(--radius); padding:12px 14px; }
+.metric-label{ font-size:11px; color:var(--paper-dim); margin-bottom:5px; font-family:var(--font-mono); letter-spacing:.03em; }
+.metric-value{ font-size:20px; font-weight:600; font-family:var(--font-mono); color:var(--paper); letter-spacing:-.02em; }
+.metric-value.green{ color:var(--soil-loam); }
+.legend-box{ display:flex; flex-wrap:wrap; gap:14px; margin-bottom:12px; }
+.legend-item{ display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--paper-dim); }
+.legend-dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.legend-sq{ width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+.legend-tri{ width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-bottom:10px solid; flex-shrink:0; }
+.legend-dash{ width:22px; height:0; border-top:2px dashed; flex-shrink:0; }
+.chart-wrap-canvas{ background:var(--soil-peat); border-radius:var(--radius); padding:14px; border:1px solid var(--line); max-width:900px; margin:0 auto; }
+.chart-wrap-canvas canvas{ display:block; max-height:320px; }
+
+/* ===== общая таблица результатов ===== */
+.tsc{ overflow-x:auto; }
+table.rt{ width:100%; border-collapse:collapse; font-size:12.5px; }
+table.rt thead th{ background:var(--soil-peat); padding:9px 13px; text-align:right; font-family:var(--font-mono); font-size:10.5px; font-weight:500; color:var(--paper-dim); border-bottom:1px solid var(--line); white-space:nowrap; user-select:none; }
+table.rt thead th:first-child{ text-align:left; }
+table.rt thead th:nth-child(2){ text-align:left; }
+table.rt thead th.cc{ cursor:pointer; }
+table.rt thead th.cc:hover{ color:var(--soil-loam); background:#DCC79A; }
+.ch{ display:block; font-size:9px; color:var(--paper-dim); font-weight:400; margin-top:1px; font-family:var(--font-body); letter-spacing:0; }
+table.rt tbody tr{ transition:background .1s; }
+table.rt tbody tr.row-frozen{ background:var(--frozen-row); }
+table.rt tbody tr.row-thaw{ background:var(--thaw-row); }
+table.rt tbody tr:nth-child(even):not(.row-frozen):not(.row-thaw){ background:var(--soil-peat); }
+table.rt tbody tr:hover{ background:#DCC79A; }
+table.rt tbody td{ padding:8px 13px; text-align:right; border-bottom:1px solid var(--line); font-family:var(--font-mono); font-size:12px; color:var(--paper); }
+table.rt tbody td:first-child{ text-align:left; font-family:var(--font-body); font-size:12px; color:var(--paper-dim); font-weight:500; }
+table.rt tbody td:nth-child(2){ text-align:left; }
+table.rt tbody tr:last-child td{ border-bottom:none; }
+.mu{ color:var(--paper-dim); }
+.hi{ color:var(--soil-loam); font-weight:500; }
+td.noise-cell{ color:var(--paper-dim); font-size:11px; }
+
+.avg-bar{ padding:14px 18px; border-top:1px solid var(--line); background:var(--soil-peat); font-family:var(--font-mono); font-size:12px; color:var(--paper-dim); display:flex; flex-wrap:wrap; gap:14px; align-items:center; }
+.avg-bar b{ color:var(--soil-loam); font-weight:600; }
+.avg-bar .seed-note{ color:var(--paper-dim); font-size:10.5px; margin-left:auto; }
+
+.ctsv{ font-family:var(--font-mono); font-size:10.5px; color:var(--paper-dim); background:var(--soil-peat); border:1px solid var(--line); border-radius:var(--radius); padding:4px 11px; cursor:pointer; transition:all .14s; }
+.ctsv:hover{ color:var(--soil-loam); border-color:var(--soil-loam); background:#DCC79A; }
+
+.tab-note{ font-size:12.5px; color:var(--paper-dim); max-width:900px; margin:0 auto 20px; text-align:center; line-height:1.6; }
+
+/* ===== вкладка "ступени вертикальной нагрузки" (внутренние под-вкладки) ===== */
+.substep-header{ max-width:800px; margin:0 auto 22px; text-align:center; }
+.substep-header p{ font-size:14.5px; color:var(--paper-dim); }
+.substep-buttons{ display:flex; justify-content:center; gap:10px; margin:0 auto 30px; flex-wrap:wrap; max-width:700px; }
+.substep-buttons .action-btn{
+  padding:12px 22px; border-radius:var(--radius); border:1px solid var(--line);
+  background-color:var(--soil-peat-2); color:var(--paper); cursor:pointer;
+  font-family:var(--font-body); font-size:14.5px; font-weight:600; min-width:220px;
+  transition:border-color .15s, color .15s, background-color .15s;
+}
+.substep-buttons .action-btn:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+.substep-buttons .action-btn.active{ background-color:var(--soil-loam); border-color:var(--soil-loam); color:var(--soil-peat); }
+.substep-buttons .action-btn.inactive{ background-color:var(--soil-peat-2); border-color:var(--line); color:var(--paper); }
+
+.test-container{ display:none; margin-top:20px; }
+.test-container.active{ display:block; }
+.calc-wrapper{ display:flex; justify-content:center; width:100%; max-width:620px; margin:0 auto; }
+.calculation-container{
+  border:1px solid var(--line); border-radius:var(--radius); padding:24px 26px;
+  background-color:var(--soil-peat-2); min-width:500px; max-width:620px; width:100%;
+}
+.form-grid{ display:grid; grid-template-columns:1fr; gap:16px 20px; }
+.form-group{ display:flex; flex-direction:column; gap:6px; }
+.form-group label{ font-family:var(--font-mono); font-size:11.5px; letter-spacing:.04em; color:var(--paper-dim); }
+.result-block{ margin-top:20px; padding:16px; background:var(--soil-peat); border:1px solid var(--line); border-radius:var(--radius); }
+.result-title{ font-family:var(--font-mono); font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--paper-dim); font-weight:600; margin-bottom:12px; }
+.step-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:12px 10px; }
+.step-item{ background:var(--soil-peat-2); padding:12px; border:1px solid var(--line); border-radius:var(--radius); text-align:center; }
+.step-item .step-num{ font-family:var(--font-mono); font-size:11.5px; color:var(--paper-dim); margin-bottom:4px; }
+.step-item .value{ font-family:var(--font-mono); font-size:16px; font-weight:600; color:var(--soil-loam); }
+.action-row{ display:flex; justify-content:flex-start; gap:10px; margin-top:20px; flex-wrap:wrap; }
+.error{ color:var(--warn); font-size:13px; margin-top:8px; min-height:20px; }
+
+/* ===== toast ===== */
+.copy-notification{
+  position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
+  background:var(--paper); color:var(--soil-peat); font-family:var(--font-mono); font-size:13px;
+  padding:10px 18px; border-radius:var(--radius); opacity:0; transition:opacity .3s;
+  pointer-events:none; z-index:100;
+}
+.copy-notification.show{ opacity:1; }
+
+/* ===== внутренняя сноска (ГОСТ) ===== */
+.inner-footer{ max-width:900px; margin:30px auto 0; padding-top:16px; border-top:1px solid var(--line); display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+.inner-footer span{ font-family:var(--font-mono); font-size:10.5px; color:var(--paper-dim); }
+
+/* ===== футер сайта ===== */
+footer{
+  flex-shrink:0;
+  max-width:920px;
+  margin:36px auto 0;
+  padding:36px 32px 40px;
+  border-top:1px solid var(--line);
+  text-align:center;
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--paper-dim);
+  width:100%;
+}
+
+@media (max-width:900px){
+  header h1{ font-size:30px; }
+  .top-bar{ padding:14px 20px 0; }
+  header{ padding:56px 20px 32px; }
+  .wrap{ padding:28px 20px 48px; }
+  .action-btn.method-btn{ width:100%; min-width:0; max-width:400px; }
+  .panel{ padding:18px 16px; }
+  .calc-wrapper{ width:100%; max-width:90%; margin:0 auto; }
+  .calculation-container{ width:100%; max-width:90%; min-width:280px; margin:0 auto; }
+  .substep-buttons .action-btn{ width:90%; max-width:340px; }
+}
+@media (max-width:400px){
+  .calculation-container{ min-width:260px; max-width:90%; }
+}
+</style>
 </head>
 <body>
 
-<div class="top-menu">
-    <button onclick="location.href='https://geocalculator.ru/index.html'">🏠</button>
+<div class="top-bar">
+  <button id="btn-back" onclick="history.back()">Назад</button>
+  <button id="btn-home" onclick="location.href='/'">Главная</button>
 </div>
 
-<div class="header-text">
-    <h1><br>Ступени нагрузки при компрессионных испытаниях <br>мерзлых грунтов</h1>
-    <p>Выберите режим ниже и введите данные для расчёта ступеней.</p>
-</div>
+<header>
+  <h1>Компрессионные испытания мерзлых грунтов</h1>
+  <p class="lede">Выберите вкладку ниже: расчёт компрессионного сжатия мерзлого грунта, оттаивания под нагрузкой, либо ступеней вертикальной нагрузки для проведения испытания.
+  <br><strong>ГОСТ 12248.6-2020</strong></br>
+  </p>
+</header>
 
-<div class="method-buttons">
-    <button class="action-btn" onclick="toggleTab('frozen')">Мерзлый грунт</button>
-    <button class="action-btn" onclick="toggleTab('thaw')">Оттаивание</button>
-</div>
+<div class="wrap">
 
-<!-- Вкладка Мерзлый грунт -->
-<div id="test-container-frozen" class="test-container">
-    <div class="tests-container">
-        <div class="test-flex">
-            <div class="calc-wrapper">
-                <div class="calculation-container">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Плотность грунта, г/см³</label>
-                            <input type="number" id="density" step="0.01" min="0.1" onkeydown="handleEnter(event, this, 'frozen')">
-                        </div>
-                        <div class="form-group">
-                            <label>Глубина залегания, м</label>
-                            <input type="number" id="depth" step="0.1" min="0" onkeydown="handleEnter(event, this, 'frozen')">
-                        </div>
-                        <div class="form-group">
-                            <label>Температура испытания, °C</label>
-                            <select id="temp" onkeydown="handleEnter(event, this, 'frozen')">
-                                <option value="-0.3">-0.3</option>
-                                <option value="-0.5">-0.5</option>
-                                <option value="-1">-1</option>
-                                <option value="-1.5">-1.5</option>
-                                <option value="-2">-2</option>
-                                <option value="-2.5">-2.5</option>
-                                <option value="-3">-3</option>
-                                <option value="-3.5">-3.5</option>
-                                <option value="-4">-4</option>
-                                <option value="-6">-6</option>
-                                <option value="-8">-8</option>
-                                <option value="-10">-10</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Тип грунта</label>
-                            <select id="soilType" onkeydown="handleEnter(event, this, 'frozen')">
-                                <option value="пески средней">Пески средней крупности</option>
-                                <option value="пески мелкие">Пески мелкие и пылеватые</option>
-                                <option value="супеси">Супеси</option>
-                                <option value="суглинки и глины">Суглинки и глины</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Льдистость, д.е.</label>
-                            <input type="number" id="iceContent" step="0.01" min="0" max="1" onkeydown="handleEnter(event, this, 'frozen')">
-                        </div>
-                    </div>
-
-                    <div class="error" id="errorMsgFrozen"></div>
-
-                    <div class="result-block" id="resultBlockFrozen" style="display:none;">
-                        <div class="result-title">Ступени нагрузки, МПа</div>
-                        <div class="step-grid" id="stepsContainerFrozen"></div>
-                    </div>
-
-                    <div class="action-row">
-                        <button class="btn-calc-green" onclick="calculateFrozen()">Рассчитать</button>
-                        <button class="btn-clear" onclick="clearFrozen()">Очистить</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="warning">
+      <span class="mark">Внимание</span>
+      <p>Представленные данные носят исключительно вспомогательный и информационный характер и не претендуют на достоверность. Модель представляет собой гипотетическое поведение грунта при выбранных условиях и характеристиках.</p>
     </div>
-</div>
 
-<!-- Вкладка Оттаивание -->
-<div id="test-container-thaw" class="test-container">
-    <div class="tests-container">
-        <div class="test-flex">
-            <div class="calc-wrapper">
-                <div class="calculation-container">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Тип грунта</label>
-                            <select id="thawSoilType" onkeydown="handleEnter(event, this, 'thaw')">
-                                <option value="глинистый">Глинистый</option>
-                                <option value="песчаный">Песчаный</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>1-я ступень (из мерзлого испытания), МПа</label>
-                            <input type="number" id="thawP1" step="0.001" min="0" onkeydown="handleEnter(event, this, 'thaw')">
-                        </div>
-                    </div>
+  <div class="section-label">Вид расчёта</div>
+  <div class="method-buttons">
+    <button class="action-btn method-btn initial" id="btn-main-frozen" onclick="switchMainTab('frozen')" aria-label="Мерзлый грунт">Мерзлый грунт</button>
+    <button class="action-btn method-btn initial" id="btn-main-thaw" onclick="switchMainTab('thaw')" aria-label="Оттаивание">Оттаивание</button>
+    <button class="action-btn method-btn initial" id="btn-main-steps" onclick="switchMainTab('steps')" aria-label="Расчёт ступеней вертикальной нагрузки">Расчёт ступеней вертикальной нагрузки</button>
+  </div>
 
-                    <div class="error" id="errorMsgThaw"></div>
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- ГЛАВНАЯ ВКЛАДКА 1 — МЕРЗЛЫЙ ГРУНТ                  -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="main-tab" id="main-tab-frozen">
 
-                    <div class="result-block" id="resultBlockThaw" style="display:none;">
-                        <div class="result-title">Ступени нагрузки при оттаивании, МПа</div>
-                        <div class="step-grid" id="stepsContainerThaw"></div>
-                    </div>
-
-                    <div class="action-row">
-                        <button class="btn-calc-green" onclick="calculateThaw()">Рассчитать</button>
-                        <button class="btn-clear" onclick="clearThaw()">Очистить</button>
-                    </div>
-                </div>
-            </div>
+    <div class="panel">
+      <div class="ph">Параметры образца</div>
+      <div class="r2">
+        <div class="field">
+          <label>Высота образца h₀, мм</label>
+          <input id="fh0" type="number" value="25" step="0.1" min="1">
         </div>
+        <div class="field">
+          <label>Средний коэффициент сжимаемости mv, МПа⁻¹</label>
+          <input id="favg_mv" type="number" value="0.073" step="0.001" min="0.001">
+        </div>
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="frandomSeed" checked>
+        <label class="check-label" for="frandomSeed">Случайный шум при каждом расчёте</label>
+        <button class="reseed-btn" onclick="freseed()">↺ новый seed</button>
+      </div>
+      <div class="seed-chip-row">
+        <div class="noise-chip" id="frozenNoiseChip">шум</div>
+        <div class="seed-lbl" id="frozenSeedDisplay"></div>
+      </div>
     </div>
+
+    <div class="panel">
+      <div class="ph">Ступени нагружения</div>
+      <table class="steps-table">
+        <thead>
+          <tr>
+            <th style="width:36px">№</th>
+            <th>Вертикальное давление σ, МПа</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="fsteps-body"></tbody>
+      </table>
+      <div class="btn-row">
+        <button class="btn-add" onclick="faddRow()">+ ступень</button>
+        <button class="btn-calc" onclick="fcalc()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          Рассчитать
+        </button>
+      </div>
+    </div>
+
+    <div class="rc anim" id="fresult">
+      <div class="rh">
+        <span class="rtit">Результаты испытания</span>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="ctsv" onclick="fcpTSV()">Копировать TSV</button>
+          <button class="recalc-btn" onclick="fcalc()">↺ пересчитать с новым шумом</button>
+        </div>
+      </div>
+      <div class="chart-wrap-svg">
+        <div class="chart-lbl">σ (МПа) → ε (относительная деформация, д.е.)</div>
+        <svg id="chartFrozen" viewBox="0 0 720 300" preserveAspectRatio="xMidYMid meet" style="max-height:300px"></svg>
+      </div>
+      <div class="tsc">
+        <table class="rt">
+          <thead>
+            <tr>
+              <th>Ступень</th>
+              <th class="cc" onclick="fcpCol(0)">σ, МПа<span class="ch">↓ копировать</span></th>
+              <th class="cc" onclick="fcpCol(1)">ε, д.е.<span class="ch">↓ копировать</span></th>
+              <th class="cc" onclick="fcpCol(2)">Δh, мм<span class="ch">↓ копировать</span></th>
+              <th class="cc" onclick="fcpCol(3)">mv, МПа⁻¹<span class="ch">↓ копировать</span></th>
+              <th class="cc" onclick="fcpCol(4)">E, МПа<span class="ch">↓ копировать</span></th>
+              <th>δ-шум</th>
+            </tr>
+          </thead>
+          <tbody id="fout"></tbody>
+        </table>
+      </div>
+      <div class="avg-bar" id="favg"></div>
+    </div>
+
+  </div><!-- /main-tab-frozen -->
+
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- ГЛАВНАЯ ВКЛАДКА 2 — ОТТАИВАНИЕ                     -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="main-tab" id="main-tab-thaw">
+
+    <div class="panel">
+      <div class="ph">Заданные коэффициенты</div>
+      <div class="r4" style="margin-bottom:0">
+        <div class="field"><label>Коэф. оттаивания A₀, д.е.</label><input type="number" id="tA0" value="0.0036" step="0.0001" min="0"></div>
+        <div class="field"><label>Коэф. сжимаемости b, МПа⁻¹</label><input type="number" id="tb0" value="0.0940" step="0.001" min="0"></div>
+        <div class="field"><label>Высота образца h₀, мм</label><input type="number" id="th0" value="25" step="0.1" min="1"></div>
+        <div class="field"><label>Разброс точек, % от ε</label><input type="number" id="tscatter" value="8" step="1" min="1" max="25"></div>
+      </div>
+      <p class="hint">Точки генерируются с разбросом, однако МНК по ним гарантированно возвращает ровно заданные A₀ и b.</p>
+    </div>
+
+    <div class="panel">
+      <div class="ph">Ступени нагружения</div>
+      <table class="steps-table">
+        <thead>
+          <tr>
+            <th style="width:36px">№</th>
+            <th style="width:150px">Тип</th>
+            <th>σ, МПа</th>
+            <th style="width:36px"></th>
+          </tr>
+        </thead>
+        <tbody id="tstepsBody"></tbody>
+      </table>
+      <div class="btn-row">
+        <button class="btn-add" onclick="taddStep()">+ Ступень</button>
+        <button class="btn-calc" onclick="tcalculate()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          Рассчитать
+        </button>
+        <button class="btn-re" id="treBtn" onclick="trescatter()">↻ Другой разброс</button>
+      </div>
+    </div>
+
+    <div id="thawResults">
+      <div class="results-grid">
+        <div class="panel" style="margin-bottom:0">
+          <div class="ph">Уравнение линии тренда</div>
+          <div class="trend-eq" id="ttrendEq"></div>
+          <div class="trend-sub">
+            <div><strong style="color:var(--paper)">b</strong> — коэффициент сжимаемости при оттаивании</div>
+            <div><strong style="color:var(--paper)">A₀</strong> — коэффициент оттаивания</div>
+          </div>
+        </div>
+        <div class="panel" style="margin-bottom:0">
+          <div class="ph">Параметры</div>
+          <div class="metrics-grid" id="tsummaryMetrics"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="ph">График ε = f(σ) — по ГОСТ</div>
+        <div class="legend-box" id="tlegendBox"></div>
+        <div class="chart-wrap-canvas">
+          <canvas id="tepsilonChart" height="300"></canvas>
+        </div>
+      </div>
+
+      <div class="rc anim on">
+        <div class="rh">
+          <span class="rtit">Таблица результатов</span>
+          <button class="ctsv" onclick="tcpTSV()">Копировать TSV</button>
+        </div>
+        <div class="tsc">
+          <table class="rt">
+            <thead>
+              <tr>
+                <th>№</th>
+                <th>Тип</th>
+                <th class="cc" onclick="tcpCol(0)">σ, МПа<span class="ch">↓ копировать</span></th>
+                <th class="cc" onclick="tcpCol(1)">ε, д.е.<span class="ch">↓ копировать</span></th>
+                <th class="cc" onclick="tcpCol(2)">Δh, мм<span class="ch">↓ копировать</span></th>
+              </tr>
+            </thead>
+            <tbody id="tresultsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-tab-thaw -->
+
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- ГЛАВНАЯ ВКЛАДКА 3 — СТУПЕНИ ВЕРТИКАЛЬНОЙ НАГРУЗКИ  -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="main-tab" id="main-tab-steps">
+
+    <div class="substep-header">
+      <p>Выберите режим ниже и введите данные для расчёта ступеней вертикальной нагрузки.</p>
+    </div>
+
+    <div class="substep-buttons">
+      <button class="action-btn" onclick="toggleTab('frozen')">Мерзлый грунт</button>
+      <button class="action-btn" onclick="toggleTab('thaw')">Оттаивание</button>
+    </div>
+
+    <!-- Вкладка Мерзлый грунт -->
+    <div id="test-container-frozen" class="test-container">
+      <div class="tests-container">
+        <div class="test-flex">
+          <div class="calc-wrapper">
+            <div class="calculation-container">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Плотность грунта, г/см³</label>
+                  <input type="number" id="density" step="0.01" min="0.1" onkeydown="handleEnter(event, this, 'frozen')">
+                </div>
+                <div class="form-group">
+                  <label>Глубина залегания, м</label>
+                  <input type="number" id="depth" step="0.1" min="0" onkeydown="handleEnter(event, this, 'frozen')">
+                </div>
+                <div class="form-group">
+                  <label>Температура испытания, °C</label>
+                  <select id="temp" onkeydown="handleEnter(event, this, 'frozen')">
+                    <option value="-0.3">-0.3</option>
+                    <option value="-0.5">-0.5</option>
+                    <option value="-1">-1</option>
+                    <option value="-1.5">-1.5</option>
+                    <option value="-2">-2</option>
+                    <option value="-2.5">-2.5</option>
+                    <option value="-3">-3</option>
+                    <option value="-3.5">-3.5</option>
+                    <option value="-4">-4</option>
+                    <option value="-6">-6</option>
+                    <option value="-8">-8</option>
+                    <option value="-10">-10</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Тип грунта</label>
+                  <select id="soilType" onkeydown="handleEnter(event, this, 'frozen')">
+                    <option value="пески средней">Пески средней крупности</option>
+                    <option value="пески мелкие">Пески мелкие и пылеватые</option>
+                    <option value="супеси">Супеси</option>
+                    <option value="суглинки и глины">Суглинки и глины</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Льдистость, д.е.</label>
+                  <input type="number" id="iceContent" step="0.01" min="0" max="1" onkeydown="handleEnter(event, this, 'frozen')">
+                </div>
+              </div>
+
+              <div class="error" id="errorMsgFrozen"></div>
+
+              <div class="result-block" id="resultBlockFrozen" style="display:none;">
+                <div class="result-title">Ступени нагрузки, МПа</div>
+                <div class="step-grid" id="stepsContainerFrozen"></div>
+              </div>
+
+              <div class="action-row">
+                <button class="btn-calc-green" onclick="calculateFrozen()">Рассчитать</button>
+                <button class="btn-clear" onclick="clearFrozen()">Очистить</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Вкладка Оттаивание -->
+    <div id="test-container-thaw" class="test-container">
+      <div class="tests-container">
+        <div class="test-flex">
+          <div class="calc-wrapper">
+            <div class="calculation-container">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Тип грунта</label>
+                  <select id="thawSoilType" onkeydown="handleEnter(event, this, 'thaw')">
+                    <option value="глинистый">Глинистый</option>
+                    <option value="песчаный">Песчаный</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>1-я ступень (из мерзлого испытания), МПа</label>
+                  <input type="number" id="thawP1" step="0.001" min="0" onkeydown="handleEnter(event, this, 'thaw')">
+                </div>
+              </div>
+
+              <div class="error" id="errorMsgThaw"></div>
+
+              <div class="result-block" id="resultBlockThaw" style="display:none;">
+                <div class="result-title">Ступени нагрузки при оттаивании, МПа</div>
+                <div class="step-grid" id="stepsContainerThaw"></div>
+              </div>
+
+              <div class="action-row">
+                <button class="btn-calc-green" onclick="calculateThaw()">Рассчитать</button>
+                <button class="btn-clear" onclick="clearThaw()">Очистить</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-tab-steps -->
+
 </div>
+
+<footer>
+  © 2026 Geocalculator. Инженерно-геологические расчеты онлайн
+</footer>
+
+<div id="toast" class="copy-notification"></div>
 
 <script>
-// Переключение вкладок
-function toggleTab(tab) {
-    document.querySelectorAll('.action-btn').forEach(btn => {
-        btn.classList.remove('active');
-        btn.classList.add('inactive');
-    });
-    event.target.classList.remove('inactive');
-    event.target.classList.add('active');
+// ═══════════════════════════════════════════════════════
+// ГЛАВНОЕ ПЕРЕКЛЮЧЕНИЕ ВЕРХНЕУРОВНЕВЫХ ВКЛАДОК
+// ═══════════════════════════════════════════════════════
+function switchMainTab(name) {
+  ['frozen','thaw','steps'].forEach(id => {
+    document.getElementById('btn-main-' + id).classList.remove('initial', 'active');
+    document.getElementById('main-tab-' + id).classList.remove('active');
+  });
+  document.getElementById('btn-main-' + name).classList.add('active');
+  document.getElementById('main-tab-' + name).classList.add('active');
+}
 
-    document.querySelectorAll('.test-container').forEach(cont => cont.classList.remove('active'));
-    document.getElementById(`test-container-${tab}`).classList.add('active');
+// ═══════════════════════════════════════════════════════
+// SHARED TOAST
+// ═══════════════════════════════════════════════════════
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function toComma(v) { return String(v).replace('.', ','); }
+function nc(v, d) { return v == null ? '' : toComma(v.toFixed(d)); }
+
+
+// ╔═══════════════════════════════════════════════════════╗
+// ║  МЕРЗЛЫЙ ГРУНТ (компрессионное испытание)             ║
+// ╚═══════════════════════════════════════════════════════╝
+let fseed = Math.floor(Math.random() * 1e9);
+
+function freseed() {
+  fseed = Math.floor(Math.random() * 1e9);
+  document.getElementById('frozenSeedDisplay').textContent = 'seed: ' + fseed;
+}
+freseed();
+document.getElementById('frozenNoiseChip').style.display = '';
+
+function mulberry32(s) {
+  return function() {
+    s |= 0; s = s + 0x6D2B79F5 | 0;
+    let t = Math.imul(s ^ s >>> 15, 1 | s);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function frandn(rng) {
+  let u, v;
+  do { u = rng(); } while (u === 0);
+  v = rng();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+let frows = [];
+function faddRow(v = 0.05) { frows.push({ sigma: v }); frenderSteps(); }
+function fdelRow(i) { frows.splice(i, 1); frenderSteps(); }
+function frenderSteps() {
+  const tb = document.getElementById('fsteps-body');
+  tb.innerHTML = frows.map((r, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td><input type="number" value="${r.sigma}" step="0.001" min="0.001"
+             onchange="frows[${i}].sigma = parseFloat(this.value)||0"></td>
+      <td><button class="step-del" onclick="fdelRow(${i})" title="Удалить">×</button></td>
+    </tr>`).join('');
+}
+
+const FPROFILE = { mvNoise: 0.04, epsNoise: 0.0018, stickSlip: 0.25, slipMag: 0.07 };
+let fcalcData = [];
+
+function fcalc() {
+  const h0 = parseFloat(document.getElementById('fh0').value) || 25;
+  const avg_mv = parseFloat(document.getElementById('favg_mv').value) || 0.073;
+  if (frows.length < 2) { toast('⚠ Нужно минимум 2 ступени'); return; }
+  if (document.getElementById('frandomSeed').checked) freseed();
+  const rng = mulberry32(fseed);
+
+  frows.sort((a, b) => a.sigma - b.sigma);
+  const s = frows.map(r => r.sigma);
+  const n = s.length;
+  const d = [s[0]];
+  for (let i = 1; i < n; i++) d.push(s[i] - s[i - 1]);
+
+  let factors = [0.7];
+  for (let i = 1; i < n; i++) {
+    if (i === 1) factors.push(2.2);
+    else if (i === 2) factors.push(1.6);
+    else factors.push(Math.max(0.6, 1.8 - i * 0.2));
+  }
+
+  const noisedFactors = factors.map((f, i) => {
+    let noise = 1 + FPROFILE.mvNoise * frandn(rng);
+    if (i > 0 && rng() < FPROFILE.stickSlip)
+      noise *= (rng() < 0.5 ? 1 + FPROFILE.slipMag : 1 - FPROFILE.slipMag);
+    return f * Math.max(0.5, noise);
+  });
+
+  const totalSigma = s[n - 1] - s[0];
+  let denom = 0;
+  for (let i = 1; i < d.length; i++) denom += d[i] * noisedFactors[i];
+  const scale = avg_mv * totalSigma / denom;
+  const mv = noisedFactors.map((f, i) => (i === 0 ? null : f * scale));
+
+  let eps = [], noiseLog = [], cum = 0;
+  for (let i = 0; i < n; i++) {
+    const mv_i = (i === 0) ? noisedFactors[0] * scale : mv[i];
+    cum += mv_i * d[i];
+    let epsDelta = FPROFILE.epsNoise * Math.abs(frandn(rng));
+    if (rng() < 0.15) epsDelta = -epsDelta * 0.4;
+    eps.push(Math.max(0, cum + epsDelta));
+    noiseLog.push(epsDelta);
+  }
+  const dh = eps.map(e => e * h0);
+  const E  = mv.map(v => v ? 0.8 / v : null);
+
+  fcalcData = s.map((sv, i) => ({ step: i + 1, sigma: sv, eps: eps[i], dh: dh[i], mv: mv[i], E: E[i], noise: noiseLog[i] }));
+  frenderTable(fcalcData);
+  frenderAvg(eps, totalSigma);
+  fdrawChart(s, eps, dh);
+
+  const res = document.getElementById('fresult');
+  res.classList.add('on', 'anim');
+  setTimeout(() => res.classList.remove('anim'), 400);
+}
+
+function frenderTable(data) {
+  document.getElementById('fout').innerHTML = data.map(r => {
+    const noiseStr = (r.noise >= 0 ? '+' : '') + (r.noise * 1000).toFixed(2) + '×10⁻³';
+    return `<tr>
+      <td>Ступень ${r.step}</td>
+      <td data-col="0">${r.sigma.toFixed(3)}</td>
+      <td data-col="1">${r.eps.toFixed(5)}</td>
+      <td data-col="2">${r.dh.toFixed(3)}</td>
+      <td data-col="3" class="${r.mv === null ? 'mu' : ''}">${r.mv === null ? '—' : r.mv.toFixed(4)}</td>
+      <td data-col="4" class="${r.E === null ? 'mu' : 'hi'}">${r.E === null ? '—' : r.E.toFixed(2)}</td>
+      <td class="noise-cell">${noiseStr}</td>
+    </tr>`;
+  }).join('');
+}
+
+function frenderAvg(eps, totalSigma) {
+  const n = eps.length;
+  const real_mv = (eps[n-1] - eps[0]) / totalSigma;
+  const real_E = 0.8 / real_mv;
+  document.getElementById('favg').innerHTML = `
+    <span>Средний mv = <b>${real_mv.toFixed(4)}</b> МПа⁻¹</span>
+    <span>Средний E = <b>${real_E.toFixed(2)}</b> МПа</span>
+    <span>Мерзлый грунт</span>
+    <span class="seed-note">seed: ${fseed}</span>`;
+}
+
+function fdrawChart(sigma, eps, dh) {
+  const W = 720, H = 300;
+  const M = { l: 68, r: 24, t: 20, b: 48 };
+  const pw = W - M.l - M.r, ph = H - M.t - M.b;
+  const maxS = Math.max(...sigma) * 1.1;
+  const maxE = Math.max(...eps) * 1.18;
+  const sx = v => M.l + v / maxS * pw;
+  const sy = v => M.t + ph - v / maxE * ph;
+
+  function crPath(pts) {
+    if (pts.length < 2) return '';
+    let d = `M ${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[Math.max(0, i-1)], p1 = pts[i], p2 = pts[i+1], p3 = pts[Math.min(pts.length-1, i+2)];
+      const cp1x = p1[0] + (p2[0]-p0[0])/6, cp1y = p1[1] + (p2[1]-p0[1])/6;
+      const cp2x = p2[0] - (p3[0]-p1[0])/6, cp2y = p2[1] - (p3[1]-p1[1])/6;
+      d += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+    }
+    return d;
+  }
+
+  const pts = sigma.map((s, i) => [sx(s), sy(eps[i])]);
+  const firstX = pts[0][0].toFixed(1), lastX = pts[pts.length-1][0].toFixed(1), baseY = (M.t + ph).toFixed(1);
+  const fillD = crPath(pts) + ` L ${lastX},${baseY} L ${firstX},${baseY} Z`;
+
+  let gridY = '', gridX = '';
+  for (let i = 0; i <= 5; i++) {
+    const yv = maxE * i / 5, yp = sy(yv).toFixed(1);
+    gridY += `<line x1="${M.l}" y1="${yp}" x2="${M.l+pw}" y2="${yp}" stroke="#D9C9A3" stroke-width="1" stroke-dasharray="4,4"/>`;
+    gridY += `<text x="${M.l-6}" y="${parseFloat(yp)+4}" text-anchor="end" font-size="10" font-family="JetBrains Mono,monospace" fill="#7A6A52">${yv.toFixed(4)}</text>`;
+  }
+  sigma.forEach(sv => {
+    const xp = sx(sv).toFixed(1);
+    gridX += `<line x1="${xp}" y1="${M.t}" x2="${xp}" y2="${M.t+ph}" stroke="#D9C9A3" stroke-width="1" stroke-dasharray="4,4"/>`;
+    gridX += `<text x="${xp}" y="${M.t+ph+16}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="#7A6A52">${sv.toFixed(2)}</text>`;
+  });
+
+  document.getElementById('chartFrozen').innerHTML = `
+    <rect x="${M.l}" y="${M.t}" width="${pw}" height="${ph}" fill="#F2E9D8" rx="6" stroke="#D9C9A3" stroke-width="1"/>
+    ${gridY}${gridX}
+    <path d="${fillD}" fill="rgba(176,107,52,0.08)"/>
+    <path d="${crPath(pts)}" fill="none" stroke="#B06B34" stroke-width="2.2" stroke-linejoin="round" opacity="0.9"/>
+    ${pts.map(([x,y],i) => `
+      <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="white" stroke="#B06B34" stroke-width="2">
+        <title>σ = ${sigma[i].toFixed(3)} МПа\nε = ${eps[i].toFixed(5)} д.е.\nΔh = ${dh[i].toFixed(3)} мм</title>
+      </circle>`).join('')}
+    <line x1="${M.l}" y1="${M.t}" x2="${M.l}" y2="${M.t+ph}" stroke="#3B2E20" stroke-width="1.5"/>
+    <line x1="${M.l}" y1="${M.t+ph}" x2="${M.l+pw}" y2="${M.t+ph}" stroke="#3B2E20" stroke-width="1.5"/>
+    <text x="${M.l+pw/2}" y="${H-4}" text-anchor="middle" font-size="12" font-family="Golos Text,sans-serif" fill="#7A6A52">σ, МПа</text>
+    <text transform="rotate(-90)" x="${-(M.t+ph/2)}" y="14" text-anchor="middle" font-size="12" font-family="Golos Text,sans-serif" fill="#7A6A52">ε, д.е.</text>`;
+}
+
+function fcpCol(colIdx) {
+  const cells = [...document.querySelectorAll(`#fresult td[data-col="${colIdx}"]`)]
+    .map(td => td.textContent.trim()).filter(v => v !== '—').map(v => v.replace('.', ','));
+  navigator.clipboard.writeText(cells.join('\n')).then(() => toast('✓ Столбец скопирован'));
+}
+function fcpTSV() {
+  if (!fcalcData.length) return;
+  const hdr = ['Ступень', 'σ МПа', 'ε д.е.', 'Δh мм', 'mv МПа-1', 'E МПа', 'δ-шум'];
+  const body = fcalcData.map(r => [
+    `Ступень ${r.step}`, nc(r.sigma,3), nc(r.eps,5), nc(r.dh,3),
+    r.mv===null?'':nc(r.mv,4), r.E===null?'':nc(r.E,2),
+    toComma((r.noise*1000).toFixed(2))+'e-3'
+  ].join('\t'));
+  navigator.clipboard.writeText([hdr.join('\t'), ...body].join('\n')).then(() => toast('✓ Таблица (TSV) скопирована'));
+}
+
+// init frozen
+[0.05, 0.12, 0.19, 0.26, 0.33, 0.40].forEach(v => faddRow(v));
+frenderSteps();
+
+
+// ╔═══════════════════════════════════════════════════════╗
+// ║  ОТТАИВАНИЕ (компрессионное испытание)                ║
+// ╚═══════════════════════════════════════════════════════╝
+let tsteps = [
+  { sigma: 0.049, type: 'frozen' },
+  { sigma: 0.049, type: 'thaw'   },
+  { sigma: 0.099, type: 'load'   },
+  { sigma: 0.149, type: 'load'   },
+  { sigma: 0.200, type: 'load'   },
+  { sigma: 0.250, type: 'load'   },
+  { sigma: 0.300, type: 'load'   },
+];
+let tchartInst = null;
+let tlastRows  = [];
+
+function tbadge(type) {
+  if (type === 'frozen') return '<span class="badge badge-frozen">Мерзлый</span>';
+  if (type === 'thaw')   return '<span class="badge badge-thaw">Оттаивание</span>';
+  return '<span class="badge badge-load">Нагрузка</span>';
+}
+
+function trenderSteps() {
+  const tb = document.getElementById('tstepsBody');
+  tb.innerHTML = tsteps.map((s, i) => {
+    const isFrozen = i === 0, isThaw = i === 1;
+    const sigDisabled = isThaw ? 'disabled' : '';
+    const delStyle = i < 2 ? 'style="opacity:.25;pointer-events:none"' : '';
+    const rowClass = isFrozen ? 'row-frozen' : isThaw ? 'row-thaw' : '';
+    const onChange = isFrozen
+      ? `tsteps[0].sigma=parseFloat(this.value)||0;tsteps[1].sigma=tsteps[0].sigma;trenderSteps();`
+      : `tsteps[${i}].sigma=parseFloat(this.value)||0;`;
+    return `<tr class="${rowClass}">
+      <td style="color:var(--paper-dim);font-family:var(--font-mono);font-size:11px">${i+1}</td>
+      <td>${tbadge(s.type)}</td>
+      <td><input type="number" value="${s.sigma}" step="0.001" min="0" ${sigDisabled} onchange="${onChange}"></td>
+      <td><button class="step-del" ${delStyle} onclick="tdelStep(${i})" title="Удалить">×</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function taddStep() {
+  const last = tsteps[tsteps.length - 1].sigma;
+  tsteps.push({ sigma: parseFloat((last + 0.05).toFixed(3)), type: 'load' });
+  trenderSteps();
+}
+function tdelStep(i) {
+  if (i < 2) return;
+  tsteps.splice(i, 1);
+  trenderSteps();
+}
+
+function trandn() {
+  let u = 0, v = 0;
+  while (u === 0) u = Math.random();
+  while (v === 0) v = Math.random();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+function tgenerateExactRows(A0, b, h0, scatterPct) {
+  const trendSteps = tsteps.slice(1);
+  const n = trendSteps.length;
+  const xs = trendSteps.map(s => s.sigma);
+  const ys = trendSteps.map(s => A0 + b * s.sigma);
+  const noise = scatterPct / 100;
+  let raw = ys.map(y => y * noise * trandn() * 0.5);
+  const mR = raw.reduce((a, v) => a + v, 0) / n;
+  raw = raw.map(v => v - mR);
+  const xm = xs.reduce((a, v) => a + v, 0) / n;
+  const xc = xs.map(x => x - xm);
+  const drx = raw.reduce((a, v, i) => a + v * xc[i], 0);
+  const dxx = xc.reduce((a, v) => a + v * v, 0);
+  const sc = dxx > 0 ? drx / dxx : 0;
+  raw = raw.map((v, i) => v - sc * xc[i]);
+  const trendRows = trendSteps.map((s, i) => ({ sigma: s.sigma, eps: Math.max(0.00001, ys[i] + raw[i]), type: s.type, idx: i + 1 }));
+  const frozenRow = { sigma: tsteps[0].sigma, eps: A0, type: 'frozen', idx: 0 };
+  const allRows = [frozenRow, ...trendRows];
+  return allRows.map(r => ({ ...r, dh: r.eps * h0 }));
+}
+
+function tgetParams() {
+  return {
+    A0: parseFloat(document.getElementById('tA0').value) || 0.0036,
+    b:  parseFloat(document.getElementById('tb0').value) || 0.094,
+    h0: parseFloat(document.getElementById('th0').value) || 25,
+    sc: parseFloat(document.getElementById('tscatter').value) || 8
+  };
+}
+
+function tcalculate() {
+  const { A0, b, h0, sc } = tgetParams();
+  tlastRows = tgenerateExactRows(A0, b, h0, sc);
+  trenderResults(tlastRows, A0, b);
+  document.getElementById('treBtn').style.display = '';
+}
+function trescatter() {
+  const { A0, b, h0, sc } = tgetParams();
+  tlastRows = tgenerateExactRows(A0, b, h0, sc);
+  trenderResults(tlastRows, A0, b);
+}
+
+function trenderResults(rows, A0, b) {
+  const h0 = parseFloat(document.getElementById('th0').value) || 25;
+  const E  = b > 0 ? (0.8 / b).toFixed(2) : '—';
+  document.getElementById('ttrendEq').textContent = `ε = ${b.toFixed(4)} · σ + ${A0.toFixed(4)}`;
+  document.getElementById('tsummaryMetrics').innerHTML = `
+    <div class="metric"><div class="metric-label">Коэф. оттаивания A₀</div><div class="metric-value green">${A0.toFixed(4)}</div></div>
+    <div class="metric"><div class="metric-label">Коэф. сжимаемости b, МПа⁻¹</div><div class="metric-value">${b.toFixed(4)}</div></div>
+    <div class="metric"><div class="metric-label">Модуль деформации E, МПа</div><div class="metric-value">${E}</div></div>
+    <div class="metric"><div class="metric-label">Δh при оттаивании A₀·h₀, мм</div><div class="metric-value">${(A0*h0).toFixed(3)}</div></div>`;
+
+  document.getElementById('tresultsBody').innerHTML = rows.map(r => {
+    const rowClass = r.type==='frozen' ? 'row-frozen' : r.type==='thaw' ? 'row-thaw' : '';
+    return `<tr class="${rowClass}">
+      <td>${r.idx + 1}</td>
+      <td>${tbadge(r.type)}</td>
+      <td data-col="0">${r.sigma.toFixed(3)}</td>
+      <td data-col="1" class="hi">${r.eps.toFixed(5)}</td>
+      <td data-col="2">${r.dh.toFixed(3)}</td>
+    </tr>`;
+  }).join('');
+
+  tdrawChart(rows, A0, b);
+  const res = document.getElementById('thawResults');
+  res.style.display = 'block';
+  res.classList.add('anim');
+  setTimeout(() => res.classList.remove('anim'), 400);
+}
+
+function tdrawChart(rows, A0, b) {
+  const frozenPts = rows.filter(r => r.type==='frozen').map(r => ({ x: r.sigma, y: +r.eps.toFixed(6) }));
+  const thawPts   = rows.filter(r => r.type==='thaw').map(r =>   ({ x: r.sigma, y: +r.eps.toFixed(6) }));
+  const loadPts   = rows.filter(r => r.type==='load').map(r =>   ({ x: r.sigma, y: +r.eps.toFixed(6) }));
+  const maxS = Math.max(...rows.map(r => r.sigma));
+  const trendPts = [{ x: 0, y: +A0.toFixed(6) }, { x: +maxS.toFixed(3), y: +(A0+b*maxS).toFixed(6) }];
+  const allE = rows.map(r => r.eps);
+  const minE = Math.min(...allE), maxE = Math.max(...allE);
+  const padE = (maxE - minE) * 0.18;
+  if (tchartInst) tchartInst.destroy();
+  tchartInst = new Chart(document.getElementById('tepsilonChart'), {
+    type: 'scatter',
+    data: {
+      datasets: [
+        { label: 'Мерзлый (ст. 1)',     data: frozenPts, backgroundColor: '#B06B34', pointRadius: 8, pointStyle: 'circle',   showLine: false },
+        { label: 'Оттаивание (ст. 2)',   data: thawPts,   backgroundColor: '#7A9B6E', pointRadius: 8, pointStyle: 'triangle', showLine: false },
+        { label: 'Нагрузка оттаявшего', data: loadPts,   backgroundColor: '#8A7355', pointRadius: 7, pointStyle: 'rect',     showLine: false },
+        { label: `Тренд: ε = ${b.toFixed(4)}·σ + ${A0.toFixed(4)}`,
+          data: trendPts, type: 'line', borderColor: '#A6462E', borderWidth: 2,
+          borderDash: [7,4], pointRadius: 0, fill: false, tension: 0 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => `σ = ${ctx.parsed.x.toFixed(3)} МПа   ε = ${ctx.parsed.y.toFixed(5)}` } }
+      },
+      scales: {
+        x: { type: 'linear', min: 0,
+          title: { display: true, text: 'Вертикальное давление σ, МПа', color: '#7A6A52', font: { size: 12, family: "'Golos Text'" } },
+          grid: { color: 'rgba(59,46,32,0.05)' },
+          ticks: { color: '#7A6A52', font: { size: 11, family: "'JetBrains Mono'" } } },
+        y: {
+          min: Math.max(0, +(minE-padE).toFixed(5)),
+          max: +(maxE+padE).toFixed(5),
+          title: { display: true, text: 'Относительная деформация ε, д.е.', color: '#7A6A52', font: { size: 12, family: "'Golos Text'" } },
+          grid: { color: 'rgba(59,46,32,0.05)' },
+          ticks: { color: '#7A6A52', font: { size: 11, family: "'JetBrains Mono'" } } }
+      }
+    }
+  });
+
+  document.getElementById('tlegendBox').innerHTML = [
+    { color: '#B06B34', shape: 'circle',   label: 'Мерзлый (ст. 1)' },
+    { color: '#7A9B6E', shape: 'triangle', label: 'Оттаивание (ст. 2)' },
+    { color: '#8A7355', shape: 'square',   label: 'Нагрузка оттаявшего' },
+    { color: '#A6462E', shape: 'dash',     label: `Тренд: ε = ${b.toFixed(4)}·σ + ${A0.toFixed(4)}` },
+  ].map(item => {
+    let icon;
+    if (item.shape==='dash')     icon = `<span class="legend-dash" style="border-color:${item.color}"></span>`;
+    else if (item.shape==='circle')   icon = `<span class="legend-dot" style="background:${item.color}"></span>`;
+    else if (item.shape==='triangle') icon = `<span class="legend-tri" style="border-bottom-color:${item.color}"></span>`;
+    else                              icon = `<span class="legend-sq" style="background:${item.color}"></span>`;
+    return `<span class="legend-item">${icon}${item.label}</span>`;
+  }).join('');
+}
+
+function tcpCol(colIdx) {
+  const cells = [...document.querySelectorAll(`#thawResults td[data-col="${colIdx}"]`)]
+    .map(td => td.textContent.trim().replace('.', ','));
+  if (!cells.length) return;
+  navigator.clipboard.writeText(cells.join('\n')).then(() => toast('✓ Столбец скопирован'));
+}
+function tcpTSV() {
+  if (!tlastRows.length) return;
+  const hdr = ['№', 'Тип', 'σ МПа', 'ε д.е.', 'Δh мм'];
+  const typeLabel = { frozen: 'Мерзлый', thaw: 'Оттаивание', load: 'Нагрузка' };
+  const body = tlastRows.map(r => [r.idx+1, typeLabel[r.type], nc(r.sigma,3), nc(r.eps,5), nc(r.dh,3)].join('\t'));
+  navigator.clipboard.writeText([hdr.join('\t'), ...body].join('\n')).then(() => toast('✓ Таблица (TSV) скопирована'));
+}
+
+// init thaw
+trenderSteps();
+
+
+// ╔═══════════════════════════════════════════════════════╗
+// ║  СТУПЕНИ ВЕРТИКАЛЬНОЙ НАГРУЗКИ (плотность/оттаивание) ║
+// ╚═══════════════════════════════════════════════════════╝
+
+// Переключение под-вкладок (мерзлый грунт / оттаивание) внутри 3-й вкладки
+function toggleTab(tab) {
+  document.querySelectorAll('.substep-buttons .action-btn').forEach(btn => {
+    btn.classList.remove('active');
+    btn.classList.add('inactive');
+  });
+  event.target.classList.remove('inactive');
+  event.target.classList.add('active');
+
+  document.querySelectorAll('#main-tab-steps .test-container').forEach(cont => cont.classList.remove('active'));
+  document.getElementById(`test-container-${tab}`).classList.add('active');
 }
 
 // Обработка Enter — переход фокуса или расчёт
 function handleEnter(e, element, tab) {
-    if (e.key === 'Enter') {
-        e.preventDefault();
+  if (e.key === 'Enter') {
+    e.preventDefault();
 
-        const form = element.closest('.form-grid');
-        const inputs = Array.from(form.querySelectorAll('input, select'));
-        const currentIndex = inputs.indexOf(element);
+    const form = element.closest('.form-grid');
+    const inputs = Array.from(form.querySelectorAll('input, select'));
+    const currentIndex = inputs.indexOf(element);
 
-        // Если это последнее поле — запускаем расчёт
-        if (currentIndex === inputs.length - 1) {
-            if (tab === 'frozen') {
-                calculateFrozen();
-            } else if (tab === 'thaw') {
-                calculateThaw();
-            }
-        } else {
-            // Переход к следующему полю
-            inputs[currentIndex + 1].focus();
-        }
+    // Если это последнее поле — запускаем расчёт
+    if (currentIndex === inputs.length - 1) {
+      if (tab === 'frozen') {
+        calculateFrozen();
+      } else if (tab === 'thaw') {
+        calculateThaw();
+      }
+    } else {
+      // Переход к следующему полю
+      inputs[currentIndex + 1].focus();
     }
+  }
 }
 
 // Мерзлый грунт (без изменений в логике)
 function clearFrozen() {
-    document.getElementById('density').value = '';
-    document.getElementById('depth').value = '';
-    document.getElementById('iceContent').value = '';
-    document.getElementById('temp').value = '';
-    document.getElementById('soilType').value = '';
-    document.getElementById('resultBlockFrozen').style.display = 'none';
-    document.getElementById('errorMsgFrozen').textContent = '';
+  document.getElementById('density').value = '';
+  document.getElementById('depth').value = '';
+  document.getElementById('iceContent').value = '';
+  document.getElementById('temp').value = '';
+  document.getElementById('soilType').value = '';
+  document.getElementById('resultBlockFrozen').style.display = 'none';
+  document.getElementById('errorMsgFrozen').textContent = '';
 }
 
 function calculateFrozen() {
-    const density = parseFloat(document.getElementById('density').value);
-    const depth   = parseFloat(document.getElementById('depth').value);
-    const temp    = document.getElementById('temp').value;
-    const ice     = parseFloat(document.getElementById('iceContent').value);
-    const soil    = document.getElementById('soilType').value;
+  const density = parseFloat(document.getElementById('density').value);
+  const depth   = parseFloat(document.getElementById('depth').value);
+  const temp    = document.getElementById('temp').value;
+  const ice     = parseFloat(document.getElementById('iceContent').value);
+  const soil    = document.getElementById('soilType').value;
 
-    const err = document.getElementById('errorMsgFrozen');
-    err.textContent = '';
+  const err = document.getElementById('errorMsgFrozen');
+  err.textContent = '';
 
-    if (isNaN(density) || isNaN(depth) || isNaN(ice) || !temp || !soil) {
-        err.textContent = 'Заполните все поля';
-        return;
-    }
+  if (isNaN(density) || isNaN(depth) || isNaN(ice) || !temp || !soil) {
+    err.textContent = 'Заполните все поля';
+    return;
+  }
 
-    let p1_raw = (density * depth) / 100;
-    let p1 = p1_raw;
-    const isSandy = soil.includes('пески средней') || soil.includes('пески мелкие');
+  let p1_raw = (density * depth) / 100;
+  let p1 = p1_raw;
+  const isSandy = soil.includes('пески средней') || soil.includes('пески мелкие');
 
-    if (isSandy) {
-        if (p1_raw > 0.100) p1 = 0.100;
-    } else {
-        if (p1_raw > 0.050) p1 = 0.050;
-    }
+  if (isSandy) {
+    if (p1_raw > 0.100) p1 = 0.100;
+  } else {
+    if (p1_raw > 0.050) p1 = 0.050;
+  }
 
-    const table = {
-        '<0.2': {
-            'пески средней':    {'-0.3':0.55,'-0.5':0.95,'-1':1.25,'-1.5':1.45,'-2':1.6,'-2.5':1.8,'-3':1.95,'-3.5':2,'-4':2.2,'-6':2.6,'-8':2.95,'-10':3.3},
-            'пески мелкие':     {'-0.3':0.45,'-0.5':0.7,'-1':0.9,'-1.5':1.1,'-2':1.3,'-2.5':1.4,'-3':1.6,'-3.5':1.7,'-4':1.8,'-6':2.2,'-8':2.55,'-10':2.86},
-            'супеси':           {'-0.3':0.3,'-0.5':0.5,'-1':0.7,'-1.5':0.8,'-2':1.05,'-2.5':1.15,'-3':1.3,'-3.5':1.4,'-4':1.5,'-6':1.9,'-8':2.25,'-10':2.5},
-            'суглинки и глины': {'-0.3':0.25,'-0.5':0.45,'-1':0.55,'-1.5':0.65,'-2':0.8,'-2.5':0.9,'-3':1,'-3.5':1.1,'-4':1.2,'-6':1.55,'-8':1.9,'-10':2.2}
-        },
-        '>=0.2': { any: {'-0.3':0.2,'-0.5':0.3,'-1':0.4,'-1.5':0.5,'-2':0.6,'-2.5':0.7,'-3':0.75,'-3.5':0.85,'-4':0.95,'-6':1.25,'-8':1.55,'-10':1.75} }
-    };
+  const table = {
+    '<0.2': {
+      'пески средней':    {'-0.3':0.55,'-0.5':0.95,'-1':1.25,'-1.5':1.45,'-2':1.6,'-2.5':1.8,'-3':1.95,'-3.5':2,'-4':2.2,'-6':2.6,'-8':2.95,'-10':3.3},
+      'пески мелкие':     {'-0.3':0.45,'-0.5':0.7,'-1':0.9,'-1.5':1.1,'-2':1.3,'-2.5':1.4,'-3':1.6,'-3.5':1.7,'-4':1.8,'-6':2.2,'-8':2.55,'-10':2.86},
+      'супеси':           {'-0.3':0.3,'-0.5':0.5,'-1':0.7,'-1.5':0.8,'-2':1.05,'-2.5':1.15,'-3':1.3,'-3.5':1.4,'-4':1.5,'-6':1.9,'-8':2.25,'-10':2.5},
+      'суглинки и глины': {'-0.3':0.25,'-0.5':0.45,'-1':0.55,'-1.5':0.65,'-2':0.8,'-2.5':0.9,'-3':1,'-3.5':1.1,'-4':1.2,'-6':1.55,'-8':1.9,'-10':2.2}
+    },
+    '>=0.2': { any: {'-0.3':0.2,'-0.5':0.3,'-1':0.4,'-1.5':0.5,'-2':0.6,'-2.5':0.7,'-3':0.75,'-3.5':0.85,'-4':0.95,'-6':1.25,'-8':1.55,'-10':1.75} }
+  };
 
-    let k6 = 0.4;
-    const key = ice < 0.2 ? '<0.2' : '>=0.2';
-    const cat = key === '<0.2' ? soil : 'any';
-    k6 = table[key]?.[cat]?.[temp] ?? table[key]?.any?.[temp] ?? 0.4;
-    const p6 = k6;
+  let k6 = 0.4;
+  const key = ice < 0.2 ? '<0.2' : '>=0.2';
+  const cat = key === '<0.2' ? soil : 'any';
+  k6 = table[key]?.[cat]?.[temp] ?? table[key]?.any?.[temp] ?? 0.4;
+  const p6 = k6;
 
-    const steps = [];
-    for (let i = 1; i <= 6; i++) {
-        if (i === 1) steps.push(p1);
-        else if (i === 6) steps.push(p6);
-        else steps.push(p1 + (p6 - p1) * (i-1)/5);
-    }
+  const steps = [];
+  for (let i = 1; i <= 6; i++) {
+    if (i === 1) steps.push(p1);
+    else if (i === 6) steps.push(p6);
+    else steps.push(p1 + (p6 - p1) * (i-1)/5);
+  }
 
-    const container = document.getElementById('stepsContainerFrozen');
-    container.innerHTML = '';
-    steps.forEach((v,i) => {
-        const div = document.createElement('div');
-        div.className = 'step-item';
-        div.innerHTML = `<div class="step-num">Ступень ${i+1}</div><div class="value">${v.toFixed(3)} МПа</div>`;
-        container.appendChild(div);
-    });
-    document.getElementById('resultBlockFrozen').style.display = 'block';
+  const container = document.getElementById('stepsContainerFrozen');
+  container.innerHTML = '';
+  steps.forEach((v,i) => {
+    const div = document.createElement('div');
+    div.className = 'step-item';
+    div.innerHTML = `<div class="step-num">Ступень ${i+1}</div><div class="value">${v.toFixed(3)} МПа</div>`;
+    container.appendChild(div);
+  });
+  document.getElementById('resultBlockFrozen').style.display = 'block';
 }
 
 // Оттаивание
 function clearThaw() {
-    document.getElementById('thawP1').value = '';
-    document.getElementById('errorMsgThaw').textContent = '';
-    document.getElementById('resultBlockThaw').style.display = 'none';
+  document.getElementById('thawP1').value = '';
+  document.getElementById('errorMsgThaw').textContent = '';
+  document.getElementById('resultBlockThaw').style.display = 'none';
 }
 
 function calculateThaw() {
-    const p1   = parseFloat(document.getElementById('thawP1').value);
-    const type = document.getElementById('thawSoilType').value;
+  const p1   = parseFloat(document.getElementById('thawP1').value);
+  const type = document.getElementById('thawSoilType').value;
 
-    const err = document.getElementById('errorMsgThaw');
-    err.textContent = '';
+  const err = document.getElementById('errorMsgThaw');
+  err.textContent = '';
 
-    if (isNaN(p1) || p1 < 0 || !type) {
-        err.textContent = 'Заполните оба поля корректно';
-        return;
-    }
+  if (isNaN(p1) || p1 < 0 || !type) {
+    err.textContent = 'Заполните оба поля корректно';
+    return;
+  }
 
-    const maxP1 = type === 'глинистый' ? 0.050 : 0.100;
+  const maxP1 = type === 'глинистый' ? 0.050 : 0.100;
 
-    if (p1 > maxP1) {
-        err.textContent = `Для ${type === 'глинистый' ? 'глинистого' : 'песчаного'} грунта 1-я ступень не может превышать ${maxP1.toFixed(3)} МПа`;
-        document.getElementById('resultBlockThaw').style.display = 'none';
-        return;
-    }
+  if (p1 > maxP1) {
+    err.textContent = `Для ${type === 'глинистый' ? 'глинистого' : 'песчаного'} грунта 1-я ступень не может превышать ${maxP1.toFixed(3)} МПа`;
+    document.getElementById('resultBlockThaw').style.display = 'none';
+    return;
+  }
 
-    const p6 = type === 'глинистый' ? 0.300 : 0.500;
+  const p6 = type === 'глинистый' ? 0.300 : 0.500;
 
-    const steps = [p1];
-    for (let i = 2; i <= 5; i++) {
-        const t = (i - 1) / 5;
-        const val = p1 + (p6 - p1) * t;
-        steps.push(val);
-    }
-    steps.push(p6);
+  const steps = [p1];
+  for (let i = 2; i <= 5; i++) {
+    const t = (i - 1) / 5;
+    const val = p1 + (p6 - p1) * t;
+    steps.push(val);
+  }
+  steps.push(p6);
 
-    const container = document.getElementById('stepsContainerThaw');
-    container.innerHTML = '';
-    steps.forEach((v, i) => {
-        const div = document.createElement('div');
-        div.className = 'step-item';
-        div.innerHTML = `<div class="step-num">Ступень ${i+1}</div><div class="value">${v.toFixed(3)} МПа</div>`;
-        container.appendChild(div);
-    });
-    document.getElementById('resultBlockThaw').style.display = 'block';
+  const container = document.getElementById('stepsContainerThaw');
+  container.innerHTML = '';
+  steps.forEach((v, i) => {
+    const div = document.createElement('div');
+    div.className = 'step-item';
+    div.innerHTML = `<div class="step-num">Ступень ${i+1}</div><div class="value">${v.toFixed(3)} МПа</div>`;
+    container.appendChild(div);
+  });
+  document.getElementById('resultBlockThaw').style.display = 'block';
 }
 </script>
 </body>
