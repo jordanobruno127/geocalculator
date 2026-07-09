@@ -115,7 +115,7 @@ header .lede{
   margin:18px auto 0;
 }
 
-/* ===== контентная обёртка ===== */
+/* ===== контентная обертка ===== */
 .wrap{
   max-width:1240px;
   margin:0 auto;
@@ -495,7 +495,7 @@ footer{
 
 <header>
   <h1>Компрессионные испытания мерзлых грунтов</h1>
-  <p class="lede">Выберите вкладку ниже: расчёт компрессионного сжатия мерзлого грунта, оттаивания под нагрузкой, либо ступеней вертикальной нагрузки для проведения испытания.
+  <p class="lede">Выберите вкладку ниже: расчет компрессионного сжатия мерзлого грунта, оттаивания под нагрузкой, либо ступеней вертикальной нагрузки для проведения испытания.
   <br><strong>ГОСТ 12248.6-2020</strong></br>
   </p>
 </header>
@@ -507,11 +507,11 @@ footer{
       <p>Представленные данные носят исключительно вспомогательный и информационный характер и не претендуют на достоверность. Модель представляет собой гипотетическое поведение грунта при выбранных условиях и характеристиках.</p>
     </div>
 
-  <div class="section-label">Вид расчёта</div>
+  <div class="section-label">Вид расчета</div>
   <div class="method-buttons">
     <button class="action-btn method-btn initial" id="btn-main-frozen" onclick="switchMainTab('frozen')" aria-label="Мерзлый грунт">Мерзлый грунт</button>
     <button class="action-btn method-btn initial" id="btn-main-thaw" onclick="switchMainTab('thaw')" aria-label="Оттаивание">Оттаивание</button>
-    <button class="action-btn method-btn initial" id="btn-main-steps" onclick="switchMainTab('steps')" aria-label="Расчёт ступеней вертикальной нагрузки">Расчёт ступеней вертикальной нагрузки</button>
+    <button class="action-btn method-btn initial" id="btn-main-steps" onclick="switchMainTab('steps')" aria-label="Расчет ступеней вертикальной нагрузки">Расчет ступеней вертикальной нагрузки</button>
   </div>
 
   <!-- ═══════════════════════════════════════════════════ -->
@@ -533,7 +533,7 @@ footer{
       </div>
       <div class="check-row">
         <input type="checkbox" id="frandomSeed" checked>
-        <label class="check-label" for="frandomSeed">Случайный шум при каждом расчёте</label>
+        <label class="check-label" for="frandomSeed">Случайный шум при каждом расчете</label>
         <button class="reseed-btn" onclick="freseed()">↺ новый seed</button>
       </div>
       <div class="seed-chip-row">
@@ -691,7 +691,7 @@ footer{
   <div class="main-tab" id="main-tab-steps">
 
     <div class="substep-header">
-      <p>Выберите режим ниже и введите данные для расчёта ступеней вертикальной нагрузки.</p>
+      <p>Выберите режим ниже и введите данные для расчета ступеней вертикальной нагрузки.</p>
     </div>
 
     <div class="substep-buttons">
@@ -1257,7 +1257,7 @@ function toggleTab(tab) {
   document.getElementById(`test-container-${tab}`).classList.add('active');
 }
 
-// Обработка Enter — переход фокуса или расчёт
+// Обработка Enter — переход фокуса или расчет
 function handleEnter(e, element, tab) {
   if (e.key === 'Enter') {
     e.preventDefault();
@@ -1266,7 +1266,7 @@ function handleEnter(e, element, tab) {
     const inputs = Array.from(form.querySelectorAll('input, select'));
     const currentIndex = inputs.indexOf(element);
 
-    // Если это последнее поле — запускаем расчёт
+    // Если это последнее поле — запускаем расчет
     if (currentIndex === inputs.length - 1) {
       if (tab === 'frozen') {
         calculateFrozen();
