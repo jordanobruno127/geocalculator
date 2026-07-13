@@ -124,6 +124,34 @@ header .note-link a:hover{ text-decoration:underline; }
   flex:1 0 auto;
 }
 
+  /* ===== предупреждение ===== */
+.warning{
+  margin-bottom:28px;
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  border-left:3px solid var(--warn);
+  border-radius:var(--radius);
+  padding:14px 18px;
+  max-width:900px;
+  margin-left:auto;
+  margin-right:auto;
+}
+.warning .mark{
+  display:block;
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--warn);
+  font-weight:600;
+  margin-bottom:5px;
+}
+.warning p{
+  font-size:13.5px;
+  line-height:1.55;
+  color:var(--paper-dim);
+}
+  
 .tests-container{
   display:flex;
   flex-direction:column;
@@ -541,6 +569,12 @@ footer{
 </header>
 
 <div class="wrap">
+
+   <div class="warning">
+      <span class="mark">Внимание</span>
+      <p>Представленные данные носят исключительно вспомогательный и информационный характер и не претендуют на достоверность. Модель отражает гипотетическое поведение грунта при выбранных условиях и не подлежит использованию в официальных технических отчетах. Продолжая работу с сайтом, Вы соглашаетесь с <a href="https://geocalculator.ru/terms">Условиями использования.</a></p>
+  </div>
+  
   <div id="test-container" class="test-container">
     <div class="tests-container" id="tests-container"></div>
     <div style="text-align:center; margin-top:25px;">
