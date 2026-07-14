@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игра "Колбаски" — Предел пластичности по ГОСТ 5180</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --panel-bg: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.6);
+            --text-main: #2c3e50;
+            --border-color: #dcdde1;
+        }
+
+        .geogame-body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 600px;
+            position: relative;
+            transition: background 1s ease;
+            overflow-x: hidden;
+        }
+
+        /* Анимация золотого градиента для достижения "Золотой стандарт" */
+        .geogame-body.gold-standard {
+            background: linear-gradient(-45deg, #f1c40f, #f39c12, #f5b041, #fcf3cf);
+            background-size: 400% 400%;
+            animation: goldShimmer 10s ease infinite;
+        }
+
+        @keyframes goldShimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Декоративные фоновые элементы для ачивок */
+        #bg-decorations {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .floating-item {
+            position: absolute;
+            opacity: 0.18;
+            font-size: 24px;
+            user-select: none;
+            pointer-events: none;
+            animation: floatAnimation 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatAnimation {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                transform: translateY(-40px) rotate(360deg);
+            }
+        }
+
+        .game-card {
+            background: var(--panel-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            box-sizing: border-box;
+            border: 1px solid var(--border-color);
+            position: relative;
+            z-index: 2;
+        }
+
+        .game-header {
+            text-align: center;
+            border-bottom: 2px dashed var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 12px;
+        }
+
+        .game-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin: 0 0 5px 0;
+            color: #8b5a2b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .game-subtitle {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin: 0;
+        }
+
+        /* Блок ачивок */
+        .achievements-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            margin-bottom: 12px;
+            min-height: 25px;
+        }
+
+        .ach-badge {
+            background: #e8f8f5;
+            color: #117a65;
+            border: 1px solid #a3e4d7;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            animation: scaleIn 0.3s ease-out;
+        }
+
+        /* Особая серая плашка для гуманитария */
+        .ach-badge.humanities {
+            background: #f2f4f4;
+            color: #7f8c8d;
+            border: 1px solid #d5dbdb;
+        }
+
+        @keyframes scaleIn {
+            0% { transform: scale(0.7); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            flex: 1;
+            margin: 0 5px;
+            text-align: center;
+        }
+
+        .stat-val {
+            font-weight: bold;
+            display: block;
+            font-size: 16px;
+            color: #2980b9;
+        }
+
+        #score-val {
+            color: #27ae60;
+            transition: color 0.3s;
+        }
+
+        #score-val.negative {
+            color: #c0392b;
+        }
+
+        .soil-info {
+            background: #fff8f0;
+            border-left: 4px solid #e67e22;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            min-height: 40px;
+        }
+
+        /* Лабораторное стекло для раскатывания */
+        .glass-plate {
+            position: relative;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(240,240,240,0.5) 0%, rgba(220,220,220,0.3) 100%);
+            border: 3px solid #b2bec3;
+            border-radius: 12px;
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.6);
+            cursor: ew-resize;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .glass-plate::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
+            background-size: 15px 15px;
+            pointer-events: none;
+        }
+
+        /* Инструкция поверх стекла при подготовке камня */
+        .rock-prompt {
+            position: absolute;
+            top: 15px;
+            background: rgba(44, 62, 80, 0.9);
+            color: #ffffff;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 5;
+            animation: pulse 1.5s infinite;
+            display: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.9; }
+        }
+
+        /* Жгутик грунта (колбаска) */
+        .sausage-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 80%;
+            height: 100px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .sausage-segment {
+            height: 50px; /* Исходная толщина */
+            width: 25%;
+            background-color: #8b5a2b;
+            transition: height 0.1s ease, width 0.1s ease, margin 0.3s ease, transform 0.3s ease, border-radius 0.2s ease, background-color 0.3s ease;
+            box-shadow: inset 0 4px 6px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.15);
+            border-radius: 0;
+        }
+
+        .sausage-segment:first-child {
+            border-top-left-radius: 25px;
+            border-bottom-left-radius: 25px;
+        }
+
+        .sausage-segment:last-child {
+            border-top-right-radius: 25px;
+            border-bottom-right-radius: 25px;
+        }
+
+        /* Каменистый твердый вид */
+        .sausage-container.rock-solid .sausage-segment {
+            background-color: #7f8c8d !important;
+            border-radius: 4px !important;
+            box-shadow: 3px 5px 10px rgba(0,0,0,0.4);
+            border: 1px solid #616a6b;
+        }
+
+        /* Вид порошка (измельченное состояние) */
+        .sausage-container.rock-powder .sausage-segment {
+            height: 8px !important;
+            width: 15% !important;
+            margin: 0 2px;
+            background-color: #95a5a6 !important;
+            border-radius: 50% !important;
+            box-shadow: none !important;
+            opacity: 0.8;
+            transform: translateY(15px);
+        }
+
+        /* Состояние: идеальный распад (3 мм достигнуто) */
+        .sausage-container.success .sausage-segment {
+            margin: 0 8px;
+            border-radius: 6px !important;
+            transform: rotate(2deg);
+        }
+        .sausage-container.success .sausage-segment:nth-child(even) {
+            transform: rotate(-3deg) translateY(2px);
+        }
+
+        /* Состояние: перекат (разрушение в крошку) */
+        .dust-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background-color: var(--soil-color, #8b5a2b);
+            border-radius: 50%;
+            opacity: 0.9;
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+        }
+
+        /* Угловатые осколки для скального грунта */
+        .stone-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #7f8c8d;
+            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+            opacity: 0.9;
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+        }
+
+        .game-feedback {
+            text-align: center;
+            font-size: 15px;
+            font-weight: bold;
+            margin-top: 15px;
+            min-height: 24px;
+            color: #2c3e50;
+        }
+
+        /* Панель управления */
+        .control-panel {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            align-items: center;
+        }
+
+        .btn-action {
+            display: block;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s, opacity 0.2s;
+            font-weight: bold;
+        }
+
+        .btn-action:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        #btn-next {
+            background: #27ae60;
+            color: white;
+            flex: 1.6;
+            padding: 12px;
+            font-size: 15px;
+        }
+
+        #btn-next:hover:not(:disabled) {
+            background: #219653;
+        }
+
+        /* Компактная уменьшенная кнопка смены */
+        #btn-change {
+            background: #e74c3c;
+            color: white;
+            flex: 0.7;
+            padding: 8px 10px;
+            font-size: 13px;
+        }
+
+        #btn-change:hover:not(:disabled) {
+            background: #c0392b;
+        }
+
+        .btn-action:disabled {
+            background: #bdc3c7 !important;
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.6;
+        }
+
+        .gost-tip {
+            font-size: 11px;
+            color: #95a5a6;
+            text-align: center;
+            margin-top: 15px;
+            line-height: 1.4;
+        }
+
+        /* Окно модальное (Модал) */
+        .joke-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .joke-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .joke-content {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 25px;
+            width: 85%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border: 3px solid #e67e22;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .joke-modal.active .joke-content {
+            transform: scale(1);
+        }
+
+        .joke-emoji {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .joke-title {
+            color: #e67e22;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .joke-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #34495e;
+            margin-bottom: 15px;
+        }
+
+        .joke-btn {
+            background: #e67e22;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .joke-btn:hover {
+            background: #d35400;
+        }
+    </style>
+</head>
+<body class="geogame-body">
+
+    <!-- Слой фоновых декораций для достижений -->
+    <div id="bg-decorations"></div>
+
+    <div class="game-card">
+        <div class="game-header">
+            <h1 class="game-title">Колбаски</h1>
+            <p class="game-subtitle">Определение предела пластичности (ГОСТ 5180)</p>
+        </div>
+
+        <!-- Отображение открытых ачивок -->
+        <div id="achievements" class="achievements-row"></div>
+
+        <div class="stats-row">
+            <div class="stat-box">
+                Грунт: <span id="soil-name" class="stat-val">—</span>
+            </div>
+            <div class="stat-box">
+                Толщина: <span id="thickness-val" class="stat-val">10.0 мм</span>
+            </div>
+            <div class="stat-box">
+                Счёт: <span id="score-val" class="stat-val">0</span>
+            </div>
+        </div>
+
+        <div id="soil-desc" class="soil-info">Загрузка типа грунта...</div>
+
+        <!-- Поле раскатывания -->
+        <div id="glass" class="glass-plate">
+            <div id="rock-hint" class="rock-prompt">Кликните по камню 5 раз!</div>
+            <div id="sausage" class="sausage-container">
+                <div class="sausage-segment"></div>
+                <div class="sausage-segment"></div>
+                <div class="sausage-segment"></div>
+                <div class="sausage-segment"></div>
+            </div>
+        </div>
+
+        <div id="feedback" class="game-feedback">Зажмите мышь и водите влево-вправо по стеклу!</div>
+
+        <!-- Панель управления с двумя кнопками -->
+        <div class="control-panel">
+            <button id="btn-change" class="btn-action">🔄 Сменить (-5)</button>
+            <button id="btn-next" class="btn-action" disabled>Следующий образец</button>
+        </div>
+
+        <div class="gost-tip">
+            <strong>Справка:</strong> Аккуратно раскатывайте жгут ладонью (мышкой) до 3 мм. Предел пластичности достигнут при распаде на кусочки длиной 8-10 мм. Перекат (менее 2.7 мм) снимет 1 балл!
+        </div>
+
+        <!-- Модальное окно для пасхалок и цепочек событий -->
+        <div id="joke-modal" class="joke-modal">
+            <div class="joke-content">
+                <div class="joke-emoji">⏳🌾</div>
+                <div class="joke-title">Ошибочка вышла!</div>
+                <div class="joke-text">
+                    Вы попытались раскатать в жгут <strong>Песок</strong>.
+                </div>
+                <button id="joke-btn" class="joke-btn">Продолжить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Полный классификатор глинистых грунтов по ГОСТ 25100-2020
+        const SOIL_TYPES = [
+            {
+                name: "Супесь песчанистая",
+                desc: "Ip от 1 до 7. Содержит > 50% песчаных частиц. Малопластичная, быстро теряет влагу при раскатывании.",
+                color: "#c8b18a", 
+                step: 0.58, 
+                difficulty: "Сложно"
+            },
+            {
+                name: "Супесь пылеватая",
+                desc: "Ip от 1 до 7. Повышенное содержание пылеватых частиц. Капризный грунт, легко крошится.",
+                color: "#bfb093", 
+                step: 0.52, 
+                difficulty: "Сложно"
+            },
+            {
+                name: "Суглинок легкий песчанистый",
+                desc: "Ip от 7 до 12. Умеренно пластичный образец с преобладанием крупных фракций.",
+                color: "#b59a72", 
+                step: 0.46,
+                difficulty: "Средне"
+            },
+            {
+                name: "Суглинок легкий пылеватый",
+                desc: "Ip от 7 до 12. Тонкая текстура, приятный в раскатывании, но чувствительный к пересушиванию.",
+                color: "#ad9574", 
+                step: 0.42,
+                difficulty: "Средне"
+            },
+            {
+                name: "Суглинок тяжелый песчанистый",
+                desc: "Ip от 12 до 17. Высокая пластичность, требует хороших усилий для раскатывания жгута.",
+                color: "#9c8059", 
+                step: 0.35,
+                difficulty: "Средне"
+            },
+            {
+                name: "Суглинок тяжелый пылеватый",
+                desc: "Ip от 12 до 17. Высоковязкий грунт. Формирует устойчивый жгутик, сохнет медленно.",
+                color: "#917651", 
+                step: 0.30,
+                difficulty: "Средне"
+            },
+            {
+                name: "Глина легкая песчанистая",
+                desc: "Ip от 17 до 27. Очень пластичный грунт. Потребуется много свайпов для испарения лишней воды.",
+                color: "#7d5d40", 
+                step: 0.23,
+                difficulty: "Легко"
+            },
+            {
+                name: "Глина легкая пылеватая",
+                desc: "Ip от 17 до 27. Плотная, жирная глина. Отлично держит форму, тяжело поддается утончению.",
+                color: "#75553a", 
+                step: 0.20,
+                difficulty: "Легко"
+            },
+            {
+                name: "Глина тяжелая",
+                desc: "Ip > 27. Сверхвысокая пластичность! Практически бесконечно тянущийся жгут. Катайте смелее.",
+                color: "#593c26", 
+                step: 0.15,
+                difficulty: "Легко"
+            }
+        ];
+
+        // Пасхалка 1: Песок
+        const SAND_SOIL = {
+            name: "Песок",
+            desc: "Пылеватый песчаный грунт средней крупности. Попробуем покатать?",
+            color: "#e5c158", 
+            step: 9.9, 
+            difficulty: "Невозможно"
+        };
+
+        // Пасхалка 2: Различные скальные / полускальные грунты
+        const ROCK_SOILS = [
+            {
+                name: "Аргиллит (полускальный)",
+                desc: "Спрессованная и частично сцементированная глина. Прочный монолит, но поддаётся истиранию.",
+                color: "#7f8c8d", 
+                step: 0.33,
+                difficulty: "Спец-подготовка"
+            },
+            {
+                name: "Алевролит пылеватый",
+                desc: "Сцементированная камнеподобная алевритовая порода. Имеет жесткие кристаллизационные связи.",
+                color: "#95a5a6", 
+                step: 0.38,
+                difficulty: "Спец-подготовка"
+            },
+            {
+                name: "Мергель глинистый",
+                desc: "Камнеподобная карбонатно-глинистая порода. Обладает высокой прочностью в сухом состоянии.",
+                color: "#bdc3c7", 
+                step: 0.26,
+                difficulty: "Спец-подготовка"
+            },
+            {
+                name: "Глинистый сланец",
+                desc: "Метаморфизованная плотная глина со сланцеватой текстурой. Измельчается только механически.",
+                color: "#566573", 
+                step: 0.30,
+                difficulty: "Спец-подготовка"
+            }
+        ];
+
+        let score = 0;
+        let currentSoil = null;
+        let thickness = 10.0;
+        let gameState = 'ready'; // ready, rolling, success, failed
+        let isDragging = false;
+        let lastX = 0;
+        let sandAttempt = 0; // Счётчик попыток раскатать текущий песок
+        let rockClicks = 0; // Счётчик кликов по камню для растирания
+        let rockState = 'solid'; // solid, needs_grinding, powder, plastic (для скальных)
+
+        // Достижения, когда-либо разблокированные в текущей сессии
+        let unlockedAchievements = {
+            humanitarian: false, // <= -10
+            gingerbread: false,  // >= 10
+            cat: false,          // >= 30
+            flower: false,       // >= 50
+            guru: false,         // >= 75
+            gold: false          // >= 100
+        };
+
+        const glass = document.getElementById('glass');
+        const sausage = document.getElementById('sausage');
+        const segments = document.querySelectorAll('.sausage-segment');
+        const scoreVal = document.getElementById('score-val');
+        const thicknessVal = document.getElementById('thickness-val');
+        const soilName = document.getElementById('soil-name');
+        const soilDesc = document.getElementById('soil-desc');
+        const feedback = document.getElementById('feedback');
+        const btnNext = document.getElementById('btn-next');
+        const btnChange = document.getElementById('btn-change');
+        const jokeModal = document.getElementById('joke-modal');
+        let jokeBtn = document.getElementById('joke-btn');
+        const rockHint = document.getElementById('rock-hint');
+        const achContainer = document.getElementById('achievements');
+        const bgDecorations = document.getElementById('bg-decorations');
+
+        // Вспомогательная функция для кастомных окон сообщений
+        function showGameModal(emoji, title, text, btnText, callback) {
+            const jokeEmoji = jokeModal.querySelector('.joke-emoji');
+            const jokeTitle = jokeModal.querySelector('.joke-title');
+            const jokeText = jokeModal.querySelector('.joke-text');
+            
+            jokeEmoji.textContent = emoji;
+            jokeTitle.textContent = title;
+            jokeText.innerHTML = text;
+            jokeBtn.textContent = btnText;
+            
+            jokeModal.classList.add('active');
+            
+            // Сбрасываем старые обработчики, клонируя кнопку
+            const newBtn = jokeBtn.cloneNode(true);
+            jokeBtn.parentNode.replaceChild(newBtn, jokeBtn);
+            jokeBtn = newBtn; 
+            
+            newBtn.addEventListener('click', () => {
+                jokeModal.classList.remove('active');
+                if (callback) callback();
+            });
+        }
+
+        // Функция обновления декораций и ачивок при изменении счёта
+        function updateScoreSystem() {
+            scoreVal.textContent = score;
+            
+            // Отрицательный/положительный класс для текста счёта
+            if (score < 0) {
+                scoreVal.classList.add('negative');
+            } else {
+                scoreVal.classList.remove('negative');
+            }
+
+            // Проверяем условия разблокировки. Флаг ставится в true и больше никогда не сбрасывается в false!
+            if (score <= -10) {
+                unlockedAchievements.humanitarian = true;
+            }
+            if (score >= 10) {
+                unlockedAchievements.gingerbread = true;
+            }
+            if (score >= 30) {
+                unlockedAchievements.cat = true;
+            }
+            if (score >= 50) {
+                unlockedAchievements.flower = true;
+            }
+            if (score >= 75) {
+                unlockedAchievements.guru = true;
+            }
+            if (score >= 100) {
+                unlockedAchievements.gold = true;
+            }
+
+            // Сбрасываем визуальное отображение ачивок перед перерисовкой
+            achContainer.innerHTML = '';
+            bgDecorations.innerHTML = '';
+            document.body.classList.remove('gold-standard');
+
+            let achievementsList = [];
+            let emojis = [];
+
+            // Формируем список отображаемых ачивок на основе сохранённого состояния
+            if (unlockedAchievements.humanitarian) {
+                achievementsList.push({ icon: "📚", text: "Гуманитарий", styleClass: "humanities" });
+                emojis.push("📚", "✒️", "📜", "📝", "✏️");
+            }
+            if (unlockedAchievements.gingerbread) {
+                achievementsList.push({ icon: "🍪", text: "Пряничный человек" });
+                emojis.push("🍪", "🍪", "🧸");
+            }
+            if (unlockedAchievements.cat) {
+                achievementsList.push({ icon: "🐈", text: "Персидский кот" });
+                emojis.push("🐈", "🐱", "🐾");
+            }
+            if (unlockedAchievements.flower) {
+                achievementsList.push({ icon: "🌸", text: "Цветочный рай" });
+                emojis.push("🌸", "🌹", "🌼", "🌺");
+            }
+            if (unlockedAchievements.guru) {
+                achievementsList.push({ icon: "🌭", text: "Гуру колбасок" });
+                emojis.push("🌭", "🥓", "🍖", "🥩");
+            }
+            if (unlockedAchievements.gold) {
+                achievementsList.push({ icon: "👑", text: "Золотой стандарт" });
+                emojis.push("✨", "⭐", "💫");
+                document.body.classList.add('gold-standard');
+            }
+
+            // Добавляем значки ачивок в панель
+            achievementsList.forEach(ach => {
+                const badge = document.createElement('div');
+                badge.className = 'ach-badge' + (ach.styleClass ? ' ' + ach.styleClass : '');
+                badge.innerHTML = `<span>${ach.icon}</span> <span>${ach.text}</span>`;
+                achContainer.appendChild(badge);
+            });
+
+            // Наполняем фоновое пространство плавающими эмодзи из всех открытых категорий
+            if (emojis.length > 0) {
+                const density = 25; // количество плавающих объектов на фоне
+                for (let i = 0; i < density; i++) {
+                    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                    const item = document.createElement('div');
+                    item.className = 'floating-item';
+                    item.textContent = randomEmoji;
+                    item.style.left = Math.random() * 95 + 'vw';
+                    item.style.top = Math.random() * 95 + 'vh';
+                    item.style.fontSize = (15 + Math.random() * 20) + 'px';
+                    
+                    // Разные временные параметры анимации для хаотичности
+                    const duration = 6 + Math.random() * 8;
+                    const delay = -Math.random() * 10;
+                    item.style.animationDuration = duration + 's';
+                    item.style.animationDelay = delay + 's';
+                    
+                    bgDecorations.appendChild(item);
+                }
+            }
+
+            // Блокировка кнопки смены грунта, если баллов меньше или равно 4, 
+            // либо если раунд уже завершен (победа/поражение)
+            if (gameState === 'success' || gameState === 'failed') {
+                btnChange.disabled = true;
+            } else {
+                btnChange.disabled = (score <= 4);
+            }
+        }
+
+        function initRound(keepSameSoil = false) {
+            if (!keepSameSoil || !currentSoil) {
+                sandAttempt = 0;
+                rockClicks = 0;
+                rockState = 'solid';
+                
+                const rand = Math.random();
+                // Вероятности: Скальные грунты 4%, Песок 4%, Обычные грунты 92%
+                if (rand < 0.04) {
+                    currentSoil = ROCK_SOILS[Math.floor(Math.random() * ROCK_SOILS.length)];
+                } else if (rand < 0.08) {
+                    currentSoil = SAND_SOIL;
+                } else {
+                    currentSoil = SOIL_TYPES[Math.floor(Math.random() * SOIL_TYPES.length)];
+                }
+            } else {
+                // Если переигрываем текущую породу
+                if (currentSoil.difficulty === "Спец-подготовка") {
+                    rockClicks = 0;
+                    rockState = 'solid';
+                }
+            }
+            
+            thickness = 10.0;
+            gameState = 'ready';
+            isDragging = false;
+            
+            sausage.className = "sausage-container";
+            rockHint.style.display = 'none';
+            
+            // Очищаем крошки и осколки
+            const crumbs = glass.querySelectorAll('.dust-particle, .stone-particle');
+            crumbs.forEach(c => c.remove());
+
+            soilName.textContent = currentSoil.name;
+            soilName.style.color = currentSoil.color;
+            
+            if (currentSoil.difficulty === "Невозможно" || currentSoil.difficulty === "Спец-подготовка") {
+                soilDesc.innerHTML = `<strong style="color: #c0392b;">${currentSoil.name} (${currentSoil.difficulty}):</strong> ${currentSoil.desc}`;
+            } else {
+                soilDesc.innerHTML = `<strong>${currentSoil.name} (${currentSoil.difficulty}):</strong> ${currentSoil.desc}`;
+            }
+            
+            segments.forEach(seg => {
+                seg.style.display = 'block';
+                seg.style.backgroundColor = currentSoil.color;
+            });
+
+            // Настройка визуального вида скального грунта
+            if (currentSoil.difficulty === "Спец-подготовка" && rockState === 'solid') {
+                sausage.classList.add('rock-solid');
+                feedback.textContent = "Попробуйте раскатать этот грунт ладонью (мышкой)!";
+                feedback.style.color = '#7f8c8d';
+            } else {
+                feedback.textContent = "Зажмите левую кнопку мыши и водите влево-вправо!";
+                feedback.style.color = '#2c3e50';
+            }
+
+            updateVisuals();
+            btnNext.disabled = true;
+            btnNext.textContent = "Следующий образец";
+            
+            // Обновляем доступность кнопки смены грунта на старте раунда
+            btnChange.disabled = (score <= 4);
+        }
+
+        function updateVisuals() {
+            thicknessVal.textContent = currentSoil.name === "Песок" || rockState === 'powder' ? "—" : thickness.toFixed(1) + " мм";
+            
+            if (gameState === 'failed' || gameState === 'success') return;
+
+            const height = 15 + (thickness - 3.0) * (35 / 7.0);
+            const width = 25 + (10.0 - thickness) * 1.2;
+
+            segments.forEach(seg => {
+                seg.style.height = `${height}px`;
+                seg.style.width = `${width}%`;
+            });
+        }
+
+        // Клик по жгутику (интерактивное измельчение скального грунта)
+        sausage.addEventListener('click', () => {
+            if (currentSoil.difficulty !== "Спец-подготовка" || rockState !== 'needs_grinding') return;
+            
+            rockClicks++;
+            spawnChips();
+
+            if (rockClicks >= 5) {
+                // Переход в состояние порошка
+                rockState = 'powder';
+                sausage.classList.remove('rock-solid');
+                sausage.classList.add('rock-powder');
+                rockHint.style.display = 'none';
+                feedback.textContent = "Отлично! Твёрдые структурные связи разрушены.";
+                feedback.style.color = '#16a085';
+                
+                // Эмулируем затворение водой
+                setTimeout(() => {
+                    rockState = 'plastic';
+                    sausage.classList.remove('rock-powder');
+                    segments.forEach(seg => {
+                        seg.style.backgroundColor = "#5d6d7e"; // plastic paste
+                    });
+                    updateVisuals();
+                    feedback.textContent = "Добавлена дистиллированная вода! Раскатаем до 3 мм.";
+                    feedback.style.color = '#2980b9';
+                }, 1200);
+            } else {
+                feedback.textContent = `Дробим породу в ступке по ГОСТ 12536... Ударов осталось: ${5 - rockClicks}`;
+                feedback.style.color = '#d35400';
+            }
+        });
+
+        // Визуальные осколки при кликах
+        function spawnChips() {
+            for (let i = 0; i < 4; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'stone-particle';
+                particle.style.left = `${45 + Math.random() * 10}%`;
+                particle.style.top = `${45 + Math.random() * 10}%`;
+                glass.appendChild(particle);
+                
+                setTimeout(() => {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 20 + Math.random() * 30;
+                    particle.style.transform = `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px) scale(0.6)`;
+                    particle.style.opacity = '0';
+                    setTimeout(() => particle.remove(), 500);
+                }, 10);
+            }
+        }
+
+        // Физика раскатки
+        function handleRoll(currentX) {
+            if (gameState !== 'ready' && gameState !== 'rolling') return;
+            
+            // Если игрок пытается покатать цельный камень напрямую
+            if (currentSoil.difficulty === "Спец-подготовка" && rockState === 'solid') {
+                isDragging = false;
+                triggerRockDirectRollAttempt();
+                return;
+            }
+            if (currentSoil.difficulty === "Спец-подготовка" && rockState === 'powder') {
+                feedback.textContent = "Подождите, сухой порошок раскатать нельзя. Добавляем воду...";
+                feedback.style.color = '#e67e22';
+                return;
+            }
+
+            const delta = Math.abs(currentX - lastX);
+            if (delta > 20) { 
+                gameState = 'rolling';
+                
+                // Песок
+                if (currentSoil.name === "Песок") {
+                    triggerSandFail();
+                    lastX = currentX;
+                    return;
+                }
+
+                thickness -= currentSoil.step;
+                
+                if (thickness < 2.7) {
+                    triggerFail();
+                } else {
+                    updateVisuals();
+                    feedback.textContent = "Катаем... Цель: ровно 3 мм. Главное не перекатать!";
+                    feedback.style.color = '#e67e22';
+                }
+                lastX = currentX;
+            }
+        }
+
+        // Проверка результата при отпускании мыши
+        function evaluateResult() {
+            if (gameState !== 'rolling') return;
+            if (currentSoil.name === "Песок") return;
+
+            if (thickness > 3.3) {
+                feedback.textContent = `Толщина ${thickness.toFixed(1)} мм — жгутик влажный. Продолжайте раскатывать!`;
+                feedback.style.color = '#3498db';
+                gameState = 'ready'; 
+            } else if (thickness >= 2.7 && thickness <= 3.3) {
+                triggerSuccess();
+            } else {
+                triggerFail();
+            }
+        }
+
+        // Обработка неудачной раскатки цельного камня напрямую
+        function triggerRockDirectRollAttempt() {
+            gameState = 'failed';
+            shatterSausage(true); // визуальное разрушение
+            btnChange.disabled = true; // Блокируем смену в процессе обработки модального окна
+            
+            showGameModal(
+                "❌⛰️",
+                "Ой! Стекло чуть не треснуло!",
+                `Вы попытались раскатать прочный цельный образец породы <strong>${currentSoil.name}</strong> напрямую!<br><br>Согласно <strong>ГОСТ 12536</strong>, скальные и полускальные грунты обладают прочными структурными цементационными связями. Чтобы определить число пластичности, породу сначала нужно расколоть и растереть в ступке в порошок!`,
+                "Растереть в ступке",
+                () => {
+                    // Переводим в состояние подготовки
+                    rockState = 'needs_grinding';
+                    sausage.className = "sausage-container rock-solid";
+                    segments.forEach(seg => seg.style.display = 'block');
+                    
+                    // Убираем старые осколки
+                    const crumbs = glass.querySelectorAll('.dust-particle, .stone-particle');
+                    crumbs.forEach(c => c.remove());
+
+                    gameState = 'ready';
+                    rockHint.style.display = 'block';
+                    feedback.textContent = "Кликните по каменному цилиндру 5 раз, чтобы измельчить его!";
+                    feedback.style.color = '#c0392b';
+                    updateVisuals();
+                    
+                    // Возвращаем доступ к смене, если у игрока хватает очков
+                    btnChange.disabled = (score <= 4);
+                }
+            );
+
+            btnNext.disabled = false;
+            btnNext.textContent = "Сменить грунт";
+        }
+
+        function triggerSuccess() {
+            gameState = 'success';
+            thickness = 3.0;
+            thicknessVal.textContent = "3.0 мм";
+            sausage.classList.add('success');
+            btnChange.disabled = true; // Раунд завершен успехом — менять грунт уже нельзя
+            
+            // Начисление баллов: Скальный грунт (+2 балла), Обычный грунт (+1 балл)
+            let pointsToAdd = 1;
+            if (currentSoil.difficulty === "Спец-подготовка") {
+                pointsToAdd = 2;
+            }
+            score += pointsToAdd;
+            updateScoreSystem();
+            
+            btnNext.disabled = false;
+            btnNext.textContent = "Следующий образец";
+
+            if (currentSoil.difficulty === "Спец-подготовка") {
+                showGameModal(
+                    "🔬🏆",
+                    `Вы великолепны! (+2 балла)`,
+                    `Вы успешно подготовили пробу скального грунта (<strong>${currentSoil.name}</strong>): измельчили до дисперсного состояния по <strong>ГОСТ 12536</strong>, добавили воды и раскатали идеальный жгутик!<br><br>Это подтверждает, что при искусственном разрушении жестких связей скальных пород входящие в их состав тонкодисперсные минералы восстанавливают пластичные свойства по <strong>ГОСТ 25100-2020</strong>.`,
+                    "Продолжить",
+                    () => { initRound(false); }
+                );
+            } else {
+                feedback.textContent = "Успех! Жгутик распался на кусочки по 8-10 мм. ГОСТ соблюден! +1 балл.";
+                feedback.style.color = '#27ae60';
+            }
+        }
+
+        function triggerFail() {
+            gameState = 'failed';
+            feedback.textContent = `Упс! Перекатали (${thickness.toFixed(1)} мм)! Жгут раскрошился. Минус 1 балл.`;
+            feedback.style.color = '#c0392b';
+            btnChange.disabled = true; // Раунд проигран — менять грунт уже поздно, нужно переиграть или пропустить
+            
+            // Списание баллов: -1 балл за неудачную раскатку (может уходить в минус)
+            score -= 1;
+            updateScoreSystem();
+            
+            shatterSausage(currentSoil.difficulty === "Спец-подготовка");
+
+            btnNext.disabled = false;
+            btnNext.textContent = "Попробовать снова";
+        }
+
+        // Пасхалка: Песок рассыпался (без списания и начисления баллов!)
+        function triggerSandFail() {
+            gameState = 'failed';
+            thickness = 10.0;
+            thicknessVal.textContent = "—";
+            feedback.textContent = "Песок рассыпался! Жгута не вышло.";
+            feedback.style.color = '#e67e22';
+            btnChange.disabled = true;
+            
+            shatterSausage(false);
+            sandAttempt++; 
+            
+            if (sandAttempt === 1) {
+                showGameModal(
+                    "😮⏳",
+                    "Ой... рассыпался!",
+                    "Жгутик совсем не держит форму и сразу раскрошился при попытке раскатать. Попробуем ещё раз?",
+                    "Повторить",
+                    () => { initRound(true); }
+                );
+            } else {
+                showGameModal(
+                    "⏳🌾",
+                    "Ошибочка вышла!",
+                    "Вы попытались раскатать в жгут <strong>Песок</strong>.<br><br>Согласно <strong>ГОСТ 25100-2020</strong> пески являются непластичными грунтами и не имеют предела пластичности! Жгут рассыпался до начала испытания. 😉",
+                    "Продолжить",
+                    () => { initRound(false); }
+                );
+            }
+
+            btnNext.disabled = false;
+            btnNext.textContent = sandAttempt === 1 ? "Попробовать снова" : "Дать нормальный грунт";
+        }
+
+        // Эффект разрушения
+        function shatterSausage(isStone = false) {
+            segments.forEach(seg => seg.style.display = 'none');
+            
+            const particleCount = isStone ? 30 : 24;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = isStone ? 'stone-particle' : 'dust-particle';
+                particle.style.setProperty('--soil-color', currentSoil.color);
+                particle.style.left = `${30 + Math.random() * 40}%`;
+                particle.style.top = `${45 + Math.random() * 15}%`;
+                glass.appendChild(particle);
+                
+                setTimeout(() => {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 15 + Math.random() * 45;
+                    particle.style.transform = `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px) scale(${isStone ? 0.7 : 0.5})`;
+                    particle.style.opacity = '0.7';
+                }, 10);
+            }
+        }
+
+        // --- СОБЫТИЯ ---
+        const startDrag = (x) => {
+            if (gameState === 'success' || gameState === 'failed') return;
+            isDragging = true;
+            lastX = x;
+        };
+
+        const moveDrag = (x) => {
+            if (!isDragging) return;
+            handleRoll(x);
+        };
+
+        const stopDrag = () => {
+            if (!isDragging) return;
+            isDragging = false;
+            evaluateResult();
+        };
+
+        glass.addEventListener('mousedown', (e) => {
+            // Игнорируем обычный свайп, если нужно кликать по ступке
+            if (currentSoil.difficulty === "Спец-подготовка" && rockState === 'needs_grinding') return;
+            startDrag(e.clientX);
+        });
+        window.addEventListener('mousemove', (e) => moveDrag(e.clientX));
+        window.addEventListener('mouseup', stopDrag);
+
+        glass.addEventListener('touchstart', (e) => {
+            if (currentSoil.difficulty === "Спец-подготовка" && rockState === 'needs_grinding') return;
+            startDrag(e.touches[0].clientX);
+        });
+        window.addEventListener('touchmove', (e) => moveDrag(e.touches[0].clientX));
+        window.addEventListener('touchend', stopDrag);
+
+        // Кнопка продолжения под стеклом
+        btnNext.addEventListener('click', () => {
+            const repeat = (gameState === 'failed' && currentSoil.difficulty !== "Невозможно");
+            initRound(repeat);
+        });
+
+        // Кнопка принудительной смены грунта (-5 баллов)
+        btnChange.addEventListener('click', () => {
+            if (score <= 4) return; // Дополнительная проверка безопасности
+            score -= 5;
+            updateScoreSystem();
+            initRound(false); // Подбираем новый случайный грунт
+        });
+
+        // Запуск игры и инициализация системы счёта
+        initRound();
+        updateScoreSystem();
+    </script>
+</body>
+</html>

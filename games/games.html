@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Игры — Geocalculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --soil-peat:   #F2E9D8;
+  --soil-peat-2: #EAE0C9;
+  --soil-clay:   #8A7355;
+  --soil-loam:   #B06B34;
+  --soil-sand:   #C98F45;
+  --paper:       #3B2E20;
+  --paper-dim:   #7A6A52;
+  --line:        #D9C9A3;
+  --ok:          #7A9B6E;
+  --warn:        #A6462E;
+
+  --font-display: 'Golos Text', -apple-system, sans-serif;
+  --font-body: 'Golos Text', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius: 3px;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+html, body{
+  background-color:var(--soil-peat);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(176,107,52,0.08) 1px, transparent 0),
+    repeating-linear-gradient(155deg, rgba(176,107,52,0.05) 0px, rgba(176,107,52,0.05) 1px, transparent 1px, transparent 26px),
+    repeating-linear-gradient(65deg, rgba(138,115,85,0.045) 0px, rgba(138,115,85,0.045) 1px, transparent 1px, transparent 34px);
+  background-size: 18px 18px, auto, auto;
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-size:17px;
+  line-height:1.55;
+  min-height:100vh;
+}
+
+body{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+.wrap{
+  max-width:920px;
+  margin:0 auto;
+  padding:0 32px 64px;
+  width:100%;
+  flex:1 0 auto;
+}
+
+/* верхняя панель навигации — справа у края экрана */
+.top-bar{
+  width:100%;
+  padding:18px 32px 0;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+.top-bar button{
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:14.5px;
+  padding:12px 22px;
+  border-radius:var(--radius);
+  cursor:pointer;
+  transition:opacity .15s, border-color .15s, color .15s;
+}
+#btn-back{
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  color:var(--paper);
+}
+#btn-back:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+#btn-home{
+  background:var(--soil-loam);
+  border:1px solid var(--soil-loam);
+  color:var(--soil-peat);
+}
+#btn-home:hover{ opacity:.88; }
+
+header{
+  max-width:920px;
+  margin:0 auto;
+  padding:12px 0 40px;
+  text-align:center;
+  border-bottom:1px solid var(--line);
+}
+
+header h1{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:42px;
+  line-height:1.2;
+  color:var(--paper);
+}
+header .lede{
+  font-size:17px;
+  color:var(--paper-dim);
+  max-width:520px;
+  margin:18px auto 0;
+}
+
+.section-label{
+  font-family:var(--font-mono);
+  font-size:13px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  margin-bottom:14px;
+}
+
+/* предупреждение — компактная строка-примечание */
+.warning{
+  margin-top:36px;
+  margin-bottom:32px;
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  border-left:3px solid var(--warn);
+  border-radius:var(--radius);
+  padding:12px 16px;
+}
+.warning .mark{
+  display:block;
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--warn);
+  font-weight:600;
+  margin-bottom:5px;
+}
+.warning p{
+  font-size:13.5px;
+  line-height:1.55;
+  color:var(--paper-dim);
+}
+
+/* список расчетов — util-row */
+.calc-list{
+  margin-top:40px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.util-row{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:17px 22px;
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  color:var(--paper); text-decoration:none; font-size:16px;
+  transition:background .15s, border-color .15s, color .15s, transform .15s;
+}
+.util-row:hover{
+  background:#DCC79A;
+  border-color:var(--soil-loam);
+  color:var(--soil-loam);
+  transform:translateX(3px);
+}
+.util-row .arrow{ font-family:var(--font-mono); color:var(--paper-dim); font-size:14px; }
+.util-row:hover .arrow{ color:var(--soil-loam); }
+
+footer{
+  flex-shrink:0;
+  max-width:920px;
+  margin:36px auto 0;
+  padding:36px 32px 40px;
+  border-top:1px solid var(--line);
+  text-align:center;
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--paper-dim);
+  width:100%;
+}
+
+@media (max-width:720px){
+  header h1{ font-size:30px; }
+  .top-bar{ padding:14px 20px 0; }
+  .wrap{ padding:0 20px 48px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <button id="btn-back" onclick="history.back()">Назад</button>
+  <button id="btn-home" onclick="location.href='/'">Главная</button>
+</div>
+
+<header>
+  <h1>Игры</h1>
+  <p class="lede">Сделайте свой перерыв интереснее с играми по лабораторным испытаниям!</p>
+</header>
+
+<div class="wrap">
+
+  <div class="section-label">Доступные игры</div>
+
+  <div class="calc-list">
+    <a class="util-row" href="game-1.html">
+      <span>Колбаски</span>
+      <span class="arrow">→</span>
+    </a>
+    <a class="util-row" href="game-2.html">
+      <span>Конус Васильева</span>
+      <span class="arrow">→</span>
+    </a>
+  </div>
+
+</div>
+
+<footer>
+  © 2026 Geocalculator. Инженерно-геологические расчеты онлайн
+</footer>
+
+</body>
+</html>
