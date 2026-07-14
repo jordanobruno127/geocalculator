@@ -112,6 +112,34 @@ header h1 em{color:var(--soil-loam);font-style:italic;}
   flex:1 0 auto;
 }
 
+  /* ===== предупреждение ===== */
+.warning{
+  margin-bottom:28px;
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  border-left:3px solid var(--warn);
+  border-radius:var(--radius);
+  padding:14px 18px;
+  max-width:900px;
+  margin-left:auto;
+  margin-right:auto;
+}
+.warning .mark{
+  display:block;
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--warn);
+  font-weight:600;
+  margin-bottom:5px;
+}
+.warning p{
+  font-size:13.5px;
+  line-height:1.55;
+  color:var(--paper-dim);
+}
+  
 /* ===== панели ===== */
 .panel{
   background:var(--soil-peat-2);
@@ -381,14 +409,20 @@ footer{
 
   <!-- Вкладки -->
   <div class="tabs-wrap">
-    <span class="section-label">Вид расчёта</span>
+
+     <div class="warning">
+      <span class="mark">Внимание</span>
+      <p>Представленные данные носят исключительно вспомогательный и информационный характер и не претендуют на достоверность. Модель отражает гипотетическое поведение грунта при выбранных условиях и не подлежит использованию в официальных технических отчетах. Продолжая работу с сайтом, Вы соглашаетесь с <a href="https://geocalculator.ru/terms">Условиями использования.</a></p>
+  </div>
+    
+    <span class="section-label">Вид расчета</span>
     <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('calc')">Расчётный режим</button>
+      <button class="tab-btn active" onclick="switchTab('calc')">Расчетный режим</button>
       <button class="tab-btn" onclick="switchTab('exp')">Экспериментальные данные</button>
     </div>
   </div>
 
-  <!-- ВКЛАДКА 1: расчётный режим -->
+  <!-- ВКЛАДКА 1: расчетный режим -->
   <div id="tab-calc" class="tab-content active">
   <div class="layout">
 
@@ -402,8 +436,8 @@ footer{
           <select id="soil">
             <option value="sand_coarse">Пески гравелистые, крупные и средней крупности</option>
             <option value="sand_fine">Пески мелкие и пылеватые</option>
-            <option value="supes_light">Супесь, суглинок лёгкий</option>
-            <option value="suglinok_heavy">Суглинок тяжёлый, глина</option>
+            <option value="supes_light">Супесь, суглинок легкий</option>
+            <option value="suglinok_heavy">Суглинок тяжелый, глина</option>
           </select>
         </div>
         <div class="field">
@@ -501,8 +535,8 @@ footer{
           <select id="exp-soil">
             <option value="sand_coarse">Пески гравелистые, крупные и средней крупности</option>
             <option value="sand_fine">Пески мелкие и пылеватые</option>
-            <option value="supes_light">Супесь, суглинок лёгкий</option>
-            <option value="suglinok_heavy">Суглинок тяжёлый, глина</option>
+            <option value="supes_light">Супесь, суглинок легкий</option>
+            <option value="suglinok_heavy">Суглинок тяжелый, глина</option>
           </select>
         </div>
         <div class="field">
@@ -580,8 +614,8 @@ const dropFraction = {
 const soilNames = {
   sand_coarse:'Пески гравелистые, крупные и средней крупности',
   sand_fine:'Пески мелкие и пылеватые',
-  supes_light:'Супесь, суглинок лёгкий',
-  suglinok_heavy:'Суглинок тяжёлый, глина'
+  supes_light:'Супесь, суглинок легкий',
+  suglinok_heavy:'Суглинок тяжелый, глина'
 };
 
 const isCohesive = soil => soil === 'supes_light' || soil === 'suglinok_heavy';
@@ -626,7 +660,7 @@ function generate(){
     const rhoK = val('coarseRhoK');
     if(K === null || rhoK === null || K <= 0 || K >= 100 || rhoK <= 0){
       document.getElementById('error').textContent =
-        'Для учёта крупных частиц укажите K (%) и ρk (г/см³).';
+        'Для учета крупных частиц укажите K (%) и ρk (г/см³).';
       return;
     }
     if(woptD || rhodmaxD){
@@ -780,7 +814,7 @@ function renderTable(rows, soil, depth, rhos, step, w1, natural, f){
   if(isCohesive(soil)) meta += `<br><span class="def">Линия нулевого содержания воздуха построена по формуле (7) ГОСТ 22733-2016.</span>`;
   if(f.coarseInfo){
     const ci = f.coarseInfo;
-    meta += `<br><b>Учёт крупных частиц (п. 8.4):</b> K = ${ci.K}%, ρk = ${ci.rhoK} г/см³.
+    meta += `<br><b>Учет крупных частиц (п. 8.4):</b> K = ${ci.K}%, ρk = ${ci.rhoK} г/см³.
       До коррекции: Wопт = ${ci.wopt_orig}%, ρd max = ${ci.rhodmax_orig} г/см³.
       <b>После коррекции: W'опт = ${round(ci.wopt_corr,2)}%, ρ'd max = ${round(ci.rhodmax_corr,3)} г/см³</b>
       (формулы 5, 6 ГОСТ 22733-2016).`;
@@ -1023,7 +1057,7 @@ function generateExp(){
   meta += ` · ρs = ${rhos} г/см³`;
   if(rhosD) meta += ` <span class="def">(типовое значение)</span>`;
   meta += ` · Точек: ${pts.length} (ГОСТ 22733-2016)`;
-  if(isCohesive(soil)) meta += `<br><span class="def">Линия нулевого содержания воздуха построена по формуле (7) ГОСТ 22733-2016. Нисходящая часть не должна её пересекать.</span>`;
+  if(isCohesive(soil)) meta += `<br><span class="def">Линия нулевого содержания воздуха построена по формуле (7) ГОСТ 22733-2016. Нисходящая часть не должна ее пересекать.</span>`;
   document.getElementById('exp-meta').innerHTML = meta;
   document.getElementById('exp-result').style.display = 'block';
 
