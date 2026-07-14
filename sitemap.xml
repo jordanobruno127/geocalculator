@@ -7,7 +7,7 @@
     <priority>1.0</priority>
   </url>
 
-  <!-- Страницы с расчётами -->
+  <!-- Основные типы грунта -->
   <url>
     <loc>https://geocalculator.ru/scale.html</loc>
     <priority>0.8</priority>
@@ -18,19 +18,19 @@
     <priority>0.8</priority>
   </url>
 
-  <!-- Директория dispersed -->
+  <!-- Дисперсный грунт -->
   <url>
     <loc>https://geocalculator.ru/dispersed/dispersed.html</loc>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://geocalculator.ru/dispersed/granulometr.html</loc>
+    <loc>https://geocalculator.ru/dispersed/vlazhnost.html</loc>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://geocalculator.ru/dispersed/organic.html</loc>
+    <loc>https://geocalculator.ru/dispersed/granulometr.html</loc>
     <priority>0.7</priority>
   </url>
 
@@ -45,8 +45,82 @@
   </url>
 
   <url>
-    <loc>https://geocalculator.ru/dispersed/vlazhnost.html</loc>
+    <loc>https://geocalculator.ru/dispersed/organic.html</loc>
     <priority>0.7</priority>
+  </url>
+
+  <!-- Прочие физические испытания -->
+  <url>
+    <loc>https://geocalculator.ru/other-physical/other-physical.html</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://geocalculator.ru/other-physical/proctor.html</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Механические испытания -->
+  <url>
+    <loc>https://geocalculator.ru/mechanics/mechanics.html</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://geocalculator.ru/mechanics/compr_shear.html</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://geocalculator.ru/mechanics/compr_froz.html</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Обратные методы расчета -->
+  <url>
+    <loc>https://geocalculator.ru/obrat/obrat.html</loc>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://geocalculator.ru/obrat/vlazhnost_obr.html</loc>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://geocalculator.ru/obrat/granulometr_obr.html</loc>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://geocalculator.ru/obrat/plastichnost_obr.html</loc>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://geocalculator.ru/obrat/plotnost_obr.html</loc>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://geocalculator.ru/obrat/organic_obr.html</loc>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Информационные страницы -->
+  <url>
+    <loc>https://geocalculator.ru/reference.html</loc>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://geocalculator.ru/contacts.html</loc>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://geocalculator.ru/terms.html</loc>
+    <priority>0.3</priority>
   </url>
 
 </urlset>
