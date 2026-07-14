@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Стандартное уплотнение — Geocalculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --soil-peat:   #F2E9D8;
+  --soil-peat-2: #EAE0C9;
+  --soil-clay:   #8A7355;
+  --soil-loam:   #B06B34;
+  --soil-sand:   #C98F45;
+  --paper:       #3B2E20;
+  --paper-dim:   #7A6A52;
+  --line:        #D9C9A3;
+  --ok:          #7A9B6E;
+  --warn:        #A6462E;
+  --blue:        #3f7ea6;
+  --font-display:'Golos Text',-apple-system,sans-serif;
+  --font-body:   'Golos Text',-apple-system,sans-serif;
+  --font-mono:   'JetBrains Mono',monospace;
+  --radius:3px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+html,body{
+  background-color:var(--soil-peat);
+  background-image:
+    radial-gradient(circle at 1px 1px,rgba(176,107,52,0.08) 1px,transparent 0),
+    repeating-linear-gradient(155deg,rgba(176,107,52,0.05) 0px,rgba(176,107,52,0.05) 1px,transparent 1px,transparent 26px),
+    repeating-linear-gradient(65deg,rgba(138,115,85,0.045) 0px,rgba(138,115,85,0.045) 1px,transparent 1px,transparent 34px);
+  background-size:18px 18px,auto,auto;
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-size:17px;
+  line-height:1.55;
+  min-height:100vh;
+}
+
+body{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ===== top-bar ===== */
+.top-bar{
+  width:100%;
+  padding:18px 32px 0;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+.top-bar button{
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:14.5px;
+  padding:12px 22px;
+  border-radius:var(--radius);
+  cursor:pointer;
+  transition:opacity .15s,border-color .15s,color .15s;
+}
+#btn-back{
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  color:var(--paper);
+}
+#btn-back:hover{border-color:var(--soil-loam);color:var(--soil-loam);}
+#btn-home{
+  background:var(--soil-loam);
+  border:1px solid var(--soil-loam);
+  color:var(--soil-peat);
+}
+#btn-home:hover{opacity:.88;}
+
+/* ===== header ===== */
+header{
+  max-width:1240px;
+  margin:0 auto;
+  padding:12px 32px 32px;
+  text-align:center;
+  border-bottom:1px solid var(--line);
+  width:100%;
+}
+header h1{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:36px;
+  line-height:1.2;
+  color:var(--paper);
+  margin-bottom:10px;
+}
+header h1 em{color:var(--soil-loam);font-style:italic;}
+.lede{
+  font-size:15px;
+  color:var(--paper-dim);
+  max-width:680px;
+  margin:0 auto;
+  line-height:1.55;
+}
+
+/* ===== content wrap ===== */
+.wrap{
+  max-width:1240px;
+  margin:0 auto;
+  padding:28px 32px 0;
+  width:100%;
+  flex:1 0 auto;
+}
+
+/* ===== панели ===== */
+.panel{
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:20px 22px;
+}
+.panel-label{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  font-weight:600;
+  margin-bottom:14px;
+  display:block;
+}
+
+/* ===== поля ввода ===== */
+.field{margin-bottom:12px;}
+.field label{
+  display:block;
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  margin-bottom:5px;
+}
+.field input,.field select{
+  width:100%;
+  background:var(--soil-peat);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:10px 12px;
+  font-family:var(--font-mono);
+  font-size:14px;
+  color:var(--paper);
+  outline:none;
+  transition:border-color .15s;
+}
+.field input::placeholder{color:var(--paper-dim);}
+.field input:focus,.field select:focus{border-color:var(--soil-loam);}
+
+/* ===== кнопки действий ===== */
+.btn-primary{
+  width:100%;margin-top:14px;
+  background:var(--soil-loam);border:1px solid var(--soil-loam);color:var(--soil-peat);
+  font-family:var(--font-body);font-weight:600;font-size:14.5px;
+  padding:12px;border-radius:var(--radius);cursor:pointer;
+  transition:opacity .15s;
+}
+.btn-primary:hover{opacity:.88;}
+.btn-outline{
+  width:100%;margin-top:8px;
+  background:var(--soil-peat-2);border:1px solid var(--line);color:var(--paper);
+  font-family:var(--font-body);font-weight:600;font-size:14.5px;
+  padding:12px;border-radius:var(--radius);cursor:pointer;
+  transition:border-color .15s,color .15s;
+}
+.btn-outline:hover{border-color:var(--soil-loam);color:var(--soil-loam);}
+
+/* разделитель внутри формы */
+.form-divider{
+  margin:14px 0 12px;
+  padding-top:14px;
+  border-top:1px solid var(--line);
+}
+.checkbox-row{
+  display:flex;align-items:center;gap:8px;
+  cursor:pointer;font-size:13.5px;color:var(--paper);
+}
+.checkbox-row input[type=checkbox]{
+  width:auto;accent-color:var(--soil-loam);
+  width:15px;height:15px;cursor:pointer;
+}
+
+/* ===== таблица результатов ===== */
+table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:13px;}
+th,td{padding:8px 10px;text-align:center;border-bottom:1px solid var(--line);}
+th{
+  background:var(--soil-peat);
+  font-family:var(--font-mono);font-size:11px;
+  letter-spacing:.05em;text-transform:uppercase;
+  color:var(--paper-dim);font-weight:500;
+}
+tr.peak td{color:var(--soil-loam);font-weight:700;background:rgba(176,107,52,.06);}
+tr.nat-row td{color:var(--blue);}
+tr.warn-row td{color:var(--warn);}
+
+/* ===== мета-блок под таблицей ===== */
+.meta{font-size:12.5px;color:var(--paper-dim);margin-top:14px;line-height:1.7;}
+.meta b{color:var(--paper);}
+.meta .def{color:var(--blue);}
+.meta .warn-text{color:var(--warn);font-weight:600;}
+
+.err{color:var(--warn);font-size:13px;margin-top:8px;font-family:var(--font-mono);}
+
+/* ===== легенда ===== */
+.legend{
+  display:flex;gap:14px;flex-wrap:wrap;
+  font-size:11px;color:var(--paper-dim);
+  font-family:var(--font-mono);margin-top:10px;
+}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.legend i{width:14px;height:3px;display:inline-block;border-radius:2px;}
+
+/* ===== ВКЛАДКИ (стиль compr_froz.html) ===== */
+.tabs-wrap{
+  text-align:center;
+  margin-bottom:24px;
+}
+.section-label{
+  font-family:var(--font-mono);
+  font-size:13px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  margin-bottom:14px;
+  display:block;
+}
+.tabs{
+  display:inline-flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.tab-btn{
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:14.5px;
+  padding:12px 26px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background:var(--soil-peat-2);
+  color:var(--paper);
+  cursor:pointer;
+  transition:background .15s,border-color .15s,color .15s;
+}
+.tab-btn:hover{border-color:var(--soil-loam);color:var(--soil-loam);}
+.tab-btn.active{
+  background:var(--soil-loam);
+  border-color:var(--soil-loam);
+  color:var(--soil-peat);
+}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+
+/* ===== раскладки ===== */
+.layout{
+  display:grid;
+  grid-template-columns:300px 1fr;
+  grid-template-rows:auto auto;
+  gap:20px;
+  align-items:start;
+}
+.layout-exp{
+  display:grid;
+  grid-template-columns:380px 1fr;
+  grid-template-rows:auto auto;
+  gap:20px;
+  align-items:start;
+}
+@media(max-width:900px){
+  .layout,.layout-exp{grid-template-columns:1fr;}
+  .top-bar{padding:14px 20px 0;}
+  header{padding:12px 20px 24px;}
+  .wrap{padding:20px 20px 0;}
+}
+
+/* ===== экспериментальный раздел ===== */
+.exp-points-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-bottom:12px;
+}
+.exp-point-row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.exp-point-row input{
+  flex:1;
+  min-width:0;
+  background:var(--soil-peat);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:9px 10px;
+  font-family:var(--font-mono);
+  font-size:13.5px;
+  color:var(--paper);
+  outline:none;
+  transition:border-color .15s;
+}
+.exp-point-row input:focus{border-color:var(--soil-loam);}
+.exp-point-row input::placeholder{color:var(--paper-dim);}
+.btn-del-point{
+  background:none;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  color:var(--paper-dim);
+  width:30px;height:34px;
+  cursor:pointer;
+  font-size:16px;
+  line-height:1;
+  transition:border-color .15s,color .15s;
+  flex-shrink:0;
+}
+.btn-del-point:hover{border-color:var(--warn);color:var(--warn);}
+.btn-add-point{
+  width:100%;
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:14px;
+  padding:9px;
+  cursor:pointer;
+  margin-bottom:10px;
+  transition:border-color .15s,color .15s;
+}
+.btn-add-point:hover{border-color:var(--soil-loam);color:var(--soil-loam);}
+.points-header{
+  display:flex;
+  gap:8px;
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--paper-dim);
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+.points-header span{flex:1;}
+.points-header .ph-del{width:30px;flex:none;}
+
+/* ===== футер ===== */
+footer{
+  flex-shrink:0;
+  max-width:1240px;
+  margin:36px auto 0;
+  padding:36px 32px 40px;
+  border-top:1px solid var(--line);
+  text-align:center;
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--paper-dim);
+  width:100%;
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <button id="btn-back" onclick="history.back()">Назад</button>
+  <button id="btn-home" onclick="location.href='/'">Главная</button>
+</div>
+
+<header>
+  <h1>Стандартное уплотнение <em>(метод Проктора)</em></h1>
+  <p class="lede">Протокол испытания по ГОСТ 22733-2016. Заполняй только имеющиеся данные — незаполненные поля не учитываются, а вместо отсутствующих ρs, Wопт и ρd max подставляются типовые значения для выбранного грунта.</p>
+</header>
+
+<div class="wrap">
+
+  <!-- Вкладки -->
+  <div class="tabs-wrap">
+    <span class="section-label">Вид расчёта</span>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('calc')">Расчётный режим</button>
+      <button class="tab-btn" onclick="switchTab('exp')">Экспериментальные данные</button>
+    </div>
+  </div>
+
+  <!-- ВКЛАДКА 1: расчётный режим -->
+  <div id="tab-calc" class="tab-content active">
+  <div class="layout">
+
+    <!-- ЛЕВАЯ КОЛОНКА: ввод -->
+    <div style="grid-column:1;grid-row:1/3;">
+      <div class="panel">
+        <span class="panel-label">Вводные данные</span>
+
+        <div class="field">
+          <label>Тип грунта</label>
+          <select id="soil">
+            <option value="sand_coarse">Пески гравелистые, крупные и средней крупности</option>
+            <option value="sand_fine">Пески мелкие и пылеватые</option>
+            <option value="supes_light">Супесь, суглинок лёгкий</option>
+            <option value="suglinok_heavy">Суглинок тяжёлый, глина</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Глубина отбора, м</label>
+          <input id="depth" type="number" step="0.1" placeholder="не указана">
+        </div>
+        <div class="field">
+          <label>Плотность частиц ρs, г/см³</label>
+          <input id="rhos" type="number" step="0.01" placeholder="типовое значение">
+        </div>
+        <div class="field">
+          <label>Оптимальная влажность Wопт, %</label>
+          <input id="wopt" type="number" step="0.1" placeholder="типовое значение">
+        </div>
+        <div class="field">
+          <label>Макс. плотность скелета ρd max, г/см³</label>
+          <input id="rhodmax" type="number" step="0.01" placeholder="типовое значение">
+        </div>
+        <div class="field">
+          <label>Номер точки оптимума</label>
+          <input id="peakIdx" type="number" min="2" max="8" placeholder="5">
+        </div>
+        <div class="field">
+          <label>Естественная влажность W, %</label>
+          <input id="wNat" type="number" step="0.1" placeholder="не указана">
+        </div>
+        <div class="field">
+          <label>Естественная плотность ρ, г/см³</label>
+          <input id="rhoNat" type="number" step="0.01" placeholder="не указана">
+        </div>
+        <div class="field">
+          <label>Естественная плотность скелета ρd, г/см³</label>
+          <input id="rhodNat" type="number" step="0.01" placeholder="не указана">
+        </div>
+
+        <div class="form-divider">
+          <label class="checkbox-row">
+            <input type="checkbox" id="useCoarse" onchange="toggleCoarse()">
+            <span>Учитывать крупные частицы (п. 8.4)</span>
+          </label>
+          <div id="coarseFields" style="margin-top:10px;opacity:0.4;pointer-events:none;">
+            <div class="field">
+              <label>Содержание крупных частиц K, %</label>
+              <input id="coarseK" type="number" step="0.1" placeholder="напр. 15">
+            </div>
+            <div class="field">
+              <label>Средняя плотность крупных частиц ρk, г/см³</label>
+              <input id="coarseRhoK" type="number" step="0.01" placeholder="напр. 2.70">
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="generate()">Рассчитать</button>
+        <button class="btn-outline" onclick="copyTable()">Скопировать таблицу</button>
+        <div id="error" class="err"></div>
+      </div>
+    </div>
+
+    <!-- ПРАВАЯ ВЕРХ: таблица -->
+    <div id="result" style="display:none;">
+      <div class="panel">
+        <span class="panel-label">Протокол испытания</span>
+        <table id="outTable"></table>
+        <div class="meta" id="metaInfo"></div>
+      </div>
+    </div>
+
+    <!-- ПРАВАЯ НИЗ: график -->
+    <div id="chartPanel" style="display:none;">
+      <div class="panel">
+        <span class="panel-label">График W — ρd</span>
+        <canvas id="chart" width="760" height="400" style="width:100%;height:auto;"></canvas>
+        <div class="legend" id="legend">
+          <span><i style="background:#5c8a4a;"></i>ломаная по точкам</span>
+          <span><i style="background:#b8b29e;"></i>регрессионная кривая</span>
+          <span><i style="background:var(--soil-loam);border-radius:50%;width:8px;height:8px;"></i>точка оптимума</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /layout -->
+  </div><!-- /tab-calc -->
+
+  <!-- ВКЛАДКА 2: экспериментальные данные -->
+  <div id="tab-exp" class="tab-content">
+  <div class="layout-exp">
+
+    <!-- ЛЕВАЯ: ввод экспериментальных данных -->
+    <div style="grid-column:1;grid-row:1/3;">
+      <div class="panel">
+        <span class="panel-label">Параметры грунта</span>
+
+        <div class="field">
+          <label>Тип грунта</label>
+          <select id="exp-soil">
+            <option value="sand_coarse">Пески гравелистые, крупные и средней крупности</option>
+            <option value="sand_fine">Пески мелкие и пылеватые</option>
+            <option value="supes_light">Супесь, суглинок лёгкий</option>
+            <option value="suglinok_heavy">Суглинок тяжёлый, глина</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Глубина отбора, м</label>
+          <input id="exp-depth" type="number" step="0.1" placeholder="не указана">
+        </div>
+        <div class="field">
+          <label>Плотность частиц ρs, г/см³</label>
+          <input id="exp-rhos" type="number" step="0.01" placeholder="типовое значение">
+        </div>
+
+        <div class="form-divider">
+          <span class="panel-label" style="margin-bottom:8px;">Точки испытания</span>
+          <div class="points-header">
+            <span>W, %</span>
+            <span>ρd, г/см³</span>
+            <span class="ph-del"></span>
+          </div>
+          <div class="exp-points-list" id="exp-points-list"></div>
+          <button class="btn-add-point" onclick="addExpPoint()">+ Добавить точку</button>
+        </div>
+
+        <button class="btn-primary" onclick="generateExp()">Построить график</button>
+        <div id="exp-error" class="err"></div>
+      </div>
+    </div>
+
+    <!-- ПРАВАЯ ВЕРХ: таблица -->
+    <div id="exp-result" style="display:none;">
+      <div class="panel">
+        <span class="panel-label">Данные испытания</span>
+        <table id="exp-table"></table>
+        <div class="meta" id="exp-meta"></div>
+      </div>
+    </div>
+
+    <!-- ПРАВАЯ НИЗ: график -->
+    <div id="exp-chartPanel" style="display:none;">
+      <div class="panel">
+        <span class="panel-label">График W — ρd (экспериментальный)</span>
+        <canvas id="exp-chart" width="620" height="360" style="width:100%;height:auto;"></canvas>
+        <div class="legend" id="exp-legend"></div>
+      </div>
+    </div>
+
+  </div>
+  </div><!-- /tab-exp -->
+
+</div><!-- /wrap -->
+
+<footer>
+  © 2026 Geocalculator. Инженерно-геологические расчеты онлайн
+</footer>
+
+<script>
+const startMoisture = {
+  sand_coarse:   {min:3.5, max:4.5},
+  sand_fine:     {min:5.5, max:6.5},
+  supes_light:   {min:6,   max:8},
+  suglinok_heavy:{min:10,  max:12}
+};
+
+const typicalValues = {
+  sand_coarse:    {rhos:2.66, wopt:8,  rhodmax:1.75},
+  sand_fine:      {rhos:2.65, wopt:11, rhodmax:1.70},
+  supes_light:    {rhos:2.70, wopt:14, rhodmax:1.72},
+  suglinok_heavy: {rhos:2.74, wopt:18, rhodmax:1.65}
+};
+
+const dropFraction = {
+  sand_coarse:0.17, sand_fine:0.15,
+  supes_light:0.10, suglinok_heavy:0.07
+};
+
+const soilNames = {
+  sand_coarse:'Пески гравелистые, крупные и средней крупности',
+  sand_fine:'Пески мелкие и пылеватые',
+  supes_light:'Супесь, суглинок лёгкий',
+  suglinok_heavy:'Суглинок тяжёлый, глина'
+};
+
+const isCohesive = soil => soil === 'supes_light' || soil === 'suglinok_heavy';
+
+function rnd(a,b){return Math.random()*(b-a)+a;}
+function round(v,d){return Math.round(v*10**d)/10**d;}
+function val(id){const v=parseFloat(document.getElementById(id).value);return isNaN(v)?null:v;}
+
+function zavRhod(w, rhos){
+  return rhos / (1 + 0.01 * w * rhos);
+}
+
+function toggleCoarse(){
+  const on  = document.getElementById('useCoarse').checked;
+  const box = document.getElementById('coarseFields');
+  box.style.opacity      = on ? '1' : '0.4';
+  box.style.pointerEvents= on ? 'auto' : 'none';
+}
+
+function generate(){
+  document.getElementById('error').textContent = '';
+
+  const soil    = document.getElementById('soil').value;
+  const tv      = typicalValues[soil];
+  const frac    = dropFraction[soil];
+
+  const depth   = val('depth');
+  const rhos    = val('rhos')    ?? tv.rhos;
+  let   wopt    = val('wopt')    ?? tv.wopt;
+  let   rhodmax = val('rhodmax') ?? tv.rhodmax;
+  let peakIdx   = val('peakIdx') ?? 5;
+  peakIdx = Math.max(2, Math.min(8, Math.round(peakIdx)));
+
+  const rhosD    = val('rhos')    === null;
+  const woptD    = val('wopt')    === null;
+  const rhodmaxD = val('rhodmax') === null;
+  const isHypo   = woptD && rhodmaxD;
+
+  let coarseInfo = null;
+  if(document.getElementById('useCoarse').checked){
+    const K    = val('coarseK');
+    const rhoK = val('coarseRhoK');
+    if(K === null || rhoK === null || K <= 0 || K >= 100 || rhoK <= 0){
+      document.getElementById('error').textContent =
+        'Для учёта крупных частиц укажите K (%) и ρk (г/см³).';
+      return;
+    }
+    if(woptD || rhodmaxD){
+      document.getElementById('error').textContent =
+        'Для коррекции п.8.4 необходимо ввести фактические Wопт и ρd max (до удаления крупных частиц).';
+      return;
+    }
+    const rhodmax_corr = (rhodmax * rhoK) / (rhoK - 0.01 * K * (rhoK - rhodmax));
+    const wopt_corr = 0.01 * wopt * (100 - K);
+    coarseInfo = { K, rhoK, wopt_orig: wopt, rhodmax_orig: rhodmax, wopt_corr, rhodmax_corr };
+    wopt    = round(wopt_corr, 2);
+    rhodmax = round(rhodmax_corr, 3);
+  }
+
+  const n    = peakIdx + 2;
+  const peakI = peakIdx - 1;
+
+  const sm = startMoisture[soil];
+  const w1 = rnd(sm.min, sm.max);
+  const baseStep = peakI > 0 ? Math.max((wopt - w1) / peakI, 0.5) : 2;
+
+  const actualW = [];
+  for(let i = 0; i < n; i++){
+    if(i === peakI){ actualW.push(wopt); continue; }
+    const planned = round(w1 + i * baseStep, 2);
+    const noise   = (i === 0) ? rnd(-0.12, 0.12) : rnd(-0.18, 0.22);
+    actualW.push(round(planned + noise, 2));
+  }
+
+  const rhodArr = new Array(n);
+  rhodArr[peakI] = rhodmax;
+
+  function edgeDrop(idx){
+    const dw    = actualW[idx] - wopt;
+    const ratio = Math.min(Math.abs(dw) / 8, 1.4);
+    return Math.max(rhodmax * frac * ratio * ratio, rhodmax * 0.015);
+  }
+
+  if(isHypo){
+    for(let i = 0; i < n; i++){
+      if(i === peakI) continue;
+      const dw    = actualW[i] - wopt;
+      const ratio = Math.min(Math.abs(dw) / 8, 1.4);
+      rhodArr[i]  = round(rhodmax - rhodmax * frac * ratio * ratio, 3);
+    }
+  } else {
+    if(peakI > 0){
+      const target = edgeDrop(0) * rnd(0.9, 1.3);
+      const W      = Array.from({length:peakI}, () => rnd(0.15,1)**1.6);
+      const ws     = W.reduce((a,b)=>a+b, 0);
+      let cum      = 0;
+      const drops  = new Array(peakI);
+      for(let s = peakI-1; s >= 0; s--){ cum += W[s]; drops[s] = target * cum / ws; }
+      const minLast = rhodmax * rnd(0.02, 0.045);
+      if(drops[peakI-1] < minLast) drops[peakI-1] = minLast;
+      const gap = rhodmax * 0.012;
+      for(let s = peakI-2; s >= 0; s--)
+        if(drops[s] <= drops[s+1]) drops[s] = drops[s+1] + gap + rnd(0,.01)*rhodmax;
+      for(let i = 0; i < peakI; i++)
+        rhodArr[i] = round(rhodmax - drops[i] + rnd(-0.0015,0.0015)*rhodmax, 3);
+    }
+
+    const post   = 2;
+    const target = edgeDrop(n-1) * rnd(0.8, 1.2);
+    const W      = Array.from({length:post}, () => rnd(0.15,1)**1.6);
+    const ws     = W.reduce((a,b)=>a+b, 0);
+    let cum      = 0;
+    const drops  = new Array(post);
+    for(let j = 0; j < post; j++){ cum += W[j]; drops[j] = target * cum / ws; }
+    const minFirst = rhodmax * rnd(0.02, 0.045);
+    if(drops[0] < minFirst) drops[0] = minFirst;
+    const gap = rhodmax * 0.012;
+    for(let j = 1; j < post; j++)
+      if(drops[j] <= drops[j-1]) drops[j] = drops[j-1] + gap + rnd(0,.01)*rhodmax;
+    for(let j = 0; j < post; j++)
+      rhodArr[peakI+1+j] = round(rhodmax - drops[j] + rnd(-0.0015,0.0015)*rhodmax, 3);
+  }
+
+  for(let i = 0; i < n; i++) rhodArr[i] = Math.max(rhodArr[i], rhodmax * 0.78);
+
+  let zavWarnings = [];
+  if(isCohesive(soil)){
+    for(let i = peakI+1; i < n; i++){
+      const zavLimit = zavRhod(actualW[i], rhos);
+      if(rhodArr[i] >= zavLimit){
+        rhodArr[i] = round(zavLimit - 0.02, 3);
+        zavWarnings.push(i+1);
+      }
+    }
+  }
+
+  const rows = [];
+  for(let i = 0; i < n; i++){
+    const w    = actualW[i];
+    const rhod = round(rhodArr[i], 3);
+    const rho  = round(rhod * (1 + w/100), 3);
+    const e    = round(rhos/rhod - 1, 3);
+    const sr   = round(w * rhos / (e * 100), 1);
+    rows.push({n:i+1, w, rho, rhod, e, sr, isPeak:i===peakI});
+  }
+
+  let natural = null;
+  const wNat = val('wNat'), rhoNat = val('rhoNat');
+  let rhodNat = val('rhodNat');
+  if(wNat !== null){
+    if(rhoNat === null && rhodNat === null){
+      natural = {w:round(wNat,2), onlyW:true};
+    } else {
+      if(rhodNat === null) rhodNat = rhoNat / (1 + wNat/100);
+      const rhoC = rhoNat ?? round(rhodNat*(1+wNat/100), 3);
+      const eN   = rhos/rhodNat - 1;
+      const srN  = wNat*rhos/(eN*100);
+      natural = {w:round(wNat,2), rho:round(rhoC,3), rhod:round(rhodNat,3), e:round(eN,3), sr:round(srN,1), onlyW:false};
+    }
+  }
+
+  renderTable(rows, soil, depth, rhos, round(baseStep,2), w1, natural,
+              {rhosD, woptD, rhodmaxD, isHypo, zavWarnings, peakIdx, coarseInfo});
+  drawChart(rows, natural, rhos, soil, wopt);
+}
+
+function renderTable(rows, soil, depth, rhos, step, w1, natural, f){
+  let html = `<tr><th>№</th><th>W, %</th><th>ρ, г/см³</th><th>ρd, г/см³</th><th>e</th><th>Sr, %</th></tr>`;
+  rows.forEach(r=>{
+    const isWarn = f.zavWarnings.includes(r.n);
+    html += `<tr class="${r.isPeak?'peak':isWarn?'warn-row':''}">
+      <td>${r.n}</td><td>${r.w.toFixed(2)}</td><td>${r.rho.toFixed(3)}</td>
+      <td>${r.rhod.toFixed(3)}${isWarn?' ⚠':''}</td>
+      <td>${r.e.toFixed(3)}</td><td>${r.sr.toFixed(1)}</td></tr>`;
+  });
+  if(natural?.onlyW){
+    html += `<tr class="nat-row"><td>прир.</td><td>${natural.w.toFixed(2)}</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>`;
+  } else if(natural){
+    html += `<tr class="nat-row"><td>прир.</td><td>${natural.w.toFixed(2)}</td><td>${natural.rho.toFixed(3)}</td><td>${natural.rhod.toFixed(3)}</td><td>${natural.e.toFixed(3)}</td><td>${natural.sr.toFixed(1)}</td></tr>`;
+  }
+  document.getElementById('outTable').innerHTML = html;
+
+  const defs = [];
+  if(f.rhosD) defs.push('ρs');
+  if(f.woptD) defs.push('Wопт');
+  if(f.rhodmaxD) defs.push('ρd max');
+
+  let meta = `Грунт: <b>${soilNames[soil]}</b>`;
+  if(depth !== null) meta += ` · Глубина: ${depth} м`;
+  meta += ` · ρs = ${rhos} г/см³ · W₁ ≈ ${w1.toFixed(1)}% · шаг ≈ ${step}% · точка оптимума: №${f.peakIdx} (ГОСТ 22733-2016)`;
+  if(defs.length) meta += `<br><span class="def">Типовые значения: ${defs.join(', ')}.</span>`;
+  if(f.isHypo)   meta += ` <span class="def">Гипотетическая кривая (лабораторные данные не введены).</span>`;
+  if(f.zavWarnings.length)
+    meta += `<br><span class="warn-text">⚠ Точки №${f.zavWarnings.join(', ')} скорректированы — нисходящая часть не должна пересекать ЛНС (п. 8.5 ГОСТ 22733-2016).</span>`;
+  if(natural) meta += `<br>Строка «прир.» — природное состояние грунта, для сравнения.`;
+  if(isCohesive(soil)) meta += `<br><span class="def">Линия нулевого содержания воздуха построена по формуле (7) ГОСТ 22733-2016.</span>`;
+  if(f.coarseInfo){
+    const ci = f.coarseInfo;
+    meta += `<br><b>Учёт крупных частиц (п. 8.4):</b> K = ${ci.K}%, ρk = ${ci.rhoK} г/см³.
+      До коррекции: Wопт = ${ci.wopt_orig}%, ρd max = ${ci.rhodmax_orig} г/см³.
+      <b>После коррекции: W'опт = ${round(ci.wopt_corr,2)}%, ρ'd max = ${round(ci.rhodmax_corr,3)} г/см³</b>
+      (формулы 5, 6 ГОСТ 22733-2016).`;
+  }
+
+  document.getElementById('metaInfo').innerHTML = meta;
+  document.getElementById('result').style.display = 'block';
+}
+
+function quadFit(pts){
+  let Sx=0,Sx2=0,Sx3=0,Sx4=0,Sy=0,Sxy=0,Sx2y=0;
+  pts.forEach(p=>{
+    const x=p.x,y=p.y,x2=x*x,x3=x2*x,x4=x3*x;
+    Sx+=x;Sx2+=x2;Sx3+=x3;Sx4+=x4;Sy+=y;Sxy+=x*y;Sx2y+=x2*y;
+  });
+  const n=pts.length;
+  const A=[[Sx4,Sx3,Sx2],[Sx3,Sx2,Sx],[Sx2,Sx,n]];
+  const B=[Sx2y,Sxy,Sy];
+  function det(m){
+    return m[0][0]*(m[1][1]*m[2][2]-m[1][2]*m[2][1])
+          -m[0][1]*(m[1][0]*m[2][2]-m[1][2]*m[2][0])
+          +m[0][2]*(m[1][0]*m[2][1]-m[1][1]*m[2][0]);
+  }
+  function rc(m,c,v){const mm=m.map(r=>r.slice());for(let i=0;i<3;i++)mm[i][c]=v[i];return mm;}
+  const D=det(A);
+  return {a:det(rc(A,0,B))/D, b:det(rc(A,1,B))/D, c:det(rc(A,2,B))/D};
+}
+
+function drawChart(rows, natural, rhos, soil, wopt){
+  const canvas = document.getElementById('chart');
+  const ctx    = canvas.getContext('2d');
+  const CW = canvas.width, CH = canvas.height;
+  ctx.clearRect(0,0,CW,CH);
+  ctx.fillStyle='#EAE0C9'; ctx.fillRect(0,0,CW,CH);
+
+  const pad = {l:64,r:20,t:24,b:48};
+  const cohesive = isCohesive(soil);
+
+  const ws  = rows.map(r=>r.w);
+  const rds = rows.map(r=>r.rhod);
+  if(natural && !natural.onlyW){ ws.push(natural.w); rds.push(natural.rhod); }
+  if(natural?.onlyW) ws.push(natural.w);
+
+  let rdMin = Math.min(...rds) - 0.04;
+  let rdMax = Math.max(...rds) + 0.06;
+  let wMin  = Math.min(...ws) - 1;
+  let wMax  = Math.max(...ws) + 1.5;
+
+  if(cohesive){
+    const wZavEnter = 100 * (1/rdMax - 1/rhos);
+    if(wZavEnter > 0 && wZavEnter < wMax + 8){
+      wMax = Math.max(wMax, wZavEnter + 2);
+    }
+  }
+
+  const xS = w  => pad.l + (w-wMin)/(wMax-wMin)*(CW-pad.l-pad.r);
+  const yS = rd => CH-pad.b - (rd-rdMin)/(rdMax-rdMin)*(CH-pad.t-pad.b);
+  const plotL=pad.l, plotR=CW-pad.r, plotT=pad.t, plotB=CH-pad.b;
+
+  ctx.strokeStyle='#D9C9A3'; ctx.fillStyle='#7A6A52';
+  ctx.font='11px monospace'; ctx.lineWidth=1;
+  for(let i=0;i<=6;i++){
+    const w=wMin+(wMax-wMin)*i/6, x=xS(w);
+    ctx.beginPath();ctx.moveTo(x,plotT);ctx.lineTo(x,plotB);ctx.stroke();
+    ctx.fillText(w.toFixed(1), x-10, plotB+16);
+  }
+  for(let i=0;i<=5;i++){
+    const rd=rdMin+(rdMax-rdMin)*i/5, y=yS(rd);
+    ctx.beginPath();ctx.moveTo(plotL,y);ctx.lineTo(plotR,y);ctx.stroke();
+    ctx.fillText(rd.toFixed(3), 4, y+4);
+  }
+
+  ctx.fillStyle='#8A7355'; ctx.font='12px sans-serif';
+  ctx.fillText('W, %', CW/2-12, CH-4);
+  ctx.save(); ctx.translate(13,CH/2+40); ctx.rotate(-Math.PI/2);
+  ctx.fillText('ρd, г/см³',0,0); ctx.restore();
+
+  if(cohesive){
+    const wStartZav = Math.max(0.5, wopt - 2);
+    const wEndZav   = wMax;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(plotL,plotT,plotR-plotL,plotB-plotT); ctx.clip();
+    ctx.strokeStyle='#A6462E'; ctx.lineWidth=2; ctx.setLineDash([7,4]);
+    ctx.beginPath();
+    let first=true;
+    for(let w=wStartZav; w<=wEndZav+0.01; w+=0.15){
+      const x=xS(w), y=yS(zavRhod(w,rhos));
+      first?ctx.moveTo(x,y):ctx.lineTo(x,y); first=false;
+    }
+    ctx.stroke(); ctx.restore();
+    for(let w=wStartZav; w<=wEndZav; w+=0.1){
+      const rd=zavRhod(w,rhos), x=xS(w), y=yS(rd);
+      if(y>=plotT+4&&y<=plotB-4&&x>=plotL+4&&x<=plotR-4){
+        ctx.fillStyle='#A6462E'; ctx.font='10px monospace';
+        ctx.fillText('ЛНС (Sr=1)',x+4,y-5); break;
+      }
+    }
+  }
+
+  const {a,b,c}=quadFit(rows.map(r=>({x:r.w,y:r.rhod})));
+  ctx.save(); ctx.strokeStyle='#D9C9A3'; ctx.lineWidth=1.6; ctx.setLineDash([6,5]);
+  ctx.beginPath();
+  const wDataMax=Math.max(...rows.map(r=>r.w)), wDataMin=Math.min(...rows.map(r=>r.w));
+  for(let i=0;i<=100;i++){
+    const w=wDataMin+(wDataMax-wDataMin)*i/100;
+    const x=xS(w),y=yS(a*w*w+b*w+c);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.stroke(); ctx.restore();
+
+  const sorted=[...rows].sort((p,q)=>p.w-q.w);
+  ctx.strokeStyle='#B06B34'; ctx.lineWidth=2.4;
+  ctx.beginPath();
+  sorted.forEach((r,i)=>{const x=xS(r.w),y=yS(r.rhod);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.stroke();
+
+  rows.forEach(r=>{
+    const x=xS(r.w),y=yS(r.rhod);
+    ctx.beginPath(); ctx.arc(x,y,r.isPeak?6:4.5,0,2*Math.PI);
+    ctx.fillStyle=r.isPeak?'#B06B34':'#3B2E20';
+    ctx.fill(); ctx.strokeStyle='#EAE0C9'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='#7A6A52'; ctx.font='11px monospace';
+    ctx.fillText(r.n,x+8,y-8);
+  });
+
+  if(natural?.onlyW){
+    const x=xS(natural.w);
+    ctx.save(); ctx.strokeStyle='#3f7ea6'; ctx.lineWidth=1.5; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(x,plotT); ctx.lineTo(x,plotB); ctx.stroke(); ctx.restore();
+    ctx.fillStyle='#3f7ea6'; ctx.font='11px monospace';
+    ctx.fillText('W прир.='+natural.w.toFixed(1)+'%',x+5,plotT+14);
+  } else if(natural){
+    const x=xS(natural.w),y=yS(natural.rhod);
+    ctx.beginPath(); ctx.arc(x,y,5.5,0,2*Math.PI);
+    ctx.fillStyle='#3f7ea6'; ctx.fill();
+    ctx.strokeStyle='#EAE0C9'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='#3f7ea6'; ctx.font='11px monospace';
+    ctx.fillText('природ.',x+8,y-8);
+  }
+
+  const legendEl=document.getElementById('legend');
+  let leg=`
+    <span><i style="background:#B06B34;"></i>ломаная по точкам</span>
+    <span><i style="background:#D9C9A3;"></i>регрессионная кривая</span>
+    <span><i style="background:#B06B34;border-radius:50%;width:8px;height:8px;"></i>точка оптимума</span>`;
+  if(cohesive)
+    leg+=`<span><i style="background:#A6462E;"></i>ЛНС — нулевое содержание воздуха (п.8.5)</span>`;
+  if(natural&&!natural.onlyW)
+    leg+=`<span><i style="background:#3f7ea6;border-radius:50%;width:8px;height:8px;"></i>природное состояние</span>`;
+  legendEl.innerHTML=leg;
+
+  document.getElementById('chartPanel').style.display='block';
+}
+
+function copyTable(){
+  const t=document.getElementById('outTable');
+  if(!t.innerHTML) return;
+  let text='';
+  t.querySelectorAll('tr').forEach(tr=>{
+    text+=Array.from(tr.querySelectorAll('th,td')).map(td=>td.textContent.trim()).join('\t')+'\n';
+  });
+  navigator.clipboard.writeText(text);
+}
+
+/* ============================================================
+   ВКЛАДКИ
+   ============================================================ */
+function switchTab(name){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    if(b.getAttribute('onclick').includes("'"+name+"'")) b.classList.add('active');
+  });
+}
+
+/* ============================================================
+   ЭКСПЕРИМЕНТАЛЬНЫЙ РЕЖИМ
+   ============================================================ */
+let expPointCount = 0;
+
+function addExpPoint(w, rhod){
+  expPointCount++;
+  const list = document.getElementById('exp-points-list');
+  const row  = document.createElement('div');
+  row.className = 'exp-point-row';
+  row.dataset.id = expPointCount;
+  row.innerHTML = `
+    <input type="number" step="any" class="exp-w" placeholder="W, %" value="${w??''}">
+    <input type="number" step="any" class="exp-rhod" placeholder="ρd, г/см³" value="${rhod??''}">
+    <button class="btn-del-point" onclick="removeExpPoint(this)" title="Удалить точку">×</button>`;
+  list.appendChild(row);
+}
+
+function removeExpPoint(btn){
+  btn.closest('.exp-point-row').remove();
+}
+
+function getExpPoints(){
+  const rows = document.querySelectorAll('#exp-points-list .exp-point-row');
+  const pts = [];
+  rows.forEach((row,i)=>{
+    const w    = parseFloat(row.querySelector('.exp-w').value);
+    const rhod = parseFloat(row.querySelector('.exp-rhod').value);
+    if(!isNaN(w) && !isNaN(rhod)) pts.push({n:i+1, w, rhod});
+  });
+  return pts;
+}
+
+function generateExp(){
+  document.getElementById('exp-error').textContent = '';
+  const pts = getExpPoints();
+  if(pts.length < 2){
+    document.getElementById('exp-error').textContent = 'Введите минимум 2 точки с корректными значениями.';
+    return;
+  }
+
+  const soil  = document.getElementById('exp-soil').value;
+  const depth = parseFloat(document.getElementById('exp-depth').value);
+  const tv    = typicalValues[soil];
+  const rhos  = parseFloat(document.getElementById('exp-rhos').value) || tv.rhos;
+  const rhosD = isNaN(parseFloat(document.getElementById('exp-rhos').value));
+
+  // Считаем ρ (влажный) из ρd и W
+  pts.forEach(p=>{
+    p.rho = round(p.rhod*(1+p.w/100), 3);
+    p.e   = round(rhos/p.rhod - 1, 3);
+    p.sr  = round(p.w*rhos/(p.e*100), 1);
+  });
+
+  // Таблица
+  let html = `<tr><th>№</th><th>W, %</th><th>ρ, г/см³</th><th>ρd, г/см³</th><th>e</th><th>Sr, %</th></tr>`;
+  pts.forEach(p=>{
+    html += `<tr><td>${p.n}</td><td>${p.w.toFixed(2)}</td><td>${p.rho.toFixed(3)}</td><td>${p.rhod.toFixed(3)}</td><td>${p.e.toFixed(3)}</td><td>${p.sr.toFixed(1)}</td></tr>`;
+  });
+  document.getElementById('exp-table').innerHTML = html;
+
+  let meta = `Грунт: <b>${soilNames[soil]}</b>`;
+  if(!isNaN(depth)) meta += ` · Глубина: ${depth} м`;
+  meta += ` · ρs = ${rhos} г/см³`;
+  if(rhosD) meta += ` <span class="def">(типовое значение)</span>`;
+  meta += ` · Точек: ${pts.length} (ГОСТ 22733-2016)`;
+  if(isCohesive(soil)) meta += `<br><span class="def">Линия нулевого содержания воздуха построена по формуле (7) ГОСТ 22733-2016. Нисходящая часть не должна её пересекать.</span>`;
+  document.getElementById('exp-meta').innerHTML = meta;
+  document.getElementById('exp-result').style.display = 'block';
+
+  drawExpChart(pts, rhos, soil);
+}
+
+function drawExpChart(pts, rhos, soil){
+  const canvas = document.getElementById('exp-chart');
+  const ctx    = canvas.getContext('2d');
+  const CW = canvas.width, CH = canvas.height;
+  ctx.clearRect(0,0,CW,CH);
+  ctx.fillStyle='#EAE0C9'; ctx.fillRect(0,0,CW,CH);
+
+  const pad = {l:64,r:20,t:24,b:48};
+  const cohesive = isCohesive(soil);
+
+  const ws  = pts.map(p=>p.w);
+  const rds = pts.map(p=>p.rhod);
+
+  let rdMin = Math.min(...rds) - 0.04;
+  let rdMax = Math.max(...rds) + 0.06;
+  let wMin  = Math.min(...ws) - 1;
+  let wMax  = Math.max(...ws) + 1.5;
+
+  if(cohesive){
+    const wZavEnter = 100*(1/rdMax - 1/rhos);
+    if(wZavEnter > 0 && wZavEnter < wMax+8) wMax = Math.max(wMax, wZavEnter+2);
+  }
+
+  const xS = w  => pad.l + (w-wMin)/(wMax-wMin)*(CW-pad.l-pad.r);
+  const yS = rd => CH-pad.b - (rd-rdMin)/(rdMax-rdMin)*(CH-pad.t-pad.b);
+  const plotL=pad.l, plotR=CW-pad.r, plotT=pad.t, plotB=CH-pad.b;
+
+  // сетка
+  ctx.strokeStyle='#D9C9A3'; ctx.fillStyle='#7A6A52';
+  ctx.font='11px monospace'; ctx.lineWidth=1;
+  for(let i=0;i<=6;i++){
+    const w=wMin+(wMax-wMin)*i/6, x=xS(w);
+    ctx.beginPath();ctx.moveTo(x,plotT);ctx.lineTo(x,plotB);ctx.stroke();
+    ctx.fillText(w.toFixed(1),x-10,plotB+16);
+  }
+  for(let i=0;i<=5;i++){
+    const rd=rdMin+(rdMax-rdMin)*i/5, y=yS(rd);
+    ctx.beginPath();ctx.moveTo(plotL,y);ctx.lineTo(plotR,y);ctx.stroke();
+    ctx.fillText(rd.toFixed(3),4,y+4);
+  }
+  ctx.fillStyle='#8A7355'; ctx.font='12px sans-serif';
+  ctx.fillText('W, %',CW/2-12,CH-4);
+  ctx.save(); ctx.translate(13,CH/2+40); ctx.rotate(-Math.PI/2);
+  ctx.fillText('ρd, г/см³',0,0); ctx.restore();
+
+  // ЛНС для связных
+  if(cohesive){
+    const wStartZav = Math.max(0.5, Math.min(...ws)-2);
+    ctx.save();
+    ctx.beginPath(); ctx.rect(plotL,plotT,plotR-plotL,plotB-plotT); ctx.clip();
+    ctx.strokeStyle='#A6462E'; ctx.lineWidth=2; ctx.setLineDash([7,4]);
+    ctx.beginPath(); let first=true;
+    for(let w=wStartZav; w<=wMax+0.01; w+=0.15){
+      const x=xS(w), y=yS(zavRhod(w,rhos));
+      first?ctx.moveTo(x,y):ctx.lineTo(x,y); first=false;
+    }
+    ctx.stroke(); ctx.restore();
+    // подпись
+    for(let w=wStartZav; w<=wMax; w+=0.1){
+      const rd=zavRhod(w,rhos), x=xS(w), y=yS(rd);
+      if(y>=plotT+4&&y<=plotB-4&&x>=plotL+4&&x<=plotR-4){
+        ctx.fillStyle='#A6462E'; ctx.font='10px monospace';
+        ctx.fillText('ЛНС (Sr=1)',x+4,y-5); break;
+      }
+    }
+  }
+
+  // регрессионная кривая (если точек ≥ 3)
+  if(pts.length >= 3){
+    const {a,b,c} = quadFit(pts.map(p=>({x:p.w,y:p.rhod})));
+    ctx.save(); ctx.strokeStyle='#D9C9A3'; ctx.lineWidth=1.6; ctx.setLineDash([6,5]);
+    ctx.beginPath();
+    const wDataMin=Math.min(...ws), wDataMax=Math.max(...ws);
+    for(let i=0;i<=100;i++){
+      const w=wDataMin+(wDataMax-wDataMin)*i/100;
+      const x=xS(w), y=yS(a*w*w+b*w+c);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.stroke(); ctx.restore();
+  }
+
+  // ломаная по точкам (сортируем по W)
+  const sorted=[...pts].sort((a,b)=>a.w-b.w);
+  ctx.strokeStyle='#B06B34'; ctx.lineWidth=2.4;
+  ctx.beginPath();
+  sorted.forEach((p,i)=>{
+    const x=xS(p.w),y=yS(p.rhod);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  // маркеры
+  pts.forEach(p=>{
+    const x=xS(p.w), y=yS(p.rhod);
+    ctx.beginPath(); ctx.arc(x,y,5,0,2*Math.PI);
+    ctx.fillStyle='#3B2E20'; ctx.fill();
+    ctx.strokeStyle='#EAE0C9'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='#7A6A52'; ctx.font='11px monospace';
+    ctx.fillText(p.n,x+8,y-8);
+  });
+
+  // легенда
+  let leg = `
+    <span><i style="background:#B06B34;"></i>ломаная по точкам</span>`;
+  if(pts.length>=3)
+    leg += `<span><i style="background:#D9C9A3;"></i>регрессионная кривая</span>`;
+  if(cohesive)
+    leg += `<span><i style="background:#A6462E;"></i>ЛНС — нулевое содержание воздуха (п.8.5)</span>`;
+  document.getElementById('exp-legend').innerHTML = leg;
+  document.getElementById('exp-chartPanel').style.display='block';
+}
+
+// Инициализация — добавляем 3 пустые строки для начала
+document.addEventListener('DOMContentLoaded', ()=>{
+  addExpPoint(); addExpPoint(); addExpPoint();
+});
+
+generate();
+</script>
+</body>
+</html>
