@@ -1,126 +1,167 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
-  <!-- Главная страница -->
-  <url>
-    <loc>https://geocalculator.ru/index.html</loc>
-    <priority>1.0</priority>
-  </url>
-
-  <!-- Основные типы грунта -->
-  <url>
-    <loc>https://geocalculator.ru/scale.html</loc>
-    <priority>0.8</priority>
-  </url>
+<?xml-stylesheet type="text/xsl" href="/download/8ea8b2eee-242a39a5b/sitemap.xsl"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 
   <url>
-    <loc>https://geocalculator.ru/frozen.html</loc>
-    <priority>0.8</priority>
+       <loc>https://geocalculator.ru/</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>1.0000</priority>
   </url>
-
-  <!-- Дисперсный грунт -->
   <url>
-    <loc>https://geocalculator.ru/dispersed/dispersed.html</loc>
-    <priority>0.7</priority>
+       <loc>https://geocalculator.ru/dispersed/dispersed.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.8000</priority>
   </url>
-
   <url>
-    <loc>https://geocalculator.ru/dispersed/vlazhnost.html</loc>
-    <priority>0.7</priority>
+       <loc>https://geocalculator.ru/scale.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.8000</priority>
   </url>
-
   <url>
-    <loc>https://geocalculator.ru/dispersed/granulometr.html</loc>
-    <priority>0.7</priority>
+       <loc>https://geocalculator.ru/frozen.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.8000</priority>
   </url>
-
   <url>
-    <loc>https://geocalculator.ru/dispersed/plastichnost.html</loc>
-    <priority>0.7</priority>
+       <loc>https://geocalculator.ru/other-physical/other-physical.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.8000</priority>
   </url>
-
   <url>
-    <loc>https://geocalculator.ru/dispersed/plotnost.html</loc>
-    <priority>0.7</priority>
+       <loc>https://geocalculator.ru/mechanics/mechanics.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.8000</priority>
   </url>
-
   <url>
-    <loc>https://geocalculator.ru/dispersed/organic.html</loc>
-    <priority>0.7</priority>
+       <loc>https://geocalculator.ru/obrat/obrat.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.8000</priority>
   </url>
-
-  <!-- Прочие физические испытания -->
   <url>
-    <loc>https://geocalculator.ru/other-physical/other-physical.html</loc>
-    <priority>0.7</priority>
+       <loc>https://geocalculator.ru/games/games.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.8000</priority>
   </url>
-
   <url>
-    <loc>https://geocalculator.ru/other-physical/proctor.html</loc>
-    <priority>0.7</priority>
+       <loc>https://geocalculator.ru/reference.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.8000</priority>
   </url>
-
-  <!-- Механические испытания -->
   <url>
-    <loc>https://geocalculator.ru/mechanics/mechanics.html</loc>
-    <priority>0.7</priority>
+       <loc>https://geocalculator.ru/contacts.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.8000</priority>
   </url>
-
   <url>
-    <loc>https://geocalculator.ru/mechanics/compr_shear.html</loc>
-    <priority>0.7</priority>
+       <loc>https://geocalculator.ru/terms.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.8000</priority>
   </url>
-
   <url>
-    <loc>https://geocalculator.ru/mechanics/compr_froz.html</loc>
-    <priority>0.7</priority>
+       <loc>https://geocalculator.ru/terms</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.6400</priority>
   </url>
-
-  <!-- Обратные методы расчета -->
   <url>
-    <loc>https://geocalculator.ru/obrat/obrat.html</loc>
-    <priority>0.6</priority>
+       <loc>https://geocalculator.ru/dispersed/vlazhnost.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.6400</priority>
   </url>
-
   <url>
-    <loc>https://geocalculator.ru/obrat/vlazhnost_obr.html</loc>
-    <priority>0.6</priority>
+       <loc>https://geocalculator.ru/dispersed/granulometr.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.6400</priority>
   </url>
-
   <url>
-    <loc>https://geocalculator.ru/obrat/granulometr_obr.html</loc>
-    <priority>0.6</priority>
+       <loc>https://geocalculator.ru/dispersed/plastichnost.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.6400</priority>
   </url>
-
   <url>
-    <loc>https://geocalculator.ru/obrat/plastichnost_obr.html</loc>
-    <priority>0.6</priority>
+       <loc>https://geocalculator.ru/dispersed/plotnost.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.6400</priority>
   </url>
-
   <url>
-    <loc>https://geocalculator.ru/obrat/plotnost_obr.html</loc>
-    <priority>0.6</priority>
+       <loc>https://geocalculator.ru/dispersed/organic.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.6400</priority>
   </url>
-
   <url>
-    <loc>https://geocalculator.ru/obrat/organic_obr.html</loc>
-    <priority>0.6</priority>
+       <loc>https://geocalculator.ru/other-physical/proctor.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.6400</priority>
   </url>
-
-  <!-- Информационные страницы -->
   <url>
-    <loc>https://geocalculator.ru/reference.html</loc>
-    <priority>0.6</priority>
+       <loc>https://geocalculator.ru/mechanics/compr_shear.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.6400</priority>
   </url>
-
   <url>
-    <loc>https://geocalculator.ru/contacts.html</loc>
-    <priority>0.4</priority>
+       <loc>https://geocalculator.ru/mechanics/compr_froz.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.6400</priority>
   </url>
-
   <url>
-    <loc>https://geocalculator.ru/terms.html</loc>
-    <priority>0.3</priority>
+       <loc>https://geocalculator.ru/obrat/vlazhnost_obr.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.6400</priority>
   </url>
-
+  <url>
+       <loc>https://geocalculator.ru/obrat/granulometr_obr.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.6400</priority>
+  </url>
+  <url>
+       <loc>https://geocalculator.ru/obrat/plastichnost_obr.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.6400</priority>
+  </url>
+  <url>
+       <loc>https://geocalculator.ru/obrat/plotnost_obr.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.6400</priority>
+  </url>
+  <url>
+       <loc>https://geocalculator.ru/obrat/organic_obr.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.6400</priority>
+  </url>
+  <url>
+       <loc>https://geocalculator.ru/games/game-1.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.6400</priority>
+  </url>
+  <url>
+       <loc>https://geocalculator.ru/games/game-2.html</loc>
+       <lastmod>2026-07-14T13:33:48+00:00</lastmod>
+       <changefreq>daily</changefreq>
+       <priority>0.6400</priority>
+  </url>
 </urlset>
