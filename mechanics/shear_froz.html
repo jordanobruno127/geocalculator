@@ -165,6 +165,49 @@ header .lede{
 }
 .warning a{ color:var(--soil-loam); }
 
+/* ===== главные вкладки (теоретический / экспериментальный расчет) ===== */
+.section-label{
+  font-family:var(--font-mono);
+  font-size:13px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  margin-bottom:16px;
+  text-align:center;
+}
+.method-buttons{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+  max-width:900px;
+  margin:0 auto 8px;
+}
+.action-btn.method-btn{
+  padding:12px 20px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background-color:var(--soil-peat-2);
+  color:var(--paper);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14.5px;
+  font-weight:600;
+  transition:border-color .15s, color .15s, background-color .15s;
+  min-width:260px;
+}
+.action-btn.method-btn:hover{
+  border-color:var(--soil-loam);
+  color:var(--soil-loam);
+}
+.action-btn.method-btn.active{
+  background-color:var(--soil-loam);
+  border-color:var(--soil-loam);
+  color:var(--soil-peat);
+}
+.main-tab{ display:none; margin-top:32px; }
+.main-tab.active{ display:block; }
+
 /* ===== легенда обозначений ===== */
 .legend-box{
   max-width:900px;
@@ -423,8 +466,8 @@ footer{
     <p>Представленные данные носят исключительно вспомогательный и информационный характер и не претендуют на достоверность. Модель отражает гипотетическое поведение грунта при выбранных условиях и не подлежит использованию в официальных технических отчетах. Продолжая работу с сайтом, Вы соглашаетесь с <a href="https://geocalculator.ru/terms">Условиями использования.</a></p>
   </div>
 
-  <div class="legend-box">
-    Теоретический расчет
+<div class="method-buttons">
+    <button class="action-btn method-btn active" id="btn-main-theory" onclick="switchMainTab('theory')">Теоретический расчет</button>
   </div>
 
   <!-- PARAMS PANEL -->
