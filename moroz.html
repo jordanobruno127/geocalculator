@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Морозное пучение — Geocalculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --soil-peat:   #F2E9D8;
+  --soil-peat-2: #EAE0C9;
+  --soil-clay:   #8A7355;
+  --soil-loam:   #B06B34;
+  --soil-sand:   #C98F45;
+  --paper:       #3B2E20;
+  --paper-dim:   #7A6A52;
+  --line:        #D9C9A3;
+  --ok:          #7A9B6E;
+  --warn:        #A6462E;
+
+  --font-display: 'Golos Text', -apple-system, sans-serif;
+  --font-body: 'Golos Text', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius: 3px;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+html, body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden;
+  background-color:var(--soil-peat);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(176,107,52,0.08) 1px, transparent 0),
+    repeating-linear-gradient(155deg, rgba(176,107,52,0.05) 0px, rgba(176,107,52,0.05) 1px, transparent 1px, transparent 26px),
+    repeating-linear-gradient(65deg, rgba(138,115,85,0.045) 0px, rgba(138,115,85,0.045) 1px, transparent 1px, transparent 34px);
+  background-size: 18px 18px, auto, auto;
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-size:17px;
+  line-height:1.55;
+  min-height:100vh;
+}
+
+body{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ===== верхняя панель навигации ===== */
+.top-bar{
+  width:100%;
+  padding:18px 32px 0;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+.top-bar button{
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:14.5px;
+  padding:12px 22px;
+  border-radius:var(--radius);
+  cursor:pointer;
+  border:1px solid transparent;
+  transition:opacity .15s, border-color .15s, color .15s;
+}
+#btn-back{
+  background:var(--soil-peat-2);
+  border-color:var(--line);
+  color:var(--paper);
+}
+#btn-back:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+#btn-home{
+  background:var(--soil-loam);
+  border-color:var(--soil-loam);
+  color:var(--soil-peat);
+}
+#btn-home:hover{ opacity:.88; }
+
+/* ===== шапка ===== */
+header{
+  max-width:920px;
+  margin:0 auto;
+  padding:12px 32px 40px;
+  text-align:center;
+  border-bottom:1px solid var(--line);
+  width:100%;
+}
+header h1{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:42px;
+  line-height:1.2;
+  color:var(--paper);
+}
+header .lede{
+  font-size:17px;
+  color:var(--paper-dim);
+  max-width:600px;
+  margin:18px auto 0;
+}
+
+/* ===== контентная обёртка ===== */
+.wrap{
+  max-width:1240px;
+  margin:0 auto;
+  padding:40px 32px 64px;
+  width:100%;
+  flex:1 0 auto;
+}
+
+.section-label{
+  font-family:var(--font-mono);
+  font-size:13px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  margin-bottom:16px;
+  text-align:center;
+}
+
+/* ===== предупреждение ===== */
+.warning{
+  margin-bottom:28px;
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  border-left:3px solid var(--warn);
+  border-radius:var(--radius);
+  padding:14px 18px;
+  max-width:900px;
+  margin-left:auto;
+  margin-right:auto;
+}
+.warning .mark{
+  display:block;
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--warn);
+  font-weight:600;
+  margin-bottom:5px;
+}
+.warning p{
+  font-size:13.5px;
+  line-height:1.55;
+  color:var(--paper-dim);
+}
+
+/* ===== легенда категорий пучинистости ===== */
+.legend-box{
+  max-width:900px;
+  margin:0 auto 32px;
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:14px 18px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px 22px;
+  justify-content:center;
+}
+.legend-item{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:var(--paper-dim);
+}
+.legend-dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+
+/* ===== кнопки выбора раздела расчета ===== */
+.method-buttons{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+  max-width:900px;
+  margin:0 auto 8px;
+}
+.action-btn.method-btn{
+  padding:12px 20px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background-color:var(--soil-peat-2);
+  color:var(--paper);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14.5px;
+  font-weight:600;
+  min-width:300px;
+  transition:border-color .15s, color .15s, background-color .15s;
+}
+.action-btn.method-btn:hover{
+  border-color:var(--soil-loam);
+  color:var(--soil-loam);
+}
+.action-btn.method-btn.active{
+  background-color:var(--soil-loam);
+  border-color:var(--soil-loam);
+  color:var(--soil-peat);
+}
+
+.test-container{
+  display:none;
+  margin-top:32px;
+}
+.test-container.active{
+  display:block;
+}
+
+/* ===== контейнеры испытаний ===== */
+.tests-container{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:20px;
+}
+
+.test-flex{
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  gap:15px;
+  opacity:0;
+  transform:translateY(20px);
+  animation:slideIn .5s ease forwards;
+  width:100%;
+  max-width:900px;
+  margin:0 auto;
+  position:relative;
+}
+
+.calc-wrapper{
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  width:100%;
+  max-width:680px;
+  margin:0 auto;
+}
+
+.calculation-container{
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:24px 26px;
+  background-color:var(--soil-peat-2);
+  min-width:500px;
+  max-width:680px;
+  margin:0 auto;
+  display:block;
+  box-sizing:border-box;
+}
+
+.input-section{ margin-bottom:6px; }
+.input-section h4{
+  margin:0 0 12px;
+  font-family:var(--font-mono);
+  font-size:12px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  font-weight:500;
+  color:var(--paper-dim);
+}
+.input-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px 14px;
+}
+.field label{
+  display:block;
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  letter-spacing:.04em;
+  color:var(--paper-dim);
+  margin-bottom:6px;
+}
+.field select, .field input{
+  width:100%;
+  padding:10px 11px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background:var(--soil-peat);
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-size:14px;
+  outline:none;
+  transition:border-color .15s;
+}
+.field input::placeholder{ color:var(--paper-dim); }
+.field select:focus, .field input:focus{ border-color:var(--soil-loam); }
+
+.hint-note{
+  font-size:12px;
+  color:var(--paper-dim);
+  margin-top:10px;
+  line-height:1.55;
+}
+
+/* ===== образцы (прямой расчет) ===== */
+.samples-list{ margin-top:14px; }
+.sample-block{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:14px 16px;
+  margin-bottom:10px;
+  background-color:var(--soil-peat);
+  position:relative;
+}
+.sample-content{ flex-grow:1; min-width:0; }
+.sample-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.sample-row input{
+  flex:1 1 140px;
+  min-width:0;
+  padding:10px 11px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background:var(--soil-peat-2);
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-size:13.5px;
+}
+.sample-row input::placeholder{ color:var(--paper-dim); }
+.sample-row input:focus{ outline:none; border-color:var(--soil-loam); }
+
+.sample-result{
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--paper-dim);
+  min-width:95px;
+  text-align:right;
+  flex-shrink:0;
+}
+
+.btn-delete-sample{
+  flex-shrink:0;
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  border:1px solid var(--warn);
+  background:var(--soil-peat-2);
+  color:var(--warn);
+  cursor:pointer;
+  font-size:14px;
+  font-weight:600;
+  line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background-color .15s, color .15s;
+}
+.btn-delete-sample:hover{ background-color:var(--warn); color:var(--soil-peat); }
+
+.btn-add-sample{
+  padding:10px 18px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background-color:var(--soil-peat-2);
+  color:var(--paper);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14px;
+  font-weight:600;
+  transition:border-color .15s, color .15s;
+}
+.btn-add-sample:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+
+.action-row{
+  display:flex;
+  justify-content:flex-start;
+  align-items:center;
+  margin-top:18px;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.btn-calc-green{
+  padding:10px 18px;
+  border-radius:var(--radius);
+  border:1px solid var(--soil-loam);
+  background-color:var(--soil-loam);
+  color:var(--soil-peat);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14px;
+  font-weight:600;
+  transition:opacity .15s;
+}
+.btn-calc-green:hover{ opacity:.88; }
+
+.btn-clear{
+  padding:10px 18px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background-color:var(--soil-peat-2);
+  color:var(--paper);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14px;
+  font-weight:600;
+  transition:border-color .15s, color .15s;
+}
+.btn-clear:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+
+.delete-btn{
+  padding:9px 16px;
+  border-radius:var(--radius);
+  border:1px solid var(--warn);
+  background-color:var(--soil-peat);
+  color:var(--warn);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:13.5px;
+  font-weight:600;
+  transition:background-color .15s, color .15s;
+  position:absolute;
+  top:0;
+  right:-92px;
+}
+.delete-btn:hover{ background-color:var(--warn); color:var(--soil-peat); }
+
+/* ===== таблица результатов (обратный метод) ===== */
+.result-table{
+  margin-top:22px;
+  width:100%;
+  border-collapse:collapse;
+  display:none;
+}
+.result-table.on{ display:table; }
+.result-table th, .result-table td{
+  border:1px solid var(--line);
+  padding:9px 10px;
+  text-align:center;
+  font-size:12.5px;
+}
+.result-table th{
+  background:var(--soil-peat);
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  font-weight:500;
+}
+.result-table td{
+  background:var(--soil-peat);
+  font-family:var(--font-mono);
+  color:var(--paper);
+}
+
+.average-container{
+  display:none;
+  flex-direction:column;
+  gap:8px;
+  margin-top:14px;
+  padding:14px 16px;
+  background-color:var(--soil-peat);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+}
+.average-container.on{ display:flex; }
+.average-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.average-label{
+  font-size:14.5px;
+  color:var(--paper);
+}
+.result-average{
+  font-family:var(--font-mono);
+  font-weight:600;
+  font-size:15px;
+  color:var(--soil-loam);
+  text-align:right;
+}
+.category-badge{
+  font-family:var(--font-mono);
+  font-weight:600;
+  font-size:13px;
+  padding:5px 12px;
+  border-radius:var(--radius);
+  color:var(--soil-peat);
+}
+
+.error{ color:var(--warn); font-size:13px; margin-top:10px; min-height:18px; font-family:var(--font-mono); }
+
+.add-test-row{
+  text-align:center;
+  margin-top:25px;
+}
+.action-btn{
+  padding:12px 22px;
+  border-radius:var(--radius);
+  border:1px solid var(--soil-loam);
+  background-color:var(--soil-loam);
+  color:var(--soil-peat);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14.5px;
+  font-weight:600;
+  transition:opacity .15s;
+}
+.action-btn:hover{ opacity:.88; }
+
+/* ===== футер ===== */
+footer{
+  flex-shrink:0;
+  max-width:920px;
+  margin:36px auto 0;
+  padding:36px 32px 40px;
+  border-top:1px solid var(--line);
+  text-align:center;
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--paper-dim);
+  width:100%;
+}
+
+@keyframes slideIn{
+  to{ opacity:1; transform:translateY(0); }
+}
+
+@media (max-width:900px){
+  header h1{ font-size:30px; }
+  .top-bar{ padding:14px 20px 0; }
+  header{ padding:56px 20px 32px; }
+  .wrap{ padding:28px 20px 48px; }
+
+  .action-btn.method-btn{ width:100%; min-width:0; max-width:420px; }
+  .input-row{ grid-template-columns:1fr; }
+  .test-flex{ flex-direction:column; align-items:center; }
+  .calc-wrapper{ width:100%; max-width:90%; margin:0 auto; }
+  .calculation-container{
+    width:100%;
+    max-width:90%;
+    min-width:280px;
+    margin:0 auto;
+  }
+  .delete-btn{
+    position:static;
+    align-self:flex-end;
+    margin-top:10px;
+  }
+  .result-table{ font-size:11px; }
+  .result-table th, .result-table td{ padding:6px; }
+}
+
+@media (max-width:400px){
+  .calculation-container{ min-width:260px; max-width:90%; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <button id="btn-back" onclick="history.back()">Назад</button>
+  <button id="btn-home" onclick="location.href='/'">Главная</button>
+</div>
+
+<header>
+  <h1>Морозное пучение</h1>
+  <p class="lede"><strong>ГОСТ 28622-2012 • ГОСТ 25100-2020</strong></p>
+</header>
+
+<div class="wrap">
+
+  <div class="warning">
+    <span class="mark">Внимание</span>
+    <p>Представленные данные носят исключительно вспомогательный и информационный характер и не претендуют на достоверность. Модель отражает гипотетическое поведение грунта при выбранных условиях и не подлежит использованию в официальных технических отчетах. Продолжая работу с сайтом, Вы соглашаетесь с <a href="https://geocalculator.ru/terms">Условиями использования.</a></p>
+  </div>
+
+  <div class="section-label">Степень пучинистости грунта, εfh</div>
+  <div class="legend-box">
+    <span class="legend-item"><span class="legend-dot" style="background:var(--ok)"></span>Непучинистый (&lt; 0,01)</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--soil-sand)"></span>Слабопучинистый (0,01–0,035)</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--soil-loam)"></span>Среднепучинистый (0,035–0,07)</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--warn)"></span>Сильнопучинистый (≥ 0,07)</span>
+  </div>
+
+  <div class="section-label">Вид расчёта</div>
+  <div class="method-buttons">
+    <button class="action-btn method-btn initial" id="btn-direct" onclick="App.toggleMethod('direct')" aria-label="Прямой расчет">Экспериментальный расчет</button>
+    <button class="action-btn method-btn initial" id="btn-reverse" onclick="App.toggleMethod('reverse')" aria-label="Обратный метод расчета">Теоретический расчет</button>
+  </div>
+
+  <!-- ═══════════════ ПРЯМОЙ РАСЧЕТ ═══════════════ -->
+  <div id="test-container-direct" class="test-container">
+    <div class="tests-container" id="tests-container-direct"></div>
+    <div class="add-test-row">
+      <button class="action-btn" onclick="App.addTest('direct')" aria-label="Добавить новое испытание">+ Добавить испытание</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════ ОБРАТНЫЙ МЕТОД ═══════════════ -->
+  <div id="test-container-reverse" class="test-container">
+    <div class="tests-container" id="tests-container-reverse"></div>
+    <div class="add-test-row">
+      <button class="action-btn" onclick="App.addTest('reverse')" aria-label="Добавить новое испытание">+ Добавить испытание</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  © 2026 Geocalculator. Инженерно-геологические расчеты онлайн
+</footer>
+
+<script>
+const App = {
+
+    init() {
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Frost heave page loaded');
+            this.toggleMethod('direct');
+        });
+    },
+
+    navigate(url) {
+        location.href = url;
+    },
+
+    rand(min, max) {
+        return Math.random() * (max - min) + min;
+    },
+
+    classify(efh) {
+        if (efh < 0.01)   return { name: 'Непучинистый',      color: 'var(--ok)' };
+        if (efh < 0.035)  return { name: 'Слабопучинистый',   color: 'var(--soil-sand)' };
+        if (efh < 0.07)   return { name: 'Среднепучинистый',  color: 'var(--soil-loam)' };
+        return                    { name: 'Сильнопучинистый', color: 'var(--warn)' };
+    },
+
+    toggleMethod(method) {
+        ['direct', 'reverse'].forEach(id => {
+            document.getElementById(`btn-${id}`).classList.remove('initial', 'active');
+            document.getElementById(`test-container-${id}`).classList.remove('active');
+        });
+        document.getElementById(`btn-${method}`).classList.add('active');
+        document.getElementById(`test-container-${method}`).classList.add('active');
+        if (!document.getElementById(`tests-container-${method}`).querySelector('.test-flex')) {
+            this.addTest(method);
+        }
+    },
+
+    addTest(method) {
+        if (method === 'direct') this.addDirectTest();
+        else this.addReverseTest();
+    },
+
+    /* ═══════════════════════════════════════════════
+       ПРЯМОЙ РАСЧЕТ:  εfh = hf / di  (ГОСТ 28622-2012, п.8)
+       ═══════════════════════════════════════════════ */
+    addDirectTest() {
+        const container = document.getElementById("tests-container-direct");
+        const testFlex = document.createElement("div");
+        testFlex.classList.add("test-flex");
+
+        const calcWrapper = document.createElement("div");
+        calcWrapper.classList.add("calc-wrapper");
+
+        const calcDiv = document.createElement("div");
+        calcDiv.classList.add("calculation-container");
+
+        calcDiv.innerHTML = `
+            <div class="input-section">
+                <h4>Измерения (можно добавить несколько образцов)</h4>
+                <div class="samples-list"></div>
+                <button class="btn-add-sample" onclick="App.addDirectSample(this)" aria-label="Добавить образец">+ Добавить образец</button>
+            </div>
+
+            <div class="error"></div>
+
+            <div class="average-container">
+                <div class="average-row">
+                    <span class="average-label">Средняя εfh:</span>
+                    <div class="result-average avg-efh">-</div>
+                </div>
+                <div class="average-row">
+                    <span class="average-label">Степень пучинистости:</span>
+                    <span class="category-badge">-</span>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <button class="btn-calc-green" onclick="App.calculateDirect(this)" aria-label="Рассчитать">Рассчитать</button>
+                <button class="btn-clear" onclick="App.clearDirect(this)" aria-label="Очистить поля">Очистить</button>
+            </div>
+        `;
+
+        calcWrapper.appendChild(calcDiv);
+        testFlex.appendChild(calcWrapper);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.classList.add("delete-btn");
+        deleteBtn.textContent = "Удалить";
+        deleteBtn.setAttribute("aria-label", "Удалить испытание");
+        deleteBtn.onclick = () => testFlex.remove();
+        testFlex.appendChild(deleteBtn);
+
+        container.appendChild(testFlex);
+
+        this.addDirectSample(calcDiv.querySelector(".btn-add-sample"));
+    },
+
+    addDirectSample(btn) {
+        const calcDiv = btn.closest(".calculation-container");
+        const list = calcDiv.querySelector(".samples-list");
+        const sampleCount = list.querySelectorAll(".sample-block").length + 1;
+
+        const sampleBlock = document.createElement("div");
+        sampleBlock.classList.add("sample-block");
+        sampleBlock.innerHTML = `
+            <div class="sample-content">
+                <div class="sample-row">
+                    <input type="number" class="hf-input" step="0.01" min="0" placeholder="hf — деформация пучения, мм" aria-label="Вертикальная деформация пучения hf" onkeypress="App.focusNextDirect(event, this)">
+                    <input type="number" class="di-input" step="0.1" min="0" placeholder="di — толщина промерзшего слоя, мм" aria-label="Толщина промерзшего слоя di" onkeypress="App.focusNextDirect(event, this)">
+                </div>
+            </div>
+            <div class="sample-result">-</div>
+            <button class="btn-delete-sample" onclick="App.deleteDirectSample(this)" aria-label="Удалить образец">—</button>
+        `;
+        list.appendChild(sampleBlock);
+        if (sampleCount === 1) {
+            sampleBlock.querySelector(".btn-delete-sample").style.visibility = "hidden";
+        }
+    },
+
+    deleteDirectSample(btn) {
+        const calcDiv = btn.closest(".calculation-container");
+        const list = calcDiv.querySelector(".samples-list");
+        if (list.querySelectorAll(".sample-block").length <= 1) return;
+        btn.closest(".sample-block").remove();
+    },
+
+    focusNextDirect(event, input) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            const calcDiv = input.closest(".calculation-container");
+            const allInputs = Array.from(calcDiv.querySelectorAll(".hf-input, .di-input"));
+            const idx = allInputs.indexOf(input);
+            if (idx === allInputs.length - 1) {
+                calcDiv.querySelector(".btn-calc-green").click();
+            } else {
+                allInputs[idx + 1].focus();
+            }
+        }
+    },
+
+    calculateDirect(btn) {
+        const calcDiv = btn.closest(".calculation-container");
+        const errorEl = calcDiv.querySelector(".error");
+        errorEl.textContent = "";
+
+        const samples = calcDiv.querySelectorAll(".sample-block");
+        let values = [];
+
+        samples.forEach(sample => {
+            const hf = parseFloat(sample.querySelector(".hf-input").value);
+            const di = parseFloat(sample.querySelector(".di-input").value);
+
+            if (isNaN(hf) || isNaN(di) || hf < 0 || di <= 0) {
+                sample.querySelector(".sample-result").textContent = "Некорректные данные";
+                return;
+            }
+
+            const efh = hf / di;
+            sample.querySelector(".sample-result").textContent = `εfh = ${efh.toFixed(4)} д.е.`;
+            values.push(efh);
+        });
+
+        if (values.length === 0) {
+            errorEl.textContent = "Заполните hf и di хотя бы для одного образца";
+            calcDiv.querySelector(".average-container").classList.remove("on");
+            return;
+        }
+
+        const avgEfh = values.reduce((s, v) => s + v, 0) / values.length;
+        const category = this.classify(avgEfh);
+
+        calcDiv.querySelector(".avg-efh").textContent = avgEfh.toFixed(4) + " д.е.";
+        const badge = calcDiv.querySelector(".category-badge");
+        badge.textContent = category.name;
+        badge.style.background = category.color;
+        calcDiv.querySelector(".average-container").classList.add("on");
+    },
+
+    clearDirect(btn) {
+        const calcDiv = btn.closest(".calculation-container");
+        const list = calcDiv.querySelector(".samples-list");
+        list.innerHTML = "";
+        this.addDirectSample(calcDiv.querySelector(".btn-add-sample"));
+        calcDiv.querySelector(".error").textContent = "";
+        calcDiv.querySelector(".average-container").classList.remove("on");
+    },
+
+    /* ═══════════════════════════════════════════════
+       ОБРАТНЫЙ МЕТОД: по заданной εfh генерируются
+       синтетические опыты (hf, di), среднее из которых
+       ровно равно введённому значению
+       ═══════════════════════════════════════════════ */
+    addReverseTest() {
+        const container = document.getElementById("tests-container-reverse");
+        const testFlex = document.createElement("div");
+        testFlex.classList.add("test-flex");
+
+        const calcWrapper = document.createElement("div");
+        calcWrapper.classList.add("calc-wrapper");
+
+        const calcDiv = document.createElement("div");
+        calcDiv.classList.add("calculation-container");
+
+        calcDiv.innerHTML = `
+            <div class="input-section">
+                <h4>Параметры образца</h4>
+                <div class="input-row">
+                    <div class="field">
+                        <label>Тип грунта</label>
+                        <select class="soil-type" aria-label="Тип грунта">
+                            <option value="Песок">Песок</option>
+                            <option value="Супесь">Супесь</option>
+                            <option value="Суглинок">Суглинок</option>
+                            <option value="Глина">Глина</option>
+                            <option value="Торф">Торф</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Глубина отбора, м</label>
+                        <input type="number" class="sample-depth" step="0.1" min="0" placeholder="напр. 1.5" onkeypress="App.focusNextInput(event, this)">
+                    </div>
+                    <div class="field">
+                        <label>Относительная деформация пучения εfh, д.е.</label>
+                        <input type="number" class="target-efh" step="0.0001" min="0" placeholder="напр. 0.045" onkeypress="App.focusNextInput(event, this)">
+                    </div>
+                    <div class="field">
+                        <label>Количество опытов</label>
+                        <input type="number" class="sample-count" step="1" min="1" value="1" onkeypress="App.focusNextInput(event, this)">
+                    </div>
+                </div>
+                <p class="hint-note">При одном опыте в таблице будет показано введённое значение εfh. При двух и более — введённое значение становится средним по всем опытам, а по отдельным опытам генерируется реалистичный разброс hf и di.</p>
+            </div>
+
+            <div class="error"></div>
+
+            <table class="result-table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>σ, МПа</th>
+                        <th>hf, мм</th>
+                        <th>di, мм</th>
+                        <th>εfh, д.е.</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div class="average-container">
+                <div class="average-row">
+                    <span class="average-label">Средняя εfh:</span>
+                    <div class="result-average avg-efh">-</div>
+                </div>
+                <div class="average-row">
+                    <span class="average-label">Степень пучинистости:</span>
+                    <span class="category-badge">-</span>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <button class="btn-calc-green" onclick="App.calculateReverse(this)" aria-label="Рассчитать">Рассчитать</button>
+                <button class="btn-clear" onclick="App.clearReverse(this)" aria-label="Очистить поля">Очистить</button>
+            </div>
+        `;
+
+        calcWrapper.appendChild(calcDiv);
+        testFlex.appendChild(calcWrapper);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.classList.add("delete-btn");
+        deleteBtn.textContent = "Удалить";
+        deleteBtn.setAttribute("aria-label", "Удалить испытание");
+        deleteBtn.onclick = () => testFlex.remove();
+        testFlex.appendChild(deleteBtn);
+
+        container.appendChild(testFlex);
+    },
+
+    focusNextInput(event, input) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            const calcDiv = input.closest(".calculation-container");
+            calcDiv.querySelector(".btn-calc-green").click();
+        }
+    },
+
+    calculateReverse(btn) {
+        const calcDiv = btn.closest(".calculation-container");
+        const errorEl = calcDiv.querySelector(".error");
+        errorEl.textContent = "";
+
+        const depth = parseFloat(calcDiv.querySelector(".sample-depth").value);
+        const target = parseFloat(calcDiv.querySelector(".target-efh").value);
+        let count = parseInt(calcDiv.querySelector(".sample-count").value, 10);
+
+        if (isNaN(depth) || depth < 0) {
+            errorEl.textContent = "Введите корректную глубину отбора";
+            calcDiv.querySelector(".result-table").classList.remove("on");
+            calcDiv.querySelector(".average-container").classList.remove("on");
+            return;
+        }
+        if (isNaN(target) || target <= 0) {
+            errorEl.textContent = "Введите корректное значение εfh";
+            calcDiv.querySelector(".result-table").classList.remove("on");
+            calcDiv.querySelector(".average-container").classList.remove("on");
+            return;
+        }
+        if (isNaN(count) || count < 1) count = 1;
+        count = Math.floor(count);
+        calcDiv.querySelector(".sample-count").value = count;
+
+        // Вертикальная нагрузка: глубина x 2 (0.02 МПа/м), но не более 0,05 МПа
+        const sigma = Number(Math.min(depth * 0.02, 0.05).toFixed(3));
+
+        const rows = [];
+
+        if (count === 1) {
+            const di = this.rand(93, 98);
+            const hf = target * di;
+            rows.push({
+                num: 1,
+                sigma: sigma,
+                hf: Number(hf.toFixed(2)),
+                di: Number(di.toFixed(1)),
+                efh: Number(target.toFixed(4))
+            });
+        } else {
+            const spread = 0.06;
+            const deviations = [];
+            for (let i = 0; i < count - 1; i++) {
+                deviations.push(this.rand(-spread, spread));
+            }
+            const sumDev = deviations.reduce((a, b) => a + b, 0);
+            deviations.push(-sumDev);
+
+            deviations.forEach((d, i) => {
+                const efh = Math.max(0.0001, target * (1 + d));
+                const di = this.rand(93, 98);
+                const hf = efh * di;
+                rows.push({
+                    num: i + 1,
+                    sigma: sigma,
+                    hf: Number(hf.toFixed(2)),
+                    di: Number(di.toFixed(1)),
+                    efh: Number(efh.toFixed(4))
+                });
+            });
+        }
+
+        const avgEfh = rows.reduce((sum, r) => sum + r.efh, 0) / rows.length;
+        const category = this.classify(target);
+
+        const tbody = calcDiv.querySelector(".result-table tbody");
+        tbody.innerHTML = rows.map(r => `
+            <tr>
+                <td>${r.num}</td>
+                <td>${r.sigma.toFixed(3)}</td>
+                <td>${r.hf.toFixed(2)}</td>
+                <td>${r.di.toFixed(1)}</td>
+                <td>${r.efh.toFixed(4)}</td>
+            </tr>
+        `).join('');
+        calcDiv.querySelector(".result-table").classList.add("on");
+
+        calcDiv.querySelector(".avg-efh").textContent = avgEfh.toFixed(4) + " д.е.";
+        const badge = calcDiv.querySelector(".category-badge");
+        badge.textContent = category.name;
+        badge.style.background = category.color;
+        calcDiv.querySelector(".average-container").classList.add("on");
+    },
+
+    clearReverse(btn) {
+        const calcDiv = btn.closest(".calculation-container");
+        calcDiv.querySelector(".sample-depth").value = "";
+        calcDiv.querySelector(".target-efh").value = "";
+        calcDiv.querySelector(".sample-count").value = "1";
+        calcDiv.querySelector(".soil-type").selectedIndex = 0;
+        calcDiv.querySelector(".error").textContent = "";
+        calcDiv.querySelector(".result-table").classList.remove("on");
+        calcDiv.querySelector(".result-table tbody").innerHTML = "";
+        calcDiv.querySelector(".average-container").classList.remove("on");
+    }
+};
+
+App.init();
+</script>
+</body>
+</html>
