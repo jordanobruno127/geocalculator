@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -243,6 +244,7 @@ header .lede{
   margin:0 auto;
   display:block;
   box-sizing:border-box;
+  overflow-x:hidden;
 }
 
 .sample-block{
@@ -292,6 +294,7 @@ header .lede{
 }
 .extra-row input, .extra-row select{
   width:100%;
+  max-width:100%;
   padding:9px 10px;
   border-radius:var(--radius);
   border:1px solid var(--line);
@@ -299,6 +302,7 @@ header .lede{
   color:var(--paper);
   font-family:var(--font-body);
   font-size:13.5px;
+  box-sizing:border-box;
 }
 .extra-row input::placeholder{ color:var(--paper-dim); }
 .extra-row input:focus, .extra-row select:focus{ outline:none; border-color:var(--soil-loam); }
@@ -309,6 +313,25 @@ header .lede{
   text-transform:uppercase;
   color:var(--paper-dim);
   margin-bottom:2px;
+}
+.manual-wtot-row .manual-wtot-controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:stretch;
+  width:100%;
+  max-width:100%;
+}
+.manual-wtot-row .manual-wtot-controls input.manual-wtot{
+  flex:1 1 140px;
+  min-width:0;
+  width:auto;
+  max-width:100%;
+}
+.manual-wtot-row .manual-wtot-controls .btn-calc-green{
+  flex:0 0 auto;
+  white-space:nowrap;
+  max-width:100%;
 }
 
 .sample-result{
@@ -763,7 +786,7 @@ footer{
                let sampleContent = "";
                 if (method === 'moisture') {
                     sampleContent = `
-                        <div class="sample-block" id="initial-moisture-block">
+                        <div class="sample-block initial-moisture-block">
                             <div class="sample-content">
                                 <div class="sample-row">
                                     <input type="number" class="box-weight" placeholder="Вес бюкса, г" aria-label="Вес бюкса" onkeypress="App.focusNextInput(event, this)">
@@ -771,26 +794,28 @@ footer{
                                     <input type="number" class="dry-weight" placeholder="Вес бюкса с сухим грунтом, г" aria-label="Вес бюкса с сухим грунтом" onkeypress="App.focusNextInput(event, this)">
                                 </div>
                             </div>
-                            <div class="sample-result" id="result-moisture">-</div>
+                            <div class="sample-result result-moisture">-</div>
                         </div>
-                        <div class="average-container" id="wtot-container">
+                        <div class="average-container wtot-container">
                             <span class="average-label">Суммарная влажность (Wtot):</span>
-                            <div class="result-average"><span class="density-value" id="wtot-value">-</span> д.е.</div>
+                            <div class="result-average"><span class="density-value wtot-value">-</span> д.е.</div>
                         </div>
                         <div class="action-row">
                             <div>
                                 <button class="btn-calc-green" onclick="App.calculateTest(this, 'moisture')" aria-label="Рассчитать">Рассчитать</button>
                                 <button class="btn-clear" onclick="App.clearTest(this)" aria-label="Очистить поля">Очистить</button>
-                                <button class="btn-continue" id="btn-continue-moisture" onclick="App.continueCalculation('moisture', 1)" aria-label="Продолжить расчёт" style="display: none;">Продолжить</button>
+                                <button class="btn-continue btn-continue-moisture" onclick="App.continueCalculation(this, 'moisture', 1)" aria-label="Продолжить расчёт" style="display: none;">Продолжить</button>
                             </div>
-                            <button class="btn-manual-toggle" id="manual-toggle-moisture" onclick="App.toggleManualInput('moisture')" aria-label="Ввести значение суммарной влажности вручную">Ввести значение суммарной влажности вручную</button>
+                            <button class="btn-manual-toggle manual-toggle-moisture" onclick="App.toggleManualInput(this)" aria-label="Ввести значение суммарной влажности вручную">Ввести значение суммарной влажности вручную</button>
                         </div>
-                        <div class="extra-row" id="manual-wtot-row" style="display: none; margin-top: 10px;">
+                        <div class="extra-row manual-wtot-row" style="display: none; margin-top: 10px;">
                             <label>Ввести Wtot вручную:</label>
-                            <input type="number" class="manual-wtot" placeholder="Суммарная влажность (Wtot), д.е." aria-label="Суммарная влажность вручную" onkeypress="App.focusNextInput(event, this)">
-                            <button class="btn-calc-green" onclick="App.useManualWtot(this)" aria-label="Использовать вручную введённое значение">Использовать</button>
+                            <div class="manual-wtot-controls">
+                              <input type="number" class="manual-wtot" placeholder="Суммарная влажность (Wtot), д.е." aria-label="Суммарная влажность вручную" onkeypress="App.focusNextInput(event, this)">
+                              <button class="btn-calc-green" onclick="App.useManualWtot(this)" aria-label="Использовать вручную введённое значение">Использовать</button>
+                            </div>
                         </div>
-                        <div id="extra-result-moisture" style="display: none; margin-top: 10px;">
+                        <div class="extra-result-moisture" style="display: none; margin-top: 10px;">
                             <p>Расчет дополнительных параметров:</p>
                             <div class="extra-row">
                                 <label>Влажность на границе раскатывания, д.е.:</label>
@@ -813,11 +838,11 @@ footer{
                                     <option value="flowing">Текучая</option>
                                 </select>
                             </div>
-                            <button class="btn-calc-green" id="calc-extra-moisture" onclick="App.calculateExtra('moisture')" aria-label="Рассчитать доп. параметры" style="display: none; margin-top: 10px;">Рассчитать доп. параметры</button>
-                            <p>Влажность между прослойками (Wm): <span id="wm-value">-</span> д.е.</p>
-                            <p>Влажность за счет ледяных включений (Wi): <span id="wi-value">-</span> д.е.</p>
-                            <p>Влажность за счет незамерзшей воды (Ww): <span id="ww-value">-</span> д.е.</p>
-                            <p>Влажность за счет порового льда (Wic): <span id="wic-value">-</span> д.е.</p>
+                            <button class="btn-calc-green calc-extra-moisture" onclick="App.calculateExtra(this, 'moisture')" aria-label="Рассчитать доп. параметры" style="display: none; margin-top: 10px;">Рассчитать доп. параметры</button>
+                            <p>Влажность между прослойками (Wm): <span class="wm-value">-</span> д.е.</p>
+                            <p>Влажность за счет ледяных включений (Wi): <span class="wi-value">-</span> д.е.</p>
+                            <p>Влажность за счет незамерзшей воды (Ww): <span class="ww-value">-</span> д.е.</p>
+                            <p>Влажность за счет порового льда (Wic): <span class="wic-value">-</span> д.е.</p>
                         </div>
                     `;
                 } else if (method === 'ice') {
@@ -1049,21 +1074,22 @@ if (method === 'freezing') {
 
 
                 else if (method === 'moisture') {
-                    const sample = block.querySelector("#initial-moisture-block");
+                    const calcDiv = btn.closest(".calculation-container");
+                    const sample = calcDiv.querySelector(".initial-moisture-block");
                     const boxWeight = parseFloat(sample.querySelector(".box-weight").value);
                     const wetWeight = parseFloat(sample.querySelector(".wet-weight").value);
                     const dryWeight = parseFloat(sample.querySelector(".dry-weight").value);
 
                     if (isNaN(boxWeight) || isNaN(wetWeight) || isNaN(dryWeight) || boxWeight < 0 || wetWeight <= boxWeight || dryWeight < boxWeight) {
-                        sample.querySelector("#result-moisture").textContent = "Некорректные данные";
-                        document.getElementById("wtot-value").textContent = "-";
+                        sample.querySelector(".result-moisture").textContent = "Некорректные данные";
+                        calcDiv.querySelector(".wtot-value").textContent = "-";
                         return;
                     }
 
                     const wtot = (((100 * (wetWeight - dryWeight)) / (dryWeight - boxWeight)) * 0.01).toFixed(3);
-                    document.getElementById("wtot-value").textContent = wtot;
-                    sample.querySelector("#result-moisture").textContent = `Wtot рассчитана: ${wtot} д.е.`;
-                    document.getElementById("btn-continue-moisture").style.display = "inline-block";
+                    calcDiv.querySelector(".wtot-value").textContent = wtot;
+                    sample.querySelector(".result-moisture").textContent = `Wtot рассчитана: ${wtot} д.е.`;
+                    calcDiv.querySelector(".btn-continue-moisture").style.display = "inline-block";
                 } else if (method === 'ice') {
                     const sample = block.querySelector(".sample-block");
                     const wtot = parseFloat(sample.querySelector(".wtot").value);
@@ -1119,8 +1145,10 @@ if (method === 'freezing') {
 
                         const Cmth = Math.round(Cth * 1000 / pd);
                         const Cmf = Math.round(Cf * 1000 / pd);
-                        const ath = (λth / Cmth * 1000).toFixed(3);
-                        const af = (λf / Cmf * 1000).toFixed(3);
+                        // a = λ / C (объёмная); табличные Cth/Cf уже в ×10⁶ Дж/(м³·°С)
+                        // для вывода ×10⁻⁶ м²/с: ath = λth / Cth
+                        const ath = (λth / Cth).toFixed(3);
+                        const af = (λf / Cf).toFixed(3);
 
                         totalLth += λth;
                         totalLf += λf;
@@ -1161,24 +1189,32 @@ if (method === 'freezing') {
             clearTest(btn) {
                 const calcDiv = btn.closest(".calculation-container");
                 calcDiv.querySelectorAll(".sample-block input, .sample-block select").forEach(input => input.value = "");
-                calcDiv.querySelectorAll(".sample-result, .density-value, #wm-value, #wi-value, #ww-value, #wic-value, #itot-value, #ii-value, #iic-value, #sr-value, #lth-value, #lf-value, #cmth-value, #cmf-value, #cth-value, #cf-value, #ath-value, #af-value").forEach(el => el.textContent = "-");
-                if (calcDiv.querySelector("#btn-continue-moisture")) {
-                    calcDiv.querySelector("#btn-continue-moisture").style.display = "none";
-                    calcDiv.querySelector("#manual-wtot-row").style.display = "none";
-                    calcDiv.querySelector("#extra-result-moisture").style.display = "none";
-                    calcDiv.querySelector("#wtot-container").style.display = "block";
-                    calcDiv.querySelector("#initial-moisture-block").style.display = "block";
-                    calcDiv.querySelector("#manual-toggle-moisture").style.display = "inline-block";
-                    calcDiv.querySelector("#calc-extra-moisture").style.display = "none";
+                calcDiv.querySelectorAll(".sample-result, .density-value, .wtot-value, .wm-value, .wi-value, .ww-value, .wic-value, #itot-value, #ii-value, #iic-value, #sr-value, #lth-value, #lf-value, #cmth-value, #cmf-value, #cth-value, #cf-value, #ath-value, #af-value").forEach(el => el.textContent = "-");
+                if (calcDiv.querySelector(".btn-continue-moisture")) {
+                    calcDiv.querySelector(".btn-continue-moisture").style.display = "none";
+                    calcDiv.querySelector(".manual-wtot-row").style.display = "none";
+                    calcDiv.querySelector(".extra-result-moisture").style.display = "none";
+                    calcDiv.querySelector(".wtot-container").style.display = "block";
+                    calcDiv.querySelector(".initial-moisture-block").style.display = "block";
+                    calcDiv.querySelector(".manual-toggle-moisture").style.display = "inline-block";
+                    const calcExtraBtn = calcDiv.querySelector(".calc-extra-moisture");
+                    if (calcExtraBtn) calcExtraBtn.style.display = "none";
+                    const actionRow = calcDiv.querySelector(".action-row");
+                    if (actionRow) {
+                        const greenBtn = actionRow.querySelector(".btn-calc-green");
+                        const clearBtn = actionRow.querySelector(".btn-clear");
+                        if (greenBtn) greenBtn.style.display = "";
+                        if (clearBtn) clearBtn.style.display = "";
+                    }
                 }
             },
 
-            continueCalculation(method, step) {
+            continueCalculation(btn, method, step) {
                 if (method === 'moisture') {
-                    const calcDiv = document.getElementById("test-container-moisture").querySelector(".calculation-container");
+                    const calcDiv = btn.closest(".calculation-container");
                     if (step === 1) {
-                        document.getElementById("extra-result-moisture").style.display = "block";
-                        document.getElementById("calc-extra-moisture").style.display = "inline-block";
+                        calcDiv.querySelector(".extra-result-moisture").style.display = "block";
+                        calcDiv.querySelector(".calc-extra-moisture").style.display = "inline-block";
                     }
                 }
             },
@@ -1188,24 +1224,25 @@ if (method === 'freezing') {
                 const manualWtot = parseFloat(calcDiv.querySelector(".manual-wtot").value);
 
                 if (isNaN(manualWtot) || manualWtot < 0) {
-                    calcDiv.querySelector("#result-moisture").textContent = "Некорректное значение Wtot";
-                    document.getElementById("wtot-value").textContent = "-";
+                    calcDiv.querySelector(".result-moisture").textContent = "Некорректное значение Wtot";
+                    calcDiv.querySelector(".wtot-value").textContent = "-";
                     return;
                 }
 
-                document.getElementById("wtot-value").textContent = manualWtot.toFixed(3);
-                calcDiv.querySelector("#result-moisture").textContent = "Wtot принята вручную";
-                document.getElementById("btn-continue-moisture").style.display = "none";
-                document.getElementById("extra-result-moisture").style.display = "block";
-                document.getElementById("calc-extra-moisture").style.display = "inline-block";
+                calcDiv.querySelector(".wtot-value").textContent = manualWtot.toFixed(3);
+                calcDiv.querySelector(".result-moisture").textContent = "Wtot принята вручную";
+                const contBtn = calcDiv.querySelector(".btn-continue-moisture");
+                if (contBtn) contBtn.style.display = "none";
+                calcDiv.querySelector(".extra-result-moisture").style.display = "block";
+                calcDiv.querySelector(".calc-extra-moisture").style.display = "inline-block";
             },
 
-            toggleManualInput(method) {
-                const calcDiv = document.getElementById(`test-container-${method}`).querySelector(".calculation-container");
-                const initialBlock = calcDiv.querySelector("#initial-moisture-block");
-                const wtotContainer = calcDiv.querySelector("#wtot-container");
-                const manualRow = calcDiv.querySelector("#manual-wtot-row");
-                const toggleBtn = calcDiv.querySelector("#manual-toggle-moisture");
+            toggleManualInput(btn) {
+                const calcDiv = btn.closest(".calculation-container");
+                const initialBlock = calcDiv.querySelector(".initial-moisture-block");
+                const wtotContainer = calcDiv.querySelector(".wtot-container");
+                const manualRow = calcDiv.querySelector(".manual-wtot-row");
+                const toggleBtn = calcDiv.querySelector(".manual-toggle-moisture");
                 const actionRow = calcDiv.querySelector(".action-row");
 
                 initialBlock.style.display = "none";
@@ -1214,25 +1251,38 @@ if (method === 'freezing') {
                 actionRow.querySelector(".btn-clear").style.display = "none";
                 toggleBtn.style.display = "none";
                 manualRow.style.display = "block";
-                document.getElementById("btn-continue-moisture").style.display = "none";
-                document.getElementById("wtot-value").textContent = "-";
-                document.getElementById("result-moisture").textContent = "-";
+                const contBtn = calcDiv.querySelector(".btn-continue-moisture");
+                if (contBtn) contBtn.style.display = "none";
+                calcDiv.querySelector(".wtot-value").textContent = "-";
+                calcDiv.querySelector(".result-moisture").textContent = "-";
             },
 
-            calculateExtra(method) {
+            calculateExtra(btn, method) {
                 if (method === 'moisture') {
-                    const calcDiv = document.getElementById("test-container-moisture").querySelector(".calculation-container");
-                    const wp = parseFloat(calcDiv.querySelector(".wp").value);
+                    const calcDiv = btn.closest(".calculation-container");
                     const soilType = calcDiv.querySelector(".soil-type").value;
                     const consistency = calcDiv.querySelector(".consistency").value;
-                    const wtot = parseFloat(document.getElementById("wtot-value").textContent);
+                    const wtot = parseFloat(calcDiv.querySelector(".wtot-value").textContent);
+                    let wp = parseFloat(calcDiv.querySelector(".wp").value);
 
-                    if (isNaN(wp) || wp < 0 || isNaN(wtot) || wtot < 0) {
-                        calcDiv.querySelector("#result-moisture").textContent = "Некорректные данные для расчёта";
-                        document.getElementById("wm-value").textContent = "-";
-                        document.getElementById("wi-value").textContent = "-";
-                        document.getElementById("ww-value").textContent = "-";
-                        document.getElementById("wic-value").textContent = "-";
+                    // Для песка Wp не требуется
+                    if (soilType === "sand") {
+                        wp = isNaN(wp) || wp < 0 ? 0 : wp;
+                    } else if (isNaN(wp) || wp < 0) {
+                        calcDiv.querySelector(".result-moisture").textContent = "Некорректные данные для расчёта";
+                        calcDiv.querySelector(".wm-value").textContent = "-";
+                        calcDiv.querySelector(".wi-value").textContent = "-";
+                        calcDiv.querySelector(".ww-value").textContent = "-";
+                        calcDiv.querySelector(".wic-value").textContent = "-";
+                        return;
+                    }
+
+                    if (isNaN(wtot) || wtot < 0) {
+                        calcDiv.querySelector(".result-moisture").textContent = "Некорректные данные для расчёта";
+                        calcDiv.querySelector(".wm-value").textContent = "-";
+                        calcDiv.querySelector(".wi-value").textContent = "-";
+                        calcDiv.querySelector(".ww-value").textContent = "-";
+                        calcDiv.querySelector(".wic-value").textContent = "-";
                         return;
                     }
 
@@ -1251,41 +1301,41 @@ if (method === 'freezing') {
                     wm = parseFloat(wm.toFixed(3));
 
                     if (wm < 0) {
-                        calcDiv.querySelector("#result-moisture").textContent = "Wm не может быть отрицательным";
-                        document.getElementById("wm-value").textContent = "-";
-                        document.getElementById("wi-value").textContent = "-";
-                        document.getElementById("ww-value").textContent = "-";
-                        document.getElementById("wic-value").textContent = "-";
+                        calcDiv.querySelector(".result-moisture").textContent = "Wm не может быть отрицательным";
+                        calcDiv.querySelector(".wm-value").textContent = "-";
+                        calcDiv.querySelector(".wi-value").textContent = "-";
+                        calcDiv.querySelector(".ww-value").textContent = "-";
+                        calcDiv.querySelector(".wic-value").textContent = "-";
                         return;
                     }
 
                     const wi = (wtot - wm).toFixed(3);
 
                     if (wi < 0) {
-                        calcDiv.querySelector("#result-moisture").textContent = "Wi не может быть отрицательным";
-                        document.getElementById("wm-value").textContent = "-";
-                        document.getElementById("wi-value").textContent = "-";
-                        document.getElementById("ww-value").textContent = "-";
-                        document.getElementById("wic-value").textContent = "-";
+                        calcDiv.querySelector(".result-moisture").textContent = "Wi не может быть отрицательным";
+                        calcDiv.querySelector(".wm-value").textContent = "-";
+                        calcDiv.querySelector(".wi-value").textContent = "-";
+                        calcDiv.querySelector(".ww-value").textContent = "-";
+                        calcDiv.querySelector(".wic-value").textContent = "-";
                         return;
                     }
 
                     const wic = (wm - parseFloat(ww)).toFixed(3);
 
                     if (wic < 0) {
-                        calcDiv.querySelector("#result-moisture").textContent = "Wic не может быть отрицательным";
-                        document.getElementById("wm-value").textContent = "-";
-                        document.getElementById("wi-value").textContent = "-";
-                        document.getElementById("ww-value").textContent = "-";
-                        document.getElementById("wic-value").textContent = "-";
+                        calcDiv.querySelector(".result-moisture").textContent = "Wic не может быть отрицательным";
+                        calcDiv.querySelector(".wm-value").textContent = "-";
+                        calcDiv.querySelector(".wi-value").textContent = "-";
+                        calcDiv.querySelector(".ww-value").textContent = "-";
+                        calcDiv.querySelector(".wic-value").textContent = "-";
                         return;
                     }
 
-                    document.getElementById("wm-value").textContent = wm;
-                    document.getElementById("wi-value").textContent = wi;
-                    document.getElementById("ww-value").textContent = ww;
-                    document.getElementById("wic-value").textContent = wic;
-                    calcDiv.querySelector("#result-moisture").textContent = "Дополнительные параметры рассчитаны";
+                    calcDiv.querySelector(".wm-value").textContent = wm;
+                    calcDiv.querySelector(".wi-value").textContent = wi;
+                    calcDiv.querySelector(".ww-value").textContent = ww;
+                    calcDiv.querySelector(".wic-value").textContent = wic;
+                    calcDiv.querySelector(".result-moisture").textContent = "Дополнительные параметры рассчитаны";
                 }
             },
 
