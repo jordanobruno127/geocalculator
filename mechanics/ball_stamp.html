@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Шариковый штамп — Geocalculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --soil-peat:   #F2E9D8;
+  --soil-peat-2: #EAE0C9;
+  --soil-clay:   #8A7355;
+  --soil-loam:   #B06B34;
+  --soil-sand:   #C98F45;
+  --paper:       #3B2E20;
+  --paper-dim:   #7A6A52;
+  --line:        #D9C9A3;
+  --ok:          #7A9B6E;
+  --warn:        #A6462E;
+
+  --font-display: 'Golos Text', -apple-system, sans-serif;
+  --font-body: 'Golos Text', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius: 3px;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+
+html, body{
+  width:100%;
+  max-width:100%;
+  overflow-x:hidden;
+  background-color:var(--soil-peat);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(176,107,52,0.08) 1px, transparent 0),
+    repeating-linear-gradient(155deg, rgba(176,107,52,0.05) 0px, rgba(176,107,52,0.05) 1px, transparent 1px, transparent 26px),
+    repeating-linear-gradient(65deg, rgba(138,115,85,0.045) 0px, rgba(138,115,85,0.045) 1px, transparent 1px, transparent 34px);
+  background-size: 18px 18px, auto, auto;
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-size:17px;
+  line-height:1.55;
+  min-height:100vh;
+}
+
+body{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ===== верхняя панель навигации ===== */
+.top-bar{
+  width:100%;
+  padding:18px 32px 0;
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+}
+.top-bar button{
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:14.5px;
+  padding:12px 22px;
+  border-radius:var(--radius);
+  cursor:pointer;
+  transition:opacity .15s, border-color .15s, color .15s;
+}
+#btn-back{
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  color:var(--paper);
+}
+#btn-back:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+#btn-home{
+  background:var(--soil-loam);
+  border:1px solid var(--soil-loam);
+  color:var(--soil-peat);
+}
+#btn-home:hover{ opacity:.88; }
+
+/* ===== шапка ===== */
+header{
+  max-width:920px;
+  margin:0 auto;
+  padding:12px 32px 40px;
+  text-align:center;
+  border-bottom:1px solid var(--line);
+  width:100%;
+}
+header h1{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:42px;
+  line-height:1.2;
+  color:var(--paper);
+}
+header .lede{
+  font-size:17px;
+  color:var(--paper-dim);
+  max-width:640px;
+  margin:18px auto 0;
+}
+
+/* ===== контентная обертка ===== */
+.wrap{
+  max-width:1240px;
+  margin:0 auto;
+  padding:40px 32px 64px;
+  width:100%;
+  flex:1 0 auto;
+}
+
+/* ===== предупреждение ===== */
+.warning{
+  margin-bottom:28px;
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  border-left:3px solid var(--warn);
+  border-radius:var(--radius);
+  padding:14px 18px;
+  max-width:900px;
+  margin-left:auto;
+  margin-right:auto;
+}
+.warning .mark{
+  display:block;
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--warn);
+  font-weight:600;
+  margin-bottom:5px;
+}
+.warning p{
+  font-size:13.5px;
+  line-height:1.55;
+  color:var(--paper-dim);
+}
+
+/* ===== главные вкладки (теоретический / экспериментальный расчет) ===== */
+.section-label{
+  font-family:var(--font-mono);
+  font-size:13px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  margin-bottom:16px;
+  text-align:center;
+}
+.method-buttons{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+  max-width:900px;
+  margin:0 auto 8px;
+}
+.action-btn.method-btn{
+  padding:12px 20px;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  background-color:var(--soil-peat-2);
+  color:var(--paper);
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-size:14.5px;
+  font-weight:600;
+  transition:border-color .15s, color .15s, background-color .15s;
+  min-width:260px;
+}
+.action-btn.method-btn:hover{
+  border-color:var(--soil-loam);
+  color:var(--soil-loam);
+}
+.action-btn.method-btn.active{
+  background-color:var(--soil-loam);
+  border-color:var(--soil-loam);
+  color:var(--soil-peat);
+}
+.main-tab{ display:none; margin-top:32px; }
+.main-tab.active{ display:block; }
+
+/* ===== опыты (экспериментальный расчет) ===== */
+.exp-list{ display:flex; flex-direction:column; gap:10px; margin-bottom:6px; }
+.exp-row{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:14px 16px;
+  background-color:var(--soil-peat);
+  position:relative;
+  flex-wrap:wrap;
+}
+.exp-row .exp-num{
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:var(--paper-dim);
+  min-width:64px;
+  flex-shrink:0;
+}
+.exp-row .exp-fields{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  flex:1;
+  min-width:260px;
+}
+.exp-row .exp-fields input{ font-size:13.5px; padding:8px 10px; }
+.exp-row .exp-result{
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--soil-loam);
+  font-weight:600;
+  min-width:110px;
+  text-align:right;
+  flex-shrink:0;
+}
+.btn-delete-exp{
+  width:26px; height:26px; border-radius:50%;
+  border:1px solid var(--warn); background-color:var(--soil-peat-2); color:var(--warn);
+  cursor:pointer; font-size:13px; font-weight:600; line-height:1;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  transition:background-color .15s, color .15s;
+}
+.btn-delete-exp:hover{ background-color:var(--warn); color:var(--soil-peat); }
+@media (max-width:640px){
+  .exp-row .exp-fields{ grid-template-columns:1fr; }
+  .exp-row{ align-items:stretch; }
+  .exp-row .exp-result{ text-align:left; }
+}
+
+/* ===== панели ===== */
+.panel{
+  background:var(--soil-peat-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:24px 26px;
+  margin-bottom:18px;
+  max-width:900px;
+  margin-left:auto;
+  margin-right:auto;
+}
+.ph{
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  font-weight:600;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--paper-dim);
+  margin-bottom:16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.ph::after{ content:''; flex:1; height:1px; background:var(--line); }
+.div{ height:1px; background:var(--line); margin:18px 0; }
+.hint{ font-size:12px; color:var(--paper-dim); margin-top:6px; line-height:1.5; }
+
+/* ===== сетки полей ===== */
+.r2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.r3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+.r4{ display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:14px; }
+@media (max-width:720px){ .r4{ grid-template-columns:1fr 1fr; } .r2, .r3{ grid-template-columns:1fr; } }
+
+.field label{ display:block; font-family:var(--font-mono); font-size:11.5px; letter-spacing:.04em; color:var(--paper-dim); margin-bottom:6px; }
+input[type=number], select{
+  width:100%;
+  background:var(--soil-peat);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:9px 11px;
+  font-family:var(--font-mono);
+  font-size:14px;
+  color:var(--paper);
+  outline:none;
+  transition:border-color .15s;
+}
+input:focus, select:focus{ border-color:var(--soil-loam); }
+select{ cursor:pointer; }
+
+/* ===== карточка нагрузки ===== */
+.load-card{
+  background:var(--soil-peat);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:14px 18px;
+  margin-top:16px;
+  display:flex;
+  align-items:center;
+  gap:22px;
+  flex-wrap:wrap;
+}
+.load-item{ display:flex; flex-direction:column; gap:3px; }
+.load-label{ font-family:var(--font-mono); font-size:10.5px; color:var(--paper-dim); letter-spacing:.05em; text-transform:uppercase; }
+.load-value{ font-family:var(--font-mono); font-size:17px; font-weight:600; color:var(--soil-loam); letter-spacing:-.01em; }
+.load-value.gray{ color:var(--paper-dim); font-size:14px; }
+.load-sep{ width:1px; height:34px; background:var(--line); flex-shrink:0; }
+
+/* ===== формула ===== */
+.formula-card{
+  background:var(--soil-peat);
+  border:1px solid var(--line);
+  border-left:3px solid var(--soil-loam);
+  border-radius:var(--radius);
+  padding:12px 16px;
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--paper);
+  line-height:1.9;
+  margin-top:16px;
+}
+.formula-card b{ color:var(--soil-loam); }
+
+/* ===== кнопки ===== */
+.btn-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+.btn-calc{
+  flex:1; min-width:160px; padding:11px; background:var(--soil-loam); color:var(--soil-peat);
+  border:1px solid var(--soil-loam); border-radius:var(--radius); font-family:var(--font-body); font-size:14.5px; font-weight:600;
+  cursor:pointer; transition:opacity .15s; display:flex; align-items:center; justify-content:center; gap:7px;
+}
+.btn-calc:hover{ opacity:.88; }
+.btn-re{
+  display:none; padding:10px 18px; background:var(--soil-peat-2); color:var(--paper);
+  border:1px solid var(--line); border-radius:var(--radius); font-family:var(--font-body); font-size:13.5px; font-weight:600;
+  cursor:pointer; transition:border-color .15s, color .15s;
+}
+.btn-re:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+.btn-clear{
+  padding:10px 18px; background:var(--soil-peat-2); color:var(--paper);
+  border:1px solid var(--line); border-radius:var(--radius); font-family:var(--font-body); font-size:13.5px; font-weight:600;
+  cursor:pointer; transition:border-color .15s, color .15s;
+}
+.btn-clear:hover{ border-color:var(--soil-loam); color:var(--soil-loam); }
+.btn-add-exp{
+  width:100%; padding:11px; margin-top:4px;
+  background:var(--soil-peat-2); color:var(--paper);
+  border:1px dashed var(--soil-clay); border-radius:var(--radius);
+  font-family:var(--font-body); font-size:13.5px; font-weight:600;
+  cursor:pointer; transition:border-color .15s, color .15s, background-color .15s;
+}
+.btn-add-exp:hover{ border-color:var(--soil-loam); border-style:solid; color:var(--soil-loam); background:#DCC79A; }
+
+/* ===== чипы ===== */
+.chips{ display:flex; flex-wrap:wrap; gap:6px; margin:0 auto 18px; max-width:900px; }
+.chip{
+  font-family:var(--font-mono); font-size:10.5px;
+  background:var(--soil-peat-2); border:1px solid var(--line); color:var(--soil-loam);
+  border-radius:20px; padding:4px 11px;
+}
+.chip strong{ font-weight:600; }
+
+/* ===== метрики ===== */
+.metrics-row{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:12px;
+  max-width:900px; margin:0 auto 18px;
+}
+@media (max-width:700px){ .metrics-row{ grid-template-columns:1fr 1fr; } }
+.metric{ background:var(--soil-peat); border:1px solid var(--line); border-radius:var(--radius); padding:13px 15px; }
+.metric.ok .mv{ color:var(--soil-loam); }
+.metric .mv{ font-size:17px; font-weight:600; font-family:var(--font-mono); color:var(--paper); letter-spacing:-.02em; margin-bottom:4px; }
+.metric .ml{ font-size:10.5px; color:var(--paper-dim); font-family:var(--font-mono); letter-spacing:.03em; }
+
+/* ===== график ===== */
+.chart-wrap{ background:var(--soil-peat); border-radius:var(--radius); padding:16px; border:1px solid var(--line); }
+.chart-lbl{ font-size:11px; color:var(--paper-dim); margin-bottom:10px; font-family:var(--font-mono); letter-spacing:.04em; text-transform:uppercase; }
+canvas{ display:block; max-height:280px; }
+
+/* ===== результаты (таблица) ===== */
+#results{ display:none; }
+#exp-results{ display:none; }
+.rc{ background:var(--soil-peat-2); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; max-width:900px; margin:0 auto 18px; }
+.rh{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; padding:12px 16px; border-bottom:1px solid var(--line); background:var(--soil-peat); }
+.rtit{ font-size:13.5px; font-weight:600; color:var(--paper); }
+.ctsv{
+  font-family:var(--font-mono); font-size:10.5px; color:var(--paper-dim);
+  background:var(--soil-peat-2); border:1px solid var(--line); border-radius:var(--radius);
+  padding:5px 12px; cursor:pointer; transition:all .14s;
+}
+.ctsv:hover{ color:var(--soil-loam); border-color:var(--soil-loam); background:#DCC79A; }
+.tsc{ overflow-x:auto; }
+table.rt{ width:100%; border-collapse:collapse; font-size:12.5px; }
+table.rt thead th{ background:var(--soil-peat); padding:9px 13px; text-align:right; font-family:var(--font-mono); font-size:10.5px; font-weight:500; color:var(--paper-dim); border-bottom:1px solid var(--line); white-space:nowrap; user-select:none; }
+table.rt thead th:first-child{ text-align:left; }
+table.rt thead th.cc{ cursor:pointer; }
+table.rt thead th.cc:hover{ color:var(--soil-loam); background:#DCC79A; }
+table.rt thead th.copied{ color:var(--soil-loam); }
+.ch{ display:block; font-size:9px; color:var(--paper-dim); font-weight:400; margin-top:1px; font-family:var(--font-body); letter-spacing:0; }
+table.rt tbody tr{ transition:background .1s; }
+table.rt tbody tr:nth-child(even){ background:var(--soil-peat); }
+table.rt tbody tr:hover{ background:#DCC79A; }
+table.rt tbody tr.avg-row td{ background:#DCC79A; color:var(--soil-loam); font-weight:600; border-top:1px solid var(--soil-loam); font-family:var(--font-mono); }
+table.rt tbody td{ padding:8px 13px; text-align:right; border-bottom:1px solid var(--line); font-family:var(--font-mono); font-size:12px; color:var(--paper); }
+table.rt tbody td:first-child{ text-align:left; font-family:var(--font-body); font-size:12px; color:var(--paper-dim); font-weight:500; }
+table.rt tbody tr:last-child td{ border-bottom:none; }
+.hi{ color:var(--soil-loam); font-weight:600; }
+
+/* ===== toast ===== */
+.copy-notification{
+  position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
+  background:var(--paper); color:var(--soil-peat); font-family:var(--font-mono); font-size:13px;
+  padding:10px 18px; border-radius:var(--radius); opacity:0; transition:opacity .3s;
+  pointer-events:none; z-index:100;
+}
+.copy-notification.show{ opacity:1; }
+
+@keyframes fu{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+.anim{ animation:fu .28s ease; }
+
+/* ===== футер сайта ===== */
+footer{
+  flex-shrink:0;
+  max-width:920px;
+  margin:36px auto 0;
+  padding:36px 32px 40px;
+  border-top:1px solid var(--line);
+  text-align:center;
+  font-family:var(--font-mono);
+  font-size:12.5px;
+  color:var(--paper-dim);
+  width:100%;
+}
+.inner-footer{ max-width:900px; margin:30px auto 0; padding-top:16px; border-top:1px solid var(--line); display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+.inner-footer span{ font-family:var(--font-mono); font-size:10.5px; color:var(--paper-dim); }
+
+@media (max-width:900px){
+  header h1{ font-size:30px; }
+  .top-bar{ padding:14px 20px 0; }
+  header{ padding:56px 20px 32px; }
+  .wrap{ padding:28px 20px 48px; }
+  .panel{ padding:18px 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <button id="btn-back" onclick="history.back()">Назад</button>
+  <button id="btn-home" onclick="location.href='/'">Главная</button>
+</div>
+
+<header>
+  <h1>Шариковый штамп</h1>
+  <p class="lede"><strong>ГОСТ 12248.7-2020 • ГОСТ 25100-2020</strong></p>
+</header>
+
+<div class="wrap">
+
+  <div class="warning">
+      <span class="mark">Внимание</span>
+      <p>Представленные данные носят исключительно вспомогательный и информационный характер и не претендуют на достоверность. Модель отражает гипотетическое поведение грунта при выбранных условиях и не подлежит использованию в официальных технических отчетах. Продолжая работу с сайтом, Вы соглашаетесь с <a href="https://geocalculator.ru/terms">Условиями использования.</a></p>
+  </div>
+
+  <div class="section-label">Вид расчета</div>
+  <div class="method-buttons">
+    <button class="action-btn method-btn active" id="btn-main-theory" onclick="switchMainTab('theory')">Теоретический расчет</button>
+    <button class="action-btn method-btn" id="btn-main-exp" onclick="switchMainTab('exp')">Экспериментальный расчет</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- ВКЛАДКА 1 — ТЕОРЕТИЧЕСКИЙ РАСЧЕТ                    -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="main-tab active" id="main-tab-theory">
+
+  <!-- ПАРАМЕТРЫ -->
+  <div class="panel">
+    <div class="ph">Исходные параметры</div>
+    <div class="r4">
+      <div class="field">
+        <label>Вид грунта</label>
+        <select id="soil-type" onchange="onParamChange()">
+          <option value="sand">Пески и супеси</option>
+          <option value="clay" selected>Глины и суглинки</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Состояние грунта</label>
+        <select id="soil-state" onchange="onParamChange()">
+          <option value="plastic">Пластично-мерзлый</option>
+          <option value="hard" selected>Твердомерзлый</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Температура, °C</label>
+        <input type="number" id="temperature" value="-3.5" step="0.5" max="-0.1">
+      </div>
+      <div class="field">
+        <label>Количество испытаний</label>
+        <input type="number" id="n-pts" value="4" step="1" min="3" max="12" oninput="onParamChange()">
+      </div>
+    </div>
+
+    <div class="div"></div>
+    <div class="ph">Параметры штампа и целевое сцепление</div>
+    <div class="r3">
+      <div class="field">
+        <label>Диаметр шарика db, мм</label>
+        <input type="number" id="db-mm" value="38.1" step="0.1" min="1" oninput="onParamChange()">
+      </div>
+      <div class="field">
+        <label>Безразмерный коэффициент K</label>
+        <input type="number" id="k-coef" value="1" step="0.01" min="0.01" disabled>
+        <div class="hint">Принимается равным 1</div>
+      </div>
+      <div class="field">
+        <label>c<sub>eq</sub> предельно длительное, МПа</label>
+        <input type="number" id="c-target" value="0.150" step="0.005" min="0.001" max="2.0" oninput="onParamChange()">
+        <div class="hint">Среднее по всем испытаниям будет равно этому значению</div>
+      </div>
+    </div>
+
+    <!-- карточка нагрузки -->
+    <div class="load-card" id="load-card">
+      <div class="load-item">
+        <span class="load-label">Нагрузка F</span>
+        <span class="load-value" id="load-kn">— кН</span>
+      </div>
+      <div class="load-sep"></div>
+      <div class="load-item">
+        <span class="load-label">Нагрузка F</span>
+        <span class="load-value gray" id="load-n">— Н</span>
+      </div>
+      <div class="load-sep"></div>
+      <div class="load-item">
+        <span class="load-label">Теоретическая глубина Sb</span>
+        <span class="load-value gray" id="sb-theory">— мм</span>
+      </div>
+      <div class="load-sep"></div>
+      <div class="load-item">
+        <span class="load-label">Вид / состояние</span>
+        <span class="load-value gray" id="soil-desc">—</span>
+      </div>
+    </div>
+
+    <div class="formula-card">
+      <b>c<sub>eq</sub></b> = (0,6 · K · F) / (d<sub>b</sub> · S<sub>b</sub>), МПа &nbsp;&nbsp;|&nbsp;&nbsp; F — кН, d<sub>b</sub>, S<sub>b</sub> — см<br>
+      <b>S<sub>b</sub></b> = (0,6 · K<sub>p</sub> · F) / (d<sub>b</sub> · c<sub>eq</sub>) &nbsp;&nbsp;|&nbsp;&nbsp; K = K<sub>p</sub> = 1 &nbsp;&nbsp;|&nbsp;&nbsp; в таблице: F — кН, d<sub>b</sub> и S<sub>b</sub> — мм, c<sub>eq</sub> — МПа
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-calc" onclick="calculate()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        Рассчитать
+      </button>
+      <button class="btn-re" id="btn-re" onclick="calculate()">↺ Новый разброс</button>
+    </div>
+  </div>
+
+  <!-- РЕЗУЛЬТАТЫ -->
+  <div id="results">
+
+    <div class="chips" id="res-chips"></div>
+
+    <div class="metrics-row">
+      <div class="metric ok">
+        <div class="mv" id="m-cavg">—</div>
+        <div class="ml">Среднее c<sub>eq</sub>, МПа</div>
+      </div>
+      <div class="metric">
+        <div class="mv" id="m-cmin">—</div>
+        <div class="ml">Минимум c<sub>eq</sub>, МПа</div>
+      </div>
+      <div class="metric">
+        <div class="mv" id="m-cmax">—</div>
+        <div class="ml">Максимум c<sub>eq</sub>, МПа</div>
+      </div>
+      <div class="metric">
+        <div class="mv" id="m-cv">—</div>
+        <div class="ml">Коэфф. вариации CV, %</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph">График зависимости c<sub>eq</sub> = f(S<sub>b</sub>)</div>
+      <div class="chart-wrap">
+        <div class="chart-lbl">S<sub>b</sub> (мм) → c<sub>eq</sub> (МПа) — точки испытания и теоретическая гиперболическая кривая</div>
+        <canvas id="stamp-chart" height="260"></canvas>
+      </div>
+    </div>
+
+    <div class="rc anim">
+      <div class="rh">
+        <span class="rtit">Результаты испытания шариковым штампом</span>
+        <button class="ctsv" onclick="cpTSV()">Копировать TSV</button>
+      </div>
+      <div class="tsc">
+        <table class="rt">
+          <thead><tr>
+            <th>Испытание</th>
+            <th class="cc" onclick="cpCol(0)">F, кН<span class="ch">↓ копировать</span></th>
+            <th class="cc" onclick="cpCol(1)">d<sub>b</sub>, мм<span class="ch">↓ копировать</span></th>
+            <th class="cc" onclick="cpCol(2)">S<sub>b</sub>, мм<span class="ch">↓ копировать</span></th>
+            <th class="cc" onclick="cpCol(3)">c<sub>eq</sub>, МПа<span class="ch">↓ копировать</span></th>
+            <th class="cc" onclick="cpCol(4)">Δc, %<span class="ch">↓ копировать</span></th>
+          </tr></thead>
+          <tbody id="res-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="inner-footer">
+      <span>ГОСТ 12248.7-2020 · Испытание мерзлых грунтов методом шарикового штампа</span>
+      <span>Нажмите заголовок столбца → скопировать значения</span>
+    </div>
+
+  </div>
+
+  </div><!-- /main-tab-theory -->
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- ВКЛАДКА 2 — ЭКСПЕРИМЕНТАЛЬНЫЙ РАСЧЕТ                -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="main-tab" id="main-tab-exp">
+
+    <div class="panel">
+      <div class="ph">Данные испытаний (п. 9.2 ГОСТ 12248.7-2020)</div>
+      <p class="hint" style="margin-bottom:14px;">Для каждого опыта укажите нагрузку на штамп (F, кН), диаметр шарикового штампа d<sub>b</sub> (см) и глубину его погружения в конце испытания S<sub>b</sub> (см). При одном опыте график и итоговое значение строятся по нему одному; при нескольких — рассчитывается среднее.</p>
+
+      <div class="exp-list" id="exp-list"></div>
+
+      <button class="btn-add-exp" onclick="addExperiment()">+ Добавить опыт</button>
+
+      <div class="formula-card" style="margin-top:16px;">
+        <b>c<sub>eq</sub></b> = (0,6 · K<sub>p</sub> · F) / (d<sub>b</sub> · S<sub>b</sub>), МПа &nbsp;&nbsp;|&nbsp;&nbsp; F — кН, d<sub>b</sub>, S<sub>b</sub> — см, K<sub>p</sub> = 1
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-calc" onclick="calculateExperimental()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          Рассчитать
+        </button>
+        <button class="btn-clear" onclick="clearExperiments()">Очистить</button>
+      </div>
+    </div>
+
+    <!-- РЕЗУЛЬТАТЫ ЭКСПЕРИМЕНТА -->
+    <div id="exp-results">
+
+      <div class="chips" id="exp-chips"></div>
+
+      <div class="metrics-row" id="exp-metrics-row">
+        <div class="metric ok">
+          <div class="mv" id="em-cavg">—</div>
+          <div class="ml">Среднее c<sub>eq</sub>, МПа</div>
+        </div>
+        <div class="metric">
+          <div class="mv" id="em-cmin">—</div>
+          <div class="ml">Минимум c<sub>eq</sub>, МПа</div>
+        </div>
+        <div class="metric">
+          <div class="mv" id="em-cmax">—</div>
+          <div class="ml">Максимум c<sub>eq</sub>, МПа</div>
+        </div>
+        <div class="metric">
+          <div class="mv" id="em-cv">—</div>
+          <div class="ml">Коэфф. вариации CV, %</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="ph">График c<sub>eq</sub> по опытам</div>
+        <div class="chart-wrap">
+          <div class="chart-lbl">S<sub>b</sub> (см) → c<sub>eq</sub> (МПа) — точки по данным опытов</div>
+          <canvas id="exp-chart" height="260"></canvas>
+        </div>
+      </div>
+
+      <div class="rc anim">
+        <div class="rh">
+          <span class="rtit">Результаты по опытам</span>
+          <button class="ctsv" onclick="cpExpTSV()">Копировать TSV</button>
+        </div>
+        <div class="tsc">
+          <table class="rt">
+            <thead><tr>
+              <th>Опыт</th>
+              <th class="cc" onclick="cpExpCol(0)">F, кН<span class="ch">↓ копировать</span></th>
+              <th class="cc" onclick="cpExpCol(1)">d<sub>b</sub>, см<span class="ch">↓ копировать</span></th>
+              <th class="cc" onclick="cpExpCol(2)">S<sub>b</sub>, см<span class="ch">↓ копировать</span></th>
+              <th class="cc" onclick="cpExpCol(3)">c<sub>eq</sub>, МПа<span class="ch">↓ копировать</span></th>
+            </tr></thead>
+            <tbody id="exp-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="inner-footer">
+        <span>ГОСТ 12248.7-2020, п. 9.2 · Предельно длительное эквивалентное сцепление по данным испытаний</span>
+        <span>Нажмите заголовок столбца → скопировать значения</span>
+      </div>
+
+    </div>
+
+  </div><!-- /main-tab-exp -->
+
+</div>
+
+<footer>
+  © 2026 Geocalculator. Инженерно-геологические расчеты онлайн
+</footer>
+
+<div id="toast" class="copy-notification"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// КОНСТАНТЫ
+// ═══════════════════════════════════════════════════════
+// Нагрузка F по виду и состоянию грунта, Н
+const LOADS = {
+  sand: { plastic: 40, hard: 50 },
+  clay: { plastic: 20, hard: 30 }
+};
+
+// Логнормальный разброс sigma — типичный CV 8-15%
+const SIGMA = {
+  sand: { plastic: 0.09, hard: 0.07 },
+  clay: { plastic: 0.10, hard: 0.08 }
+};
+
+// Реалистичный паттерн смещения точек
+const BIAS = [0.06, -0.03, 0.04, -0.02, 0.05, -0.01, 0.03, -0.04, 0.02, -0.03, 0.06, -0.02];
+
+// ═══════════════════════════════════════════════════════
+// ФОРМУЛЫ
+// ceq [МПа] = 0.6 * K * F[кН] / (db[см] * Sb[см])
+// Sb [см]   = 0.6 * K * F[кН] / (db[см] * ceq[МПа])
+// ═══════════════════════════════════════════════════════
+function getK() {
+  return parseFloat(document.getElementById('k-coef').value) || 1;
+}
+function cFromS(F_kN, db_cm, Sb_cm, K) {
+  return (0.6 * K * F_kN) / (db_cm * Sb_cm);
+}
+function sFromC(F_kN, db_cm, c_mpa, K) {
+  return (0.6 * K * F_kN) / (db_cm * c_mpa);
+}
+function toComma(v) { return String(v).replace('.', ','); }
+function nc(v, d)   { return toComma(v.toFixed(d)); }
+
+// Mulberry32 PRNG
+function mb32(seed) {
+  return () => {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function gaussRng(rng) {
+  let u; do { u = rng(); } while (u === 0);
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rng());
+}
+
+// ═══════════════════════════════════════════════════════
+// STATE & UI
+// ═══════════════════════════════════════════════════════
+let calcData  = [];
+let chartInst = null;
+
+function onParamChange() {
+  const type    = document.getElementById('soil-type').value;
+  const state   = document.getElementById('soil-state').value;
+  const P_N     = LOADS[type][state];
+  const P_kN    = P_N / 1000;
+  const db_mm   = parseFloat(document.getElementById('db-mm').value) || 38.1;
+  const db_cm   = db_mm / 10;
+  const K       = getK();
+  const cTarget = parseFloat(document.getElementById('c-target').value) || 0.15;
+  const sbTheory_cm = sFromC(P_kN, db_cm, cTarget, K);
+  const sbTheory_mm = sbTheory_cm * 10;
+
+  document.getElementById('load-kn').textContent = nc(P_kN, 4) + ' кН';
+  document.getElementById('load-n').textContent  = P_N + ' Н';
+  document.getElementById('sb-theory').textContent = sbTheory_mm.toFixed(4) + ' мм';
+  document.getElementById('soil-desc').textContent =
+    (type === 'sand' ? 'Пески/супеси' : 'Глины/суглинки') + ' · ' +
+    (state === 'hard' ? 'Твердомерзлый' : 'Пластично-мерзлый');
+}
+
+// ═══════════════════════════════════════════════════════
+// ГЕНЕРАЦИЯ — точное среднее через мультипликативное масштабирование
+// ═══════════════════════════════════════════════════════
+/*
+  c_i = 0.6*K*F / (db * Sb_i)  →  mean(c_i) = 0.6*K*F/db · mean(1/Sb_i)
+
+  Чтобы гарантировать mean(c_i) = c_target:
+  1. Генерируем «сырые» Sb_i с логнормальным разбросом
+  2. Вычисляем mean(1/Sb_i)
+  3. Масштабируем все Sb_i на k = mean(1/Sb_i) / inv_target
+     → новое mean(1/Sb_i) = inv_target → mean(c_i) = c_target точно
+*/
+function generateSb(N, F_kN, db_cm, K, c_target_mpa, sigLog) {
+  const inv_target = (c_target_mpa * db_cm) / (0.6 * K * F_kN); // 1/см
+  const sb_ref_cm  = 1 / inv_target;
+
+  const seed = (Date.now() ^ (N * 7919 + Math.round(c_target_mpa * 100000))) >>> 0;
+  const rng  = mb32(seed);
+
+  const sbs_cm = Array.from({ length: N }, (_, i) => {
+    const z = gaussRng(rng);
+    const b = BIAS[i % BIAS.length];
+    return sb_ref_cm * Math.exp(b + z * sigLog);
+  });
+
+  const mean_inv = sbs_cm.reduce((s, sb) => s + 1 / sb, 0) / N;
+  const k        = mean_inv / inv_target;
+  return sbs_cm.map(sb => sb * k * 10); // → мм
+}
+
+// ═══════════════════════════════════════════════════════
+// РАСЧЕТ
+// ═══════════════════════════════════════════════════════
+function calculate() {
+  const type    = document.getElementById('soil-type').value;
+  const state   = document.getElementById('soil-state').value;
+  const temp    = parseFloat(document.getElementById('temperature').value) || -3.5;
+  const N       = Math.max(3, Math.min(12, parseInt(document.getElementById('n-pts').value) || 4));
+  const db_mm   = parseFloat(document.getElementById('db-mm').value) || 38.1;
+  const db_cm   = db_mm / 10;
+  const K       = getK();
+  const cTarget = parseFloat(document.getElementById('c-target').value) || 0.15;
+  const P_N     = LOADS[type][state];
+  const P_kN    = P_N / 1000;
+  const sigLog  = SIGMA[type][state];
+
+  const sbs_mm = generateSb(N, P_kN, db_cm, K, cTarget, sigLog);
+
+  calcData = sbs_mm.map((Sb_mm, i) => ({
+    idx: i + 1,
+    F_kN: P_kN,
+    db_mm,
+    Sb_mm,
+    c: cFromS(P_kN, db_cm, Sb_mm / 10, K)
+  }));
+
+  // Статистика
+  const cs    = calcData.map(r => r.c);
+  const cMean = cs.reduce((a, b) => a + b, 0) / N;
+  const cMin  = Math.min(...cs);
+  const cMax  = Math.max(...cs);
+  const cStd  = Math.sqrt(cs.reduce((s, c) => s + (c - cMean) ** 2, 0) / N);
+  const cv    = (cStd / cMean * 100).toFixed(1);
+
+  document.getElementById('m-cavg').textContent = cMean.toFixed(5) + ' МПа';
+  document.getElementById('m-cmin').textContent = cMin.toFixed(5)  + ' МПа';
+  document.getElementById('m-cmax').textContent = cMax.toFixed(5)  + ' МПа';
+  document.getElementById('m-cv').textContent   = cv + ' %';
+
+  const typeL  = type  === 'sand' ? 'Пески/супеси'    : 'Глины/суглинки';
+  const stateL = state === 'hard' ? 'Твердомерзлый'   : 'Пластично-мерзлый';
+  document.getElementById('res-chips').innerHTML = [
+    `Испытаний: <strong>${N}</strong>`,
+    `F: <strong>${nc(P_kN, 4)} кН / ${P_N} Н</strong>`,
+    `d<sub>b</sub>: <strong>${db_mm} мм</strong>`,
+    `Грунт: <strong>${typeL}</strong>`,
+    `Состояние: <strong>${stateL}</strong>`,
+    `T: <strong>${temp} °C</strong>`,
+    `c<sub>eq</sub> цел.: <strong>${cTarget} МПа</strong>`
+  ].map(s => `<span class="chip">${s}</span>`).join('');
+
+  renderTable(calcData, cTarget);
+  renderChart(calcData, cTarget, P_kN, db_cm, K);
+
+  const res = document.getElementById('results');
+  res.style.display = 'block';
+  res.classList.add('anim');
+  setTimeout(() => res.classList.remove('anim'), 400);
+  document.getElementById('btn-re').style.display = '';
+}
+
+// ═══════════════════════════════════════════════════════
+// ТАБЛИЦА
+// ═══════════════════════════════════════════════════════
+function renderTable(data, cTarget) {
+  const N     = data.length;
+  const avgSb = data.reduce((s, r) => s + r.Sb_mm, 0) / N;
+  const avgC  = data.reduce((s, r) => s + r.c, 0) / N;
+
+  document.getElementById('res-tbody').innerHTML =
+    data.map(r => {
+      const dev     = (r.c - cTarget) / cTarget * 100;
+      const devSign = dev >= 0 ? '+' : '';
+      const devClr  = Math.abs(dev) > 15 ? 'var(--warn)' : 'var(--paper-dim)';
+      return `<tr>
+        <td>Испытание ${r.idx}</td>
+        <td data-col="0">${nc(r.F_kN, 4)}</td>
+        <td data-col="1">${nc(r.db_mm, 1)}</td>
+        <td data-col="2">${nc(r.Sb_mm, 4)}</td>
+        <td data-col="3" class="hi">${nc(r.c, 5)}</td>
+        <td data-col="4" style="color:${devClr}">${devSign}${nc(dev, 2)}</td>
+      </tr>`;
+    }).join('') +
+    `<tr class="avg-row">
+      <td>Среднее</td>
+      <td>${nc(data[0].F_kN, 4)}</td>
+      <td>${nc(data[0].db_mm, 1)}</td>
+      <td>${nc(avgSb, 4)}</td>
+      <td>${nc(avgC, 5)}</td>
+      <td>0,00</td>
+    </tr>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// ГРАФИК
+// ═══════════════════════════════════════════════════════
+function renderChart(data, cTarget, F_kN, db_cm, K) {
+  const ctx = document.getElementById('stamp-chart').getContext('2d');
+  if (chartInst) chartInst.destroy();
+
+  const sbs   = data.map(r => r.Sb_mm);
+  const sbMin = Math.min(...sbs) * 0.70;
+  const sbMax = Math.max(...sbs) * 1.35;
+
+  // Теоретическая гиперболическая кривая
+  const curve = Array.from({ length: 120 }, (_, i) => {
+    const sb_mm = sbMin + (sbMax - sbMin) * i / 119;
+    return { x: +sb_mm.toFixed(5), y: +cFromS(F_kN, db_cm, sb_mm / 10, K).toFixed(6) };
+  });
+
+  const allC = [...data.map(r => r.c), cTarget];
+  const cLo  = Math.min(...allC) * 0.80;
+  const cHi  = Math.max(...allC) * 1.22;
+
+  chartInst = new Chart(ctx, {
+    type: 'scatter',
+    data: { datasets: [
+      {
+        label: 'c = 0,6·K·F / (db·Sb)',
+        data: curve, type: 'line',
+        borderColor: 'rgba(176,107,52,0.35)', borderWidth: 1.5,
+        borderDash: [4, 3], pointRadius: 0, fill: false, tension: 0, order: 3
+      },
+      {
+        label: `c целевое = ${cTarget} МПа`,
+        data: [{ x: sbMin, y: cTarget }, { x: sbMax, y: cTarget }],
+        type: 'line', borderColor: '#A6462E', borderWidth: 1.5,
+        borderDash: [7, 4], pointRadius: 0, fill: false, tension: 0, order: 2
+      },
+      {
+        label: 'Точки испытания',
+        data: data.map(r => ({ x: +r.Sb_mm.toFixed(4), y: +r.c.toFixed(5) })),
+        backgroundColor: '#B06B34',
+        pointRadius: 8, pointHoverRadius: 11,
+        borderColor: '#F2E9D8', borderWidth: 2, order: 0
+      }
+    ]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          labels: { color: '#7A6A52', font: { size: 12, family: "'Golos Text'" }, boxWidth: 14, padding: 16 }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              if (ctx.datasetIndex === 2) {
+                const r = data[ctx.dataIndex];
+                return `Исп. ${r.idx}:  Sb = ${r.Sb_mm.toFixed(4)} мм  →  c = ${r.c.toFixed(5)} МПа`;
+              }
+              return '';
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          type: 'linear',
+          title: { display: true, text: 'Глубина погружения Sb, мм', font: { size: 11, family: "'Golos Text'" }, color: '#7A6A52' },
+          grid: { color: 'rgba(59,46,32,0.05)' },
+          ticks: { color: '#7A6A52', font: { size: 10, family: "'JetBrains Mono'" } }
+        },
+        y: {
+          min: +cLo.toFixed(5),
+          max: +cHi.toFixed(5),
+          title: { display: true, text: 'c\u2091\u2071, МПа', font: { size: 11, family: "'Golos Text'" }, color: '#7A6A52' },
+          grid: { color: 'rgba(59,46,32,0.05)' },
+          ticks: { color: '#7A6A52', font: { size: 10, family: "'JetBrains Mono'" } }
+        }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// КОПИРОВАНИЕ
+// ═══════════════════════════════════════════════════════
+function cpCol(ci) {
+  if (!calcData.length) return;
+  const cTarget = parseFloat(document.getElementById('c-target').value) || 0.15;
+  const vals = calcData.map(r => {
+    switch (ci) {
+      case 0: return nc(r.F_kN, 4);
+      case 1: return nc(r.db_mm, 1);
+      case 2: return nc(r.Sb_mm, 4);
+      case 3: return nc(r.c, 5);
+      case 4: return nc((r.c - cTarget) / cTarget * 100, 2);
+      default: return '';
+    }
+  });
+  navigator.clipboard.writeText(vals.join('\n')).then(() => {
+    const ths = document.querySelectorAll('table.rt thead th');
+    if (ths[ci + 1]) {
+      ths[ci + 1].classList.add('copied');
+      setTimeout(() => ths[ci + 1].classList.remove('copied'), 1500);
+    }
+    toast('✓ Столбец скопирован');
+  });
+}
+
+function cpTSV() {
+  if (!calcData.length) return;
+  const cTarget = parseFloat(document.getElementById('c-target').value) || 0.15;
+  const N = calcData.length;
+  const hdr  = ['Испытание', 'F кН', 'db мм', 'Sb мм', 'c_eq МПа', 'Δc %'];
+  const body = calcData.map(r => [
+    `Испытание ${r.idx}`,
+    nc(r.F_kN, 4),
+    nc(r.db_mm, 1),
+    nc(r.Sb_mm, 4),
+    nc(r.c, 5),
+    nc((r.c - cTarget) / cTarget * 100, 2)
+  ].join('\t'));
+  const avgSb = calcData.reduce((s, r) => s + r.Sb_mm, 0) / N;
+  const avgC  = calcData.reduce((s, r) => s + r.c, 0) / N;
+  body.push(['Среднее', nc(calcData[0].F_kN, 4), nc(calcData[0].db_mm, 1),
+             nc(avgSb, 4), nc(avgC, 5), nc(0, 2)].join('\t'));
+  navigator.clipboard.writeText([hdr.join('\t'), ...body].join('\n'))
+    .then(() => toast('✓ Таблица (TSV) скопирована'));
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ═══════════════════════════════════════════════════════
+// ПЕРЕКЛЮЧЕНИЕ ГЛАВНЫХ ВКЛАДОК
+// ═══════════════════════════════════════════════════════
+function switchMainTab(name) {
+  ['theory', 'exp'].forEach(id => {
+    document.getElementById('btn-main-' + id).classList.remove('active');
+    document.getElementById('main-tab-' + id).classList.remove('active');
+  });
+  document.getElementById('btn-main-' + name).classList.add('active');
+  document.getElementById('main-tab-' + name).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════
+// ЭКСПЕРИМЕНТАЛЬНЫЙ РАСЧЕТ (п. 9.2 ГОСТ 12248.7-2020)
+// c_eq = 0.6 * Kp * F / (db * Sb),  F — кН, db, Sb — см,  Kp = 1
+// ═══════════════════════════════════════════════════════
+const KP = 1;
+let expCount = 0;
+let expData  = [];
+let expChartInst = null;
+
+function addExperiment(F, db, Sb) {
+  expCount++;
+  const list = document.getElementById('exp-list');
+  const row = document.createElement('div');
+  row.className = 'exp-row';
+  row.dataset.id = expCount;
+  row.innerHTML = `
+    <span class="exp-num">Опыт ${expCount}</span>
+    <div class="exp-fields">
+      <input type="number" step="any" class="exp-f" placeholder="F, кН" value="${F ?? ''}" oninput="calcExpRowPreview(this)">
+      <input type="number" step="any" class="exp-db" placeholder="db, см" value="${db ?? ''}" oninput="calcExpRowPreview(this)">
+      <input type="number" step="any" class="exp-sb" placeholder="Sb, см" value="${Sb ?? ''}" oninput="calcExpRowPreview(this)">
+    </div>
+    <span class="exp-result">—</span>
+    <button class="btn-delete-exp" onclick="deleteExperiment(this)" title="Удалить опыт">×</button>
+  `;
+  list.appendChild(row);
+  calcExpRowPreview(row.querySelector('.exp-f'));
+}
+
+function calcExpRowPreview(input) {
+  const row = input.closest('.exp-row');
+  const F  = parseFloat(row.querySelector('.exp-f').value);
+  const db = parseFloat(row.querySelector('.exp-db').value);
+  const Sb = parseFloat(row.querySelector('.exp-sb').value);
+  const resEl = row.querySelector('.exp-result');
+  if (isNaN(F) || isNaN(db) || isNaN(Sb) || F <= 0 || db <= 0 || Sb <= 0) {
+    resEl.textContent = '—';
+    return;
+  }
+  const c = (0.6 * KP * F) / (db * Sb);
+  resEl.textContent = nc(c, 5) + ' МПа';
+}
+
+function deleteExperiment(btn) {
+  btn.closest('.exp-row').remove();
+}
+
+function clearExperiments() {
+  document.getElementById('exp-list').innerHTML = '';
+  expCount = 0;
+  expData = [];
+  document.getElementById('exp-results').style.display = 'none';
+  addExperiment();
+}
+
+function calculateExperimental() {
+  const rows = Array.from(document.querySelectorAll('#exp-list .exp-row'));
+  const data = [];
+  let hasError = false;
+
+  rows.forEach((row, i) => {
+    const F  = parseFloat(row.querySelector('.exp-f').value);
+    const db = parseFloat(row.querySelector('.exp-db').value);
+    const Sb = parseFloat(row.querySelector('.exp-sb').value);
+    if (isNaN(F) || isNaN(db) || isNaN(Sb) || F <= 0 || db <= 0 || Sb <= 0) {
+      hasError = true;
+      return;
+    }
+    const c = (0.6 * KP * F) / (db * Sb);
+    data.push({ idx: i + 1, F_kN: F, db_cm: db, Sb_cm: Sb, c });
+  });
+
+  if (hasError || data.length === 0) {
+    alert('Заполните корректно F, db и Sb (все значения должны быть больше 0) хотя бы для одного опыта.');
+    return;
+  }
+
+  expData = data;
+  const N = data.length;
+  const cs    = data.map(r => r.c);
+  const cMean = cs.reduce((a, b) => a + b, 0) / N;
+  const cMin  = Math.min(...cs);
+  const cMax  = Math.max(...cs);
+  const cStd  = N > 1 ? Math.sqrt(cs.reduce((s, c) => s + (c - cMean) ** 2, 0) / N) : 0;
+  const cv    = N > 1 ? (cStd / cMean * 100).toFixed(1) : '0.0';
+
+  document.getElementById('em-cavg').textContent = cMean.toFixed(5) + ' МПа';
+  document.getElementById('em-cmin').textContent = cMin.toFixed(5)  + ' МПа';
+  document.getElementById('em-cmax').textContent = cMax.toFixed(5)  + ' МПа';
+  document.getElementById('em-cv').textContent   = cv + ' %';
+
+  document.getElementById('exp-chips').innerHTML = [
+    `Опытов: <strong>${N}</strong>`,
+    `K<sub>p</sub>: <strong>1</strong>`,
+    N > 1 ? `Среднее c<sub>eq</sub>: <strong>${nc(cMean, 5)} МПа</strong>` : `c<sub>eq</sub>: <strong>${nc(cMean, 5)} МПа</strong>`
+  ].map(s => `<span class="chip">${s}</span>`).join('');
+
+  renderExpTable(data, N > 1);
+  renderExpChart(data);
+
+  const res = document.getElementById('exp-results');
+  res.style.display = 'block';
+  res.classList.add('anim');
+  setTimeout(() => res.classList.remove('anim'), 400);
+}
+
+function renderExpTable(data, showAvg) {
+  const N = data.length;
+  const avgF  = data.reduce((s, r) => s + r.F_kN, 0) / N;
+  const avgDb = data.reduce((s, r) => s + r.db_cm, 0) / N;
+  const avgSb = data.reduce((s, r) => s + r.Sb_cm, 0) / N;
+  const avgC  = data.reduce((s, r) => s + r.c, 0) / N;
+
+  let html = data.map(r => `
+    <tr>
+      <td>Опыт ${r.idx}</td>
+      <td data-col="0">${nc(r.F_kN, 4)}</td>
+      <td data-col="1">${nc(r.db_cm, 3)}</td>
+      <td data-col="2">${nc(r.Sb_cm, 4)}</td>
+      <td data-col="3" class="hi">${nc(r.c, 5)}</td>
+    </tr>`).join('');
+
+  if (showAvg) {
+    html += `<tr class="avg-row">
+      <td>Среднее</td>
+      <td>${nc(avgF, 4)}</td>
+      <td>${nc(avgDb, 3)}</td>
+      <td>${nc(avgSb, 4)}</td>
+      <td>${nc(avgC, 5)}</td>
+    </tr>`;
+  }
+
+  document.getElementById('exp-tbody').innerHTML = html;
+}
+
+function renderExpChart(data) {
+  const ctx = document.getElementById('exp-chart').getContext('2d');
+  if (expChartInst) expChartInst.destroy();
+
+  const N = data.length;
+  const cMean = data.reduce((s, r) => s + r.c, 0) / N;
+  const sbs = data.map(r => r.Sb_cm);
+  const sbMin = N > 1 ? Math.min(...sbs) * 0.85 : sbs[0] * 0.6;
+  const sbMax = N > 1 ? Math.max(...sbs) * 1.15 : sbs[0] * 1.4;
+
+  const allC = [...data.map(r => r.c)];
+  const cLo  = Math.min(...allC) * (N > 1 ? 0.85 : 0.7);
+  const cHi  = Math.max(...allC) * (N > 1 ? 1.15 : 1.3);
+
+  const datasets = [
+    {
+      label: 'Опытные точки',
+      data: data.map(r => ({ x: +r.Sb_cm.toFixed(4), y: +r.c.toFixed(5) })),
+      backgroundColor: '#B06B34',
+      pointRadius: 8, pointHoverRadius: 11,
+      borderColor: '#F2E9D8', borderWidth: 2, order: 0
+    }
+  ];
+
+  if (N > 1) {
+    datasets.push({
+      label: `Среднее c\u2091\u2071 = ${nc(cMean, 5)} МПа`,
+      data: [{ x: sbMin, y: cMean }, { x: sbMax, y: cMean }],
+      type: 'line', borderColor: '#A6462E', borderWidth: 1.5,
+      borderDash: [7, 4], pointRadius: 0, fill: false, tension: 0, order: 1
+    });
+  }
+
+  expChartInst = new Chart(ctx, {
+    type: 'scatter',
+    data: { datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          labels: { color: '#7A6A52', font: { size: 12, family: "'Golos Text'" }, boxWidth: 14, padding: 16 }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              if (ctx.datasetIndex === 0) {
+                const r = data[ctx.dataIndex];
+                return `Опыт ${r.idx}:  Sb = ${r.Sb_cm.toFixed(4)} см  →  c = ${r.c.toFixed(5)} МПа`;
+              }
+              return '';
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          type: 'linear',
+          title: { display: true, text: 'Глубина погружения Sb, см', font: { size: 11, family: "'Golos Text'" }, color: '#7A6A52' },
+          grid: { color: 'rgba(59,46,32,0.05)' },
+          ticks: { color: '#7A6A52', font: { size: 10, family: "'JetBrains Mono'" } }
+        },
+        y: {
+          min: +cLo.toFixed(5),
+          max: +cHi.toFixed(5),
+          title: { display: true, text: 'c\u2091\u2071, МПа', font: { size: 11, family: "'Golos Text'" }, color: '#7A6A52' },
+          grid: { color: 'rgba(59,46,32,0.05)' },
+          ticks: { color: '#7A6A52', font: { size: 10, family: "'JetBrains Mono'" } }
+        }
+      }
+    }
+  });
+}
+
+function cpExpCol(ci) {
+  if (!expData.length) return;
+  const vals = expData.map(r => {
+    switch (ci) {
+      case 0: return nc(r.F_kN, 4);
+      case 1: return nc(r.db_cm, 3);
+      case 2: return nc(r.Sb_cm, 4);
+      case 3: return nc(r.c, 5);
+      default: return '';
+    }
+  });
+  navigator.clipboard.writeText(vals.join('\n')).then(() => {
+    const ths = document.querySelectorAll('#exp-results table.rt thead th');
+    if (ths[ci + 1]) {
+      ths[ci + 1].classList.add('copied');
+      setTimeout(() => ths[ci + 1].classList.remove('copied'), 1500);
+    }
+    toast('✓ Столбец скопирован');
+  });
+}
+
+function cpExpTSV() {
+  if (!expData.length) return;
+  const N = expData.length;
+  const hdr  = ['Опыт', 'F кН', 'db см', 'Sb см', 'c_eq МПа'];
+  const body = expData.map(r => [
+    `Опыт ${r.idx}`, nc(r.F_kN, 4), nc(r.db_cm, 3), nc(r.Sb_cm, 4), nc(r.c, 5)
+  ].join('\t'));
+  if (N > 1) {
+    const avgF  = expData.reduce((s, r) => s + r.F_kN, 0) / N;
+    const avgDb = expData.reduce((s, r) => s + r.db_cm, 0) / N;
+    const avgSb = expData.reduce((s, r) => s + r.Sb_cm, 0) / N;
+    const avgC  = expData.reduce((s, r) => s + r.c, 0) / N;
+    body.push(['Среднее', nc(avgF, 4), nc(avgDb, 3), nc(avgSb, 4), nc(avgC, 5)].join('\t'));
+  }
+  navigator.clipboard.writeText([hdr.join('\t'), ...body].join('\n'))
+    .then(() => toast('✓ Таблица (TSV) скопирована'));
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+onParamChange();
+addExperiment(0.030, 3.81, 0.315);
+</script>
+</body>
+</html>
