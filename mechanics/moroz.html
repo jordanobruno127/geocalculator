@@ -105,7 +105,7 @@ header .lede{
   margin:18px auto 0;
 }
 
-/* ===== контентная обёртка ===== */
+/* ===== контентная обертка ===== */
 .wrap{
   max-width:1240px;
   margin:0 auto;
@@ -594,7 +594,7 @@ footer{
     <span class="legend-item"><span class="legend-dot" style="background:var(--warn)"></span>Сильнопучинистый (≥ 0,07)</span>
   </div>
 
-  <div class="section-label">Вид расчёта</div>
+  <div class="section-label">Вид расчета</div>
   <div class="method-buttons">
     <button class="action-btn method-btn initial" id="btn-direct" onclick="App.toggleMethod('direct')" aria-label="Прямой расчет">Экспериментальный расчет</button>
     <button class="action-btn method-btn initial" id="btn-reverse" onclick="App.toggleMethod('reverse')" aria-label="Обратный метод расчета">Теоретический расчет</button>
@@ -813,7 +813,7 @@ const App = {
     /* ═══════════════════════════════════════════════
        ОБРАТНЫЙ МЕТОД: по заданной εfh генерируются
        синтетические опыты (hf, di), среднее из которых
-       ровно равно введённому значению
+       ровно равно введенному значению
        ═══════════════════════════════════════════════ */
     addReverseTest() {
         const container = document.getElementById("tests-container-reverse");
@@ -853,7 +853,7 @@ const App = {
                         <input type="number" class="sample-count" step="1" min="1" value="1" onkeypress="App.focusNextInput(event, this)">
                     </div>
                 </div>
-                <p class="hint-note">При одном опыте в таблице будет показано введённое значение εfh. При двух и более — введённое значение становится средним по всем опытам, а по отдельным опытам генерируется реалистичный разброс hf и di.</p>
+                <p class="hint-note">При одном опыте в таблице будет показано введенное значение εfh. При двух и более — введенное значение становится средним по всем опытам, а по отдельным опытам генерируется реалистичный разброс hf и di.</p>
             </div>
 
             <div class="error"></div>
